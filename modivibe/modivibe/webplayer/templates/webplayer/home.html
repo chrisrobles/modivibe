@@ -1,5 +1,5 @@
 {% extends 'webplayer/base.html'%}
 {% block content %}
     <h1>{{ title }}</h1>
-    <a href="settings">Settings</a>
+    <a href="{% url 'settings' %}">Settings</a>
 {% endblock content %}
