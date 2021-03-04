@@ -4,8 +4,15 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import render
 
-def index(request):
-    return render(request, 'webplayer/index.html')
+
+def home(request):
+    context = {
+        'title': 'Home'
+    }
+    return render(request, 'webplayer/home.html', context)
 
 def settings(request):
-    return render(request, 'webplayer/settings.html')
+    context = {
+        'title': 'Settings'
+    }
+    return render(request, 'webplayer/settings.html', context)
