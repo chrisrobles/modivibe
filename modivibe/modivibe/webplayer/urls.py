@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     #path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
-    path('settings', views.settings, name='settings')
+    path('', views.splash, name='splash'),
+    path('webplayer', views.home, name='webplayer'),
+    path('webplayer/settings', views.settings, name='webplayer/settings')
 ]
