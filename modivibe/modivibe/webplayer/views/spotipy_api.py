@@ -30,6 +30,19 @@ def redirectToHome(request):
     # valid token is obtained
     return redirect('webplayer')
 
+# Sets Spotify's active device to Modivibe
+# Expects:
+#   device_id [STRING] (generated device id)
+def transferPlayback(request):
+    response = False
+    deviceID = request.POST['device_id']
+    try:
+        sp.transfer_playback(deviceID, force_play=False)
+        response = True
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
 
 # Resumes or pauses playback for a specific device
 # Expects:
@@ -42,7 +55,6 @@ def setPlayback(request):
     try:
         # Temporarily attempt to ensure Modivibe becomes the active device
         sp.transfer_playback(deviceID, force_play=False)
-        print(sp.devices())
         if songStatus == 'play':
             sp.start_playback(device_id=deviceID)
             response = True

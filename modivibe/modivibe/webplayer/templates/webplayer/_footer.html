@@ -1,43 +1,70 @@
-<button id="previousTrackControl" aria-label="Previous Track"><<</button>
-<button id="playbackControl">PLAY</button>
-<button id="nextTrackControl" aria-label="Next Track">>></button>
-<input type="number" id="volumeControl" placeholder="VOLUME" step="10" min="0" max="100" style="width: 75px" aria-label="Volume"></input>
+<fieldset class="playbar">
+    <span class="playbackContainer">
+        <button id="previousTrackControl" aria-label="Previous Track"><<</button>
+        <button id="playbackControl">PLAY</button>
+        <button id="nextTrackControl" aria-label="Next Track">>></button>
+    </span>
+    <span class="volumeContainer">
+        <label for="volumeControl">VOLUME:</label>
+        <input type="number" id="volumeControl" placeholder="0-100" step="10" min="0" max="100" style="width: 75px" aria-label="Volume"></input>
+    </span>
+</fieldset>
 
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
-    var deviceID;
+    let deviceID;
+    let isPlaying = false;
 
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = '{{ userAccessCode }}';
         const player = new Spotify.Player({
-        name: 'Modivibe',
-        getOAuthToken: cb => { cb(token); }
-    });
+            name: 'Modivibe',
+            getOAuthToken: cb => { cb(token); }
+        });
 
-    // Error handling
-    player.addListener('initialization_error', ({ message }) => { console.error(message); });
-    player.addListener('authentication_error', ({ message }) => { console.error(message); });
-    player.addListener('account_error', ({ message }) => { console.error(message); });
-    player.addListener('playback_error', ({ message }) => { console.error(message); });
+        // Error handling
+        player.addListener('initialization_error', ({message}) => { console.error(message); });
+        player.addListener('authentication_error', ({message}) => { console.error(message); });
+        player.addListener('account_error', ({message}) => { console.error(message); });
+        player.addListener('playback_error', ({message}) => { console.error(message); });
 
-    // Playback status updates
-    player.addListener('player_state_changed', state => { console.log(state); });
+        // Playback status updates
+        player.addListener('player_state_changed', state => {
+            console.log(state);
+        });
 
-    // Ready
-    player.addListener('ready', ({ device_id }) => {
-        console.log('Ready with Device ID', device_id);
-        deviceID = device_id;
-    });
+        // Ready
+        player.addListener('ready', ({device_id}) => {
+            console.log('Ready with Device ID', device_id);
+            deviceID = device_id;
+            // Trigger playback transfer to Modivibe
+            console.log('Attempting to transfer playback');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'transferPlayback' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully transferred playback');
+                    } else {
+                        console.log('Failed to resume playback');
+                    }
+                }
+            });
+        });
 
-    // Not Ready
-    player.addListener('not_ready', ({ device_id }) => {
-        console.log('Device ID has gone offline', device_id);
-    });
+        // Not Ready
+        player.addListener('not_ready', ({device_id}) => {
+            console.log('Device ID has gone offline', device_id);
+        });
 
-    // Connect to the player!
-    player.connect();
+        // Connect to the player!
+        player.connect();
+    }
 
-    let isPlaying = false;
     $('#playbackControl').on('click', function() {
         if (!isPlaying) {
             console.log('Requesting playback resume');
@@ -142,4 +169,4 @@
         });
     });
 
-}</script>
+</script>
