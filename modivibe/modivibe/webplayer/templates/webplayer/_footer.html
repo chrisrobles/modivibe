@@ -1,1 +1,172 @@
-FOOTER
+<fieldset class="playbar">
+    <span class="playbackContainer">
+        <button id="previousTrackControl" aria-label="Previous Track"><<</button>
+        <button id="playbackControl">PLAY</button>
+        <button id="nextTrackControl" aria-label="Next Track">>></button>
+    </span>
+    <span class="volumeContainer">
+        <label for="volumeControl">VOLUME:</label>
+        <input type="number" id="volumeControl" placeholder="0-100" step="10" min="0" max="100" style="width: 75px" aria-label="Volume"></input>
+    </span>
+</fieldset>
+
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+<script>
+    let deviceID;
+    let isPlaying = false;
+
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        const token = '{{ userAccessCode }}';
+        const player = new Spotify.Player({
+            name: 'Modivibe',
+            getOAuthToken: cb => { cb(token); }
+        });
+
+        // Error handling
+        player.addListener('initialization_error', ({message}) => { console.error(message); });
+        player.addListener('authentication_error', ({message}) => { console.error(message); });
+        player.addListener('account_error', ({message}) => { console.error(message); });
+        player.addListener('playback_error', ({message}) => { console.error(message); });
+
+        // Playback status updates
+        player.addListener('player_state_changed', state => {
+            console.log(state);
+        });
+
+        // Ready
+        player.addListener('ready', ({device_id}) => {
+            console.log('Ready with Device ID', device_id);
+            deviceID = device_id;
+            // Trigger playback transfer to Modivibe
+            console.log('Attempting to transfer playback');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'transferPlayback' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully transferred playback');
+                    } else {
+                        console.log('Failed to resume playback');
+                    }
+                }
+            });
+        });
+
+        // Not Ready
+        player.addListener('not_ready', ({device_id}) => {
+            console.log('Device ID has gone offline', device_id);
+        });
+
+        // Connect to the player!
+        player.connect();
+    }
+
+    $('#playbackControl').on('click', function() {
+        if (!isPlaying) {
+            console.log('Requesting playback resume');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'setPlayback' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    status: 'play'
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully resuming playback');
+                        $('#playbackControl').text('PAUSE');
+                        isPlaying = true;
+                    } else {
+                        console.log('Failed to resume playback');
+                    }
+                }
+            });
+
+        } else {
+            console.log('Requesting playback pause');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'setPlayback' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    status: 'pause'
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully pausing playback');
+                        $('#playbackControl').text('PLAY');
+                        isPlaying = false;
+                    } else {
+                        console.log('Failed to pause playback');
+                    }
+                }
+            });
+        }
+
+    });
+
+    $('#volumeControl').on('change', function() {
+       console.log('Attempting to set volume');
+       $.ajax({
+            type: "POST",
+            url: "{% url 'setVolume' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+                volume: $(this).val()
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log('Successfully set volume');
+                } else {
+                    console.log('Failed to set volume');
+                }
+            }
+        });
+    });
+
+    $('#previousTrackControl').on('click', function() {
+        console.log('Attempting to play previous track');
+        $.ajax({
+            type: "POST",
+            url: "{% url 'previousTrack' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log('Successfully played previous track');
+                } else {
+                    console.log('Failed to play previous track');
+                }
+            }
+        });
+    });
+
+    $('#nextTrackControl').on('click', function() {
+        console.log('Attempting to play next track');
+        $.ajax({
+            type: "POST",
+            url: "{% url 'nextTrack' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log('Successfully played next track');
+                } else {
+                    console.log('Failed to play next track');
+                }
+            }
+        });
+    });
+
+</script>
