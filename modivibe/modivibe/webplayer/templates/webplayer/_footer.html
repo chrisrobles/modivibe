@@ -1,4 +1,8 @@
 <fieldset class="playbar">
+    <span class="trackContainer">
+        <p id="trackName">Song Name</p>
+        <p id="trackArtist">Artist Name</p>
+    </span>
     <span class="playbackContainer">
         <button id="previousTrackControl" aria-label="Previous Track"><<</button>
         <button id="playbackControl">PLAY</button>
@@ -10,9 +14,9 @@
     </span>
 </fieldset>
 
-<script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
     let deviceID;
+    let deviceState;
     let isPlaying = false;
 
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -31,6 +35,20 @@
         // Playback status updates
         player.addListener('player_state_changed', state => {
             console.log(state);
+            deviceState = state;
+
+            // Update Track Name in Player
+            $('#trackName').text(deviceState['track_window']['current_track']['name']);
+
+            // Update Track Artists in Player
+            let i;
+            let artists = "";
+            let artistsList = deviceState['track_window']['current_track']['artists'];
+            for(i = 0; i < artistsList.length; i++){
+                artists += artistsList[i]['name'];
+                if (i != artistsList.length - 1) artists += ", ";
+            }
+            $('#trackArtist').text(artists)
         });
 
         // Ready
@@ -65,7 +83,14 @@
         player.connect();
     }
 
-    $('#playbackControl').on('click', function() {
+    $('#playbackControl').on('click', togglePlayback);
+    $('#volumeControl').on('change', setVolume);
+    $('#previousTrackControl').on('click', previousTrack);
+    $('#nextTrackControl').on('click', nextTrack);
+
+
+
+    function togglePlayback(event){
         if (!isPlaying) {
             console.log('Requesting playback resume');
             $.ajax({
@@ -108,10 +133,9 @@
                 }
             });
         }
+    }
 
-    });
-
-    $('#volumeControl').on('change', function() {
+    function setVolume(event) {
        console.log('Attempting to set volume');
        $.ajax({
             type: "POST",
@@ -129,9 +153,9 @@
                 }
             }
         });
-    });
+    }
 
-    $('#previousTrackControl').on('click', function() {
+    function previousTrack(event) {
         console.log('Attempting to play previous track');
         $.ajax({
             type: "POST",
@@ -148,9 +172,9 @@
                 }
             }
         });
-    });
+    }
 
-    $('#nextTrackControl').on('click', function() {
+    function nextTrack(event) {
         console.log('Attempting to play next track');
         $.ajax({
             type: "POST",
@@ -167,6 +191,6 @@
                 }
             }
         });
-    });
+    }
 
 </script>

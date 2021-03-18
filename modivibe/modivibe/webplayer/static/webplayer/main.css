@@ -48,6 +48,23 @@ body {
     margin: 0;
 }
 
+.trackContainer {
+    float: left;
+}
+
+.trackContainer p {
+    padding: 0;
+    margin: 0;
+}
+
+.trackContainer #trackName {
+    font-weight: bold;
+}
+
+.trackContainer #trackArtist {
+    font-weight: normal;
+}
+
 .playbackContainer {
     position: absolute;
     left: 50%;
