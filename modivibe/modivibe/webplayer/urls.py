@@ -14,5 +14,9 @@ urlpatterns = [
     path('setPlayback', views.setPlayback, name='setPlayback'),
     path('setVolume', views.setVolume, name='setVolume'),
     path('nextTrack', views.nextTrack, name='nextTrack'),
-    path('previousTrack', views.previousTrack, name='previousTrack')
+    path('previousTrack', views.previousTrack, name='previousTrack'),
+
+    # user collections (albums, artists, playlists, podcasts)
+    path('my/playlists', views.myplaylists, name='myplaylists'),
+    path('playlist/<str:playlist_id>', views.playlist, name='playlist')
 ]
