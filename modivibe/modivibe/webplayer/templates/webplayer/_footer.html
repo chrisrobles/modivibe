@@ -26,8 +26,10 @@
 <script>
     let deviceID;
     let deviceState;
+    let repeatStatus;
     let isPlaying = false;
     let isShuffled = false;
+
 
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = '{{ userAccessCode }}';
@@ -69,6 +71,19 @@
                 let shuffleStatus = isShuffled ? 'Y' : 'N';
                 $('#shuffleTrackControl').text('SHFL: ' + shuffleStatus);
             }
+
+            // Initially set Repeat Status
+            if ($('#repeatTrackControl').text() === 'LOOP: X') {
+                repeatStatus = deviceState['repeat_mode'];
+                let repeatValue;
+                switch(repeatStatus) {
+                    case 0: repeatValue = 'track'; break;
+                    case 1: repeatValue = 'context'; break;
+                    case 2: repeatValue = 'off'; break;
+                    default: break;
+                }
+                $('#repeatTrackControl').text('LOOP: ' + repeatValue);
+            }
         });
 
         // Ready
@@ -108,6 +123,7 @@
     $('#previousTrackControl').on('click', previousTrack);
     $('#nextTrackControl').on('click', nextTrack);
     $('#shuffleTrackControl').on('click', toggleShuffle);
+    $('#repeatTrackControl').on('click', toggleRepeat);
 
 
 
@@ -216,7 +232,7 @@
 
     function toggleShuffle(event){
         if (!isShuffled) {
-            console.log('Requesting enabled shuffle');
+            console.log('Attempting to enable shuffle');
             $.ajax({
                 type: "POST",
                 url: "{% url 'setShuffle' %}",
@@ -237,7 +253,7 @@
             });
 
         } else {
-            console.log('Requesting disabled shuffle');
+            console.log('Attempting to disable shuffle');
             $.ajax({
                 type: "POST",
                 url: "{% url 'setShuffle' %}",
@@ -257,6 +273,30 @@
                 }
             });
         }
+    }
+
+    function toggleRepeat(event) {
+        console.log('Attempting to toggle repeat state');
+        repeatStatus += 1;
+        if (repeatStatus > 2 || repeatStatus < 0) repeatStatus = 0;
+        $.ajax({
+                type: "POST",
+                url: "{% url 'setRepeat' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    repeat_status: repeatStatus
+                },
+                success: function(response) {
+                    if (response != 'False') {
+                        console.log('Successfully toggled repeat state');
+                        $('#repeatTrackControl').text('LOOP: ' + response);
+                    } else {
+                        console.log('Failed to toggle repeat state');
+                        repeatStatus -= 1;
+                    }
+                }
+        });
     }
 
 </script>

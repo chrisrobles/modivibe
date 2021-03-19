@@ -117,13 +117,32 @@ def previousTrack(request):
 #   shuffle_status [STRING] ('enabled' || 'disabled')
 def setShuffle(request):
     response = False
-    if request.POST['shuffle_status'] != 'enabled' and request.POST['shuffle_status'] != 'disabled':
-        return HttpResponse(response)
     deviceID = request.POST['device_id']
-    shuffleState = request.POST['shuffle_status'] == 'enabled'
+    shuffleStatus = request.POST['shuffle_status']
+    if shuffleStatus != 'enabled' and shuffleStatus != 'disabled':
+        return HttpResponse(response)
+    shuffleState = shuffleStatus == 'enabled'
     try:
         sp.shuffle(state=shuffleState, device_id=deviceID)
         response = True
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
+
+#
+def setRepeat(request):
+    deviceID = request.POST['device_id']
+    repeatStatus = request.POST['repeat_status']
+    repeatStates = {
+        '0': 'off',
+        '1': 'context',
+        '2': 'track'
+    }
+    repeatState = repeatStates.get(repeatStatus, 'none')
+    try:
+        sp.repeat(state=repeatState, device_id=deviceID)
+        response = repeatState
     except SpotifyException:
         response = False
     return HttpResponse(response)
