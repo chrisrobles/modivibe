@@ -2,15 +2,17 @@
     <span class="playbarLeft">
         <img id="trackImage" src="" alt="Track Album Cover" width="64" height="64">
         <div class="trackInfoContainer">
-            <p id="trackName">Song Name</p>
-            <p id="trackArtist">Artist Name</p>
+            <p id="trackName">Track Name</p>
+            <p id="trackArtist">Track Artist</p>
         </div>
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
+            <button id="shuffleTrackControl">SHFL: X</button>
             <button id="previousTrackControl" aria-label="Previous Track"><<</button>
             <button id="playbackControl">PLAY</button>
             <button id="nextTrackControl" aria-label="Next Track">>></button>
+            <button id="repeatTrackControl">LOOP: X</button>
         </div>
     </span>
     <span class="playbarRight">
@@ -25,6 +27,7 @@
     let deviceID;
     let deviceState;
     let isPlaying = false;
+    let isShuffled = false;
 
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = '{{ userAccessCode }}';
@@ -59,6 +62,13 @@
 
             // Update Track Image in Player
             $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
+
+            // Initially set Shuffle Status
+            if ($('#shuffleTrackControl').text() === 'SHFL: X') {
+                isShuffled = deviceState['shuffle'];
+                let shuffleStatus = isShuffled ? 'Y' : 'N';
+                $('#shuffleTrackControl').text('SHFL: ' + shuffleStatus);
+            }
         });
 
         // Ready
@@ -97,6 +107,7 @@
     $('#volumeControl').on('change', setVolume);
     $('#previousTrackControl').on('click', previousTrack);
     $('#nextTrackControl').on('click', nextTrack);
+    $('#shuffleTrackControl').on('click', toggleShuffle);
 
 
 
@@ -201,6 +212,51 @@
                 }
             }
         });
+    }
+
+    function toggleShuffle(event){
+        if (!isShuffled) {
+            console.log('Requesting enabled shuffle');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'setShuffle' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    shuffle_status: 'enabled'
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully enabled shuffle');
+                        isShuffled = true;
+                        $('#shuffleTrackControl').text('SHFL: Y');
+                    } else {
+                        console.log('Failed to enable shuffle');
+                    }
+                }
+            });
+
+        } else {
+            console.log('Requesting disabled shuffle');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'setShuffle' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    shuffle_status: 'disabled'
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully disabled shuffle');
+                        isShuffled = false;
+                        $('#shuffleTrackControl').text('SHFL: N');
+                    } else {
+                        console.log('Failed to disable shuffle');
+                    }
+                }
+            });
+        }
     }
 
 </script>

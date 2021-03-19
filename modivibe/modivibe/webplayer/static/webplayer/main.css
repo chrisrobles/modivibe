@@ -91,6 +91,10 @@ body {
     flex: 1;
 }
 
+.playbarMiddle button {
+    height: 25px;
+}
+
 .playbarRight {
     margin: 0 10px;
     display: flex;

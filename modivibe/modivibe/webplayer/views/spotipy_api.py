@@ -30,6 +30,7 @@ def redirectToHome(request):
     # valid token is obtained
     return redirect('webplayer')
 
+
 # Sets Spotify's active device to Modivibe
 # Expects:
 #   device_id [STRING] (generated device id)
@@ -108,3 +109,22 @@ def previousTrack(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
+
+
+# Sets shuffle status for a specific device
+# Excepts:
+#   device_id [STRING] (generated device id)
+#   shuffle_status [STRING] ('enabled' || 'disabled')
+def setShuffle(request):
+    response = False
+    if request.POST['shuffle_status'] != 'enabled' and request.POST['shuffle_status'] != 'disabled':
+        return HttpResponse(response)
+    deviceID = request.POST['device_id']
+    shuffleState = request.POST['shuffle_status'] == 'enabled'
+    try:
+        sp.shuffle(state=shuffleState, device_id=deviceID)
+        response = True
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+

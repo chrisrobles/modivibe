@@ -14,5 +14,6 @@ urlpatterns = [
     path('setPlayback', views.setPlayback, name='setPlayback'),
     path('setVolume', views.setVolume, name='setVolume'),
     path('nextTrack', views.nextTrack, name='nextTrack'),
-    path('previousTrack', views.previousTrack, name='previousTrack')
+    path('previousTrack', views.previousTrack, name='previousTrack'),
+    path('setShuffle', views.setShuffle, name='setShuffle')
 ]
