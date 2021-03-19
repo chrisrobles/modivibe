@@ -1,16 +1,23 @@
 <fieldset class="playbar">
-    <span class="trackContainer">
-        <p id="trackName">Song Name</p>
-        <p id="trackArtist">Artist Name</p>
+    <span class="playbarLeft">
+        <img id="trackImage" src="" alt="Track Album Cover" width="64" height="64">
+        <div class="trackInfoContainer">
+            <p id="trackName">Song Name</p>
+            <p id="trackArtist">Artist Name</p>
+        </div>
     </span>
-    <span class="playbackContainer">
-        <button id="previousTrackControl" aria-label="Previous Track"><<</button>
-        <button id="playbackControl">PLAY</button>
-        <button id="nextTrackControl" aria-label="Next Track">>></button>
+    <span class="playbarMiddle">
+        <div class="trackControllers">
+            <button id="previousTrackControl" aria-label="Previous Track"><<</button>
+            <button id="playbackControl">PLAY</button>
+            <button id="nextTrackControl" aria-label="Next Track">>></button>
+        </div>
     </span>
-    <span class="volumeContainer">
-        <label for="volumeControl">VOLUME:</label>
-        <input type="number" id="volumeControl" placeholder="0-100" step="10" min="0" max="100" style="width: 75px" aria-label="Volume"></input>
+    <span class="playbarRight">
+        <div class="volumeController">
+            <label for="volumeControl">VOLUME:</label>
+            <input type="number" id="volumeControl" placeholder="0-100" step="10" min="0" max="100" style="width: 75px" aria-label="Volume"></input>
+        </div>
     </span>
 </fieldset>
 
@@ -49,6 +56,9 @@
                 if (i != artistsList.length - 1) artists += ", ";
             }
             $('#trackArtist').text(artists)
+
+            // Update Track Image in Player
+            $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
         });
 
         // Ready
