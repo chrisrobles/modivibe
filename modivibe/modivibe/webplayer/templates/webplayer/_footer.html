@@ -1,10 +1,11 @@
 <fieldset class="playbar">
     <span class="playbackContainer">
-        <span id="shuffleControl" class="material-icons md-36" aria-label="Shuffle">shuffle</span>
-        <span id="previousTrackControl" class="material-icons md-36" aria-label="Previous Track">skip_previous</span>
-        <span id="playbackControl" class="material-icons md-36" aria-label="Play">play_arrow</span>
-        <span id="nextTrackControl" class="material-icons md-36" aria-label="Next Track">skip_next</span>
-        <span id="loopTrackControl" class="material-icons md-36" aria-label="Loop Track">loop</span>
+        <span id="shuffleControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">shuffle</span>
+        <span id="previousTrackControl" class="material-icons md-36 md-light" aria-label="Previous Track">skip_previous</span>
+        <span id="playbackControl" class="material-icons md-36 md-light" aria-label="Play">play_circle</span>
+        <span id="nextTrackControl" class="material-icons md-36 md-light" aria-label="Next Track">skip_next</span>
+        <span id="loopTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop</span>
+        <span id="queueControl" class="material-icons md-36 md-light" aria-label="Queue">queue</span>
     </span>
     <span class="volumeContainer">
         <label for="volumeControl">VOLUME:</label>
@@ -66,6 +67,16 @@
         // Connect to the player!
         player.connect();
     }
+
+    // Update with the actual API call and flipping the 'md-inactive' class,
+    //  model after how playbackControl does it for the play button
+    $('#shuffleControl').on('click', function() {
+        console.log('Shuffle control clicked');
+
+        // Below doesn't work need to find another way
+        // $('#shuffleControl').classList.remove('md-inactive');
+        // $('#shuffleControl').classList.add('md-inactive');
+    });
 
     $('#playbackControl').on('click', function() {
         if (!isPlaying) {
@@ -169,6 +180,22 @@
                 }
             }
         });
+    });
+
+    // Update with the actual API call and flipping the 'md-inactive' class,
+    //  model after how playbackControl does it for the play button
+    $('#loopTrackControl').on('click', function() {
+        console.log('Loop control clicked');
+
+        // Below doesn't work need to find another way
+        // $('#loopTrackControl').classList.remove('md-inactive');
+        // $('#loopTrackControl').classList.add('md-inactive');
+    });
+
+    // Update with the actual API call and flipping the 'md-inactive' class,
+    //  model after how playbackControl does it for the play button
+    $('#queueControl').on('click', function() {
+        console.log('Queue control clicked');
     });
 
 </script>
