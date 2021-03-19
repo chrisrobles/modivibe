@@ -1,8 +1,10 @@
 <fieldset class="playbar">
     <span class="playbackContainer">
-        <button id="previousTrackControl" aria-label="Previous Track"><<</button>
-        <button id="playbackControl">PLAY</button>
-        <button id="nextTrackControl" aria-label="Next Track">>></button>
+        <span id="shuffleControl" class="material-icons md-36" aria-label="Shuffle">shuffle</span>
+        <span id="previousTrackControl" class="material-icons md-36" aria-label="Previous Track">skip_previous</span>
+        <span id="playbackControl" class="material-icons md-36" aria-label="Play">play_arrow</span>
+        <span id="nextTrackControl" class="material-icons md-36" aria-label="Next Track">skip_next</span>
+        <span id="loopTrackControl" class="material-icons md-36" aria-label="Loop Track">loop</span>
     </span>
     <span class="volumeContainer">
         <label for="volumeControl">VOLUME:</label>
@@ -79,7 +81,7 @@
                 success: function(response) {
                     if (response == 'True') {
                         console.log('Successfully resuming playback');
-                        $('#playbackControl').text('PAUSE');
+                        $('#playbackControl').text('pause');
                         isPlaying = true;
                     } else {
                         console.log('Failed to resume playback');
@@ -100,7 +102,7 @@
                 success: function(response) {
                     if (response == 'True') {
                         console.log('Successfully pausing playback');
-                        $('#playbackControl').text('PLAY');
+                        $('#playbackControl').text('play_arrow');
                         isPlaying = false;
                     } else {
                         console.log('Failed to pause playback');
