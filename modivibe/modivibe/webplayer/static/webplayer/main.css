@@ -83,10 +83,6 @@ a:hover, a:active, a:focus {
   align-items: center;
 }
 
-/* Button hover FX */
-/* Might still need to be revisited esp now with a color theme */
-#playbackControl:hover { font-size: 38px; }
-
 /* Google Material Icons stuff */
 /* - from the guide at https://google.github.io/material-design-icons/ */
 
