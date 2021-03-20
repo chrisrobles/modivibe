@@ -8,11 +8,11 @@
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
-            <button id="shuffleTrackControl">SHFL: X</button>
-            <button id="previousTrackControl" aria-label="Previous Track"><<</button>
-            <button id="playbackControl">PLAY</button>
-            <button id="nextTrackControl" aria-label="Next Track">>></button>
-            <button id="repeatTrackControl">LOOP: X</button>
+            <button id="shuffleTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">SHFL: X</button>
+            <button id="previousTrackControl" class="material-icons md-36 md-light" aria-label="Previous Track"><<</button>
+            <button id="playbackControl" class="material-icons md-36 md-light" aria-label="Play">PLAY</button>
+            <button id="nextTrackControl" class="material-icons md-36 md-light" aria-label="Next Track">>></button>
+            <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">LOOP: X</button>
         </div>
     </span>
     <span class="playbarRight">
@@ -141,7 +141,7 @@
                 success: function(response) {
                     if (response == 'True') {
                         console.log('Successfully resuming playback');
-                        $('#playbackControl').text('PAUSE');
+                        $('#playbackControl').text('pause');
                         isPlaying = true;
                     } else {
                         console.log('Failed to resume playback');
@@ -162,7 +162,7 @@
                 success: function(response) {
                     if (response == 'True') {
                         console.log('Successfully pausing playback');
-                        $('#playbackControl').text('PLAY');
+                        $('#playbackControl').text('play_arrow');
                         isPlaying = false;
                     } else {
                         console.log('Failed to pause playback');
@@ -231,6 +231,9 @@
     }
 
     function toggleShuffle(event){
+        // Below doesn't work need to find another way
+        // $('#shuffleControl').classList.remove('md-inactive');
+        // $('#shuffleControl').classList.add('md-inactive');
         if (!isShuffled) {
             console.log('Attempting to enable shuffle');
             $.ajax({
@@ -276,6 +279,9 @@
     }
 
     function toggleRepeat(event) {
+        // Below doesn't work need to find another way
+        // $('#loopTrackControl').classList.remove('md-inactive');
+        // $('#loopTrackControl').classList.add('md-inactive');
         console.log('Attempting to toggle repeat state');
         repeatStatus += 1;
         if (repeatStatus > 2 || repeatStatus < 0) repeatStatus = 0;
