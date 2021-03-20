@@ -73,6 +73,7 @@ body {
 
 .playbar #trackImage {
     background-color: black;
+    border: 1px solid black;
 }
 
 .playbarLeft #trackName {
@@ -88,11 +89,24 @@ body {
     display: flex;
     justify-content: center;
     align-content: center;
+    flex-flow: wrap;
+    flex-direction: column;
     flex: 1;
 }
 
 .playbarMiddle button {
-    height: 25px;
+    background: none;
+    border: 0;
+}
+
+.playbarMiddle button:focus {
+    outline: none;
+}
+
+.playbarMiddle #repeatDot {
+    position: absolute;
+    font-size: x-small;
+    display: none;
 }
 
 .playbarRight {
@@ -100,11 +114,9 @@ body {
     display: flex;
     justify-content: flex-end;
     align-content: center;
+    flex-flow: wrap;
     flex: 1;
 }
-
-/* Will update how all the buttons react on hover once we get the webplayer color scheme figured out */
-#playbackControl:hover { font-size: 38px; }
 
 /* Google Material Icons stuff */
 /* - from the guide at https://google.github.io/material-design-icons/ */
@@ -121,11 +133,22 @@ body {
 
 /* Rules for using icons as white on a dark background. */
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light:hover { color: rgba(225, 225, 225, 1); }
+.material-icons.md-light:focus { color: rgba(225, 225, 225, 1); }
+.material-icons.md-light:active { color: rgba(200, 200, 200, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
+.material-icons.md-light.md-inactive:hover { color: rgba(255, 255, 255, 0.4); }
+.material-icons.md-light.md-inactive:focus { color: rgba(255, 255, 255, 0.4); }
+.material-icons.md-light.md-inactive:active { color: rgba(255, 255, 255, 0.5); }
 
 .material-icons:hover {
     cursor: default;
 }
+
+/*MDC Sliders*/
+.mdc-slider.mdc-slider--discrete { display: flex; justify-content: center; }
+
+
 
 
 

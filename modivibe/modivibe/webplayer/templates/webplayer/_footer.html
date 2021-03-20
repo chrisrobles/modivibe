@@ -8,17 +8,28 @@
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
-            <button id="shuffleTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">SHFL: X</button>
-            <button id="previousTrackControl" class="material-icons md-36 md-light" aria-label="Previous Track"><<</button>
-            <button id="playbackControl" class="material-icons md-36 md-light" aria-label="Play">PLAY</button>
-            <button id="nextTrackControl" class="material-icons md-36 md-light" aria-label="Next Track">>></button>
-            <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">LOOP: X</button>
+            <button id="shuffleTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">shuffle</button>
+            <button id="previousTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Previous Track">skip_previous</button>
+            <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_circle</button>
+            <button id="nextTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Next Track">skip_next</button>
+            <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
         </div>
     </span>
     <span class="playbarRight">
         <div class="volumeController">
-            <label for="volumeControl">VOLUME:</label>
-            <input type="number" id="volumeControl" placeholder="0-100" step="10" min="0" max="100" style="width: 75px" aria-label="Volume"></input>
+            <div class="mdc-slider mdc-slider--discrete">
+                <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
+                <input class="mdc-slider__input" type="range" value="100" min="0" max="100" step="1" name="volume" aria-label="Volume Slider">
+                <div class="mdc-slider__track">
+                <div class="mdc-slider__track--inactive"></div>
+                <div class="mdc-slider__track--active">
+                  <div class="mdc-slider__track--active_fill"></div>
+                </div>
+                </div>
+                <div class="mdc-slider__thumb">
+                <div class="mdc-slider__thumb-knob"></div>
+                </div>
+            </div>
         </div>
     </span>
 </fieldset>
@@ -29,8 +40,9 @@
     let repeatStatus;
     let isPlaying = false;
     let isShuffled = false;
+    let initializeStates = true;
 
-
+    // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = '{{ userAccessCode }}';
         const player = new Spotify.Player({
@@ -65,24 +77,29 @@
             // Update Track Image in Player
             $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
 
-            // Initially set Shuffle Status
-            if ($('#shuffleTrackControl').text() === 'SHFL: X') {
-                isShuffled = deviceState['shuffle'];
-                let shuffleStatus = isShuffled ? 'Y' : 'N';
-                $('#shuffleTrackControl').text('SHFL: ' + shuffleStatus);
-            }
+            if(initializeStates) {
 
-            // Initially set Repeat Status
-            if ($('#repeatTrackControl').text() === 'LOOP: X') {
+                // This will only run once!
+                initializeStates = false;
+
+                // Track controls are now available
+                $('#playbackControl').removeClass('md-inactive');
+                $('#previousTrackControl').removeClass('md-inactive');
+                $('#nextTrackControl').removeClass('md-inactive')
+
+                // Set Shuffle Status
+                isShuffled = deviceState['shuffle'];
+                if (isShuffled) $('#shuffleTrackControl').removeClass('md-inactive');
+                else $('#shuffleTrackControl').addClass('md-inactive');
+
+                // Set Repeat Status
                 repeatStatus = deviceState['repeat_mode'];
-                let repeatValue;
                 switch(repeatStatus) {
-                    case 0: repeatValue = 'track'; break;
-                    case 1: repeatValue = 'context'; break;
-                    case 2: repeatValue = 'off'; break;
+                    case 0: $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','inline'); break; // Loop Track
+                    case 1: $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Context
+                    case 2: $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Off
                     default: break;
                 }
-                $('#repeatTrackControl').text('LOOP: ' + repeatValue);
             }
         });
 
@@ -91,22 +108,7 @@
             console.log('Ready with Device ID', device_id);
             deviceID = device_id;
             // Trigger playback transfer to Modivibe
-            console.log('Attempting to transfer playback');
-            $.ajax({
-                type: "POST",
-                url: "{% url 'transferPlayback' %}",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    device_id: deviceID,
-                },
-                success: function(response) {
-                    if (response == 'True') {
-                        console.log('Successfully transferred playback');
-                    } else {
-                        console.log('Failed to resume playback');
-                    }
-                }
-            });
+            transferPlayback();
         });
 
         // Not Ready
@@ -118,14 +120,33 @@
         player.connect();
     }
 
+    // Button event bindings
     $('#playbackControl').on('click', togglePlayback);
-    $('#volumeControl').on('change', setVolume);
+    $('.mdc-slider__input').on('change', setVolume);
     $('#previousTrackControl').on('click', previousTrack);
     $('#nextTrackControl').on('click', nextTrack);
     $('#shuffleTrackControl').on('click', toggleShuffle);
     $('#repeatTrackControl').on('click', toggleRepeat);
 
-
+    // Button event functions
+    function transferPlayback() {
+        console.log('Attempting to transfer playback');
+        $.ajax({
+            type: "POST",
+            url: "{% url 'transferPlayback' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log('Successfully transferred playback');
+                } else {
+                    console.log('Failed to resume playback');
+                }
+            }
+        });
+    }
 
     function togglePlayback(event){
         if (!isPlaying) {
@@ -185,8 +206,31 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully set volume');
+                    if ($('.mdc-slider__input').val() <= 0) { $('#volumeIcon').text('volume_mute'); }
+                    else if ($('.mdc-slider__input').val() <= 49) { $('#volumeIcon').text('volume_down'); }
+                    else if ($('.mdc-slider__input').val() <= 100) { $('#volumeIcon').text('volume_up'); }
                 } else {
                     console.log('Failed to set volume');
+                }
+            }
+        });
+    }
+
+    function getVolume() {
+     console.log('Attempting to retrieve volume');
+       $.ajax({
+            type: "POST",
+            url: "{% url 'getVolume' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+            },
+            success: function(response) {
+                if (response != 'False') {
+                    console.log('Successfully retrieved volume');
+                    console.log(response);
+                } else {
+                    console.log('Failed to retrieve volume');
                 }
             }
         });
@@ -231,9 +275,6 @@
     }
 
     function toggleShuffle(event){
-        // Below doesn't work need to find another way
-        // $('#shuffleControl').classList.remove('md-inactive');
-        // $('#shuffleControl').classList.add('md-inactive');
         if (!isShuffled) {
             console.log('Attempting to enable shuffle');
             $.ajax({
@@ -248,7 +289,7 @@
                     if (response == 'True') {
                         console.log('Successfully enabled shuffle');
                         isShuffled = true;
-                        $('#shuffleTrackControl').text('SHFL: Y');
+                        $('#shuffleTrackControl').removeClass('md-inactive');
                     } else {
                         console.log('Failed to enable shuffle');
                     }
@@ -269,7 +310,7 @@
                     if (response == 'True') {
                         console.log('Successfully disabled shuffle');
                         isShuffled = false;
-                        $('#shuffleTrackControl').text('SHFL: N');
+                        $('#shuffleTrackControl').addClass('md-inactive');
                     } else {
                         console.log('Failed to disable shuffle');
                     }
@@ -279,9 +320,6 @@
     }
 
     function toggleRepeat(event) {
-        // Below doesn't work need to find another way
-        // $('#loopTrackControl').classList.remove('md-inactive');
-        // $('#loopTrackControl').classList.add('md-inactive');
         console.log('Attempting to toggle repeat state');
         repeatStatus += 1;
         if (repeatStatus > 2 || repeatStatus < 0) repeatStatus = 0;
@@ -296,7 +334,12 @@
                 success: function(response) {
                     if (response != 'False') {
                         console.log('Successfully toggled repeat state');
-                        $('#repeatTrackControl').text('LOOP: ' + response);
+                        switch(response) {
+                            case 'track': $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','inline'); break;
+                            case 'context': $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','none'); break;
+                            case 'off': $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break;
+                            default: break;
+                        }
                     } else {
                         console.log('Failed to toggle repeat state');
                         repeatStatus -= 1;
