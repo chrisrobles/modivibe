@@ -6,29 +6,13 @@ $(document).ready(function() {
             url: "my/playlists",
             type: "GET",
             success: function(response) {
-                $(".content").first().html("<h1 id=\"PlaylistsList\">Playlists</h1>");
-
-                let playlistId;
-                let playlistName;
-
-                for(const pl in response.playlists) {
-                    playlistId = pl;
-                    playlistName = response.playlists[pl];
-
-                    $(".content").first().append(
-                        "<div class=\"UserPlaylist\"id=\"" + playlistId + "\">\n" +
-                        "<a class=\"UserPlaylistLink\" data-name=\"" + playlistName + "\" href=\"playlist/" + playlistId + "\">"
-                         + playlistName +
-                         "</a>" +
-                        "</div>"
-                    );
-                }
+                  $(".content").first().html(response.playlists);
             }
         });
 
     });
 
-    $(document).on("click", ".UserPlaylistLink", function(e) {
+    $(document).on("click", ".playlistLink", function(e) {
         e.preventDefault();
         let playlistName = $(this).attr("data-name");
 
@@ -59,5 +43,4 @@ $(document).ready(function() {
             }
         });
     });
-
 });

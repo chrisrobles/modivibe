@@ -5,6 +5,7 @@ from ..SpotifyApiObjs import sp, auth_manager
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
 import pprint
+from webplayer.views.create_html import *
 
 def validUser():
     try:
@@ -136,19 +137,32 @@ def myplaylists(request):
         plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
         numPLs = plInfo['total']    # total number of playlists the user has
 
-        p_id_name = {}  # { playlist id: name of playlist }
+        info = []
 
         for p in plInfo['items']:
-            p_id_name[p['id']] = p['name']
+            info.append({
+            'contentImg':  p['images'][0]['url'] if p['images'] else 'default',
+            'contentName': p['name'],
+            'contentId' :  p['id'],
+            'contentDesc': p['description']
+            })
 
         # if there are still more playlists to get
         while lim + startAt < numPLs:
             startAt += lim
             plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
-            for p in plInfo['items']:
-                p_id_name[p['id']] = p['name']
 
-        return JsonResponse({'playlists': p_id_name }, status=200)
+            for p in plInfo['items']:
+                info.append({
+                    'contentImg': p['images'][0]['url'] if p['images'] else 'default',
+                    'contentName': p['name'],
+                    'contentId': p['id'],
+                    'contentDesc': p['description']
+                })
+
+        playlists = createCollectionItems(info, 'playlist')
+
+        return JsonResponse({'playlists': playlists}, status=200)
 
     return HttpResponse("no") # need to find a way to trigger ajax if we type the url
 
@@ -166,7 +180,7 @@ def playlist(request, playlist_id):
         numSongs = slInfo['total'] # total number of songs in a playlist
 
         num_artist_songname_dur = []
-        pp = pprint.PrettyPrinter(indent=4)
+
 
         for s in slInfo['items']:
             num_artist_songname_dur.append({
@@ -191,9 +205,6 @@ def playlist(request, playlist_id):
 
                 pNo += 1
 
-        pp.pprint(num_artist_songname_dur)
-
         return JsonResponse({'songlist': num_artist_songname_dur}, status=200)
-
 
     return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this
