@@ -75,6 +75,7 @@ a:hover, a:active, a:focus {
 
 .sideBarLink:hover, .sideBarLink:active, .sideBarLink:focus{
     filter: brightness(1.5);
+    text-decoration: none;
 }
 
 #sideBarTest {
@@ -83,7 +84,7 @@ a:hover, a:active, a:focus {
 }
 
 /* Button hover FX */
-/* Not sure if Kelvyn did this in his branch or if still needs to be revisited */
+/* Might still need to be revisited esp now with a color theme */
 #playbackControl:hover { font-size: 38px; }
 
 /* Google Material Icons stuff */
