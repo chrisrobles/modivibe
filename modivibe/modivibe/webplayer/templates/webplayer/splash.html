@@ -4,14 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
-    <title>Modivibe</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'webplayer/splash.css' %}">
+    <title>Modivibe - An Alternative Spotify Player</title>
 </head>
 <body>
-    <h1>MODIVIBE</h1>
+    <div class="header" id="header">
+        <div class="headerLeft">
+            <h1>MODIVIBE</h1>
+        </div>
+        <div class="headerRight">
+            <a href="#" >Overview</a>
+            <a href="{{ loginurl }}" >Login with Spotify</a>
+        </div>
+
+    </div>
+
     <p>
-        Description text
+<!--        Description text-->
     </p>
-    <a href="{{ loginurl }}">LOGIN</a>
+
+<!--    <a href="{{ loginurl }}">Login With Spotify</a>-->
 </body>
 </html>
 
