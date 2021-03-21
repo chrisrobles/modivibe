@@ -1,9 +1,22 @@
 # All views here will be dedicated to API calls
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from ..SpotifyApiObjs import sp, auth_manager
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
+import pprint
+from webplayer.views.create_html import *
+
+def validUser():
+    try:
+        auth_manager.validate_token(auth_manager.cache_handler.get_cached_token())
+    except:
+        print('Access denied.')
+        return False
+    return True
+
+def isAjaxRequest(request):
+    return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
 
 # After logging in, we're redirected to this redirect uri
@@ -131,7 +144,6 @@ def previousTrack(request):
         response = False
     return HttpResponse(response)
 
-
 # Sets shuffle status for a specific device
 # Excepts:
 #   device_id [STRING] (generated device id)
@@ -171,3 +183,95 @@ def setRepeat(request):
         response = False
     return HttpResponse(response)
 
+# Display all of the current user's playlists
+# my/playlists
+def myplaylists(request):
+    # check a user is authenticated
+    # also refreshes token if expired
+    if not validUser():
+        return redirect('splash')
+
+    if isAjaxRequest(request):
+        startAt = 0
+        lim = 50 # 50 is max for api request
+
+        plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
+        numPLs = plInfo['total']    # total number of playlists the user has
+
+        info = []
+
+        for p in plInfo['items']:
+            info.append({
+            'contentImg':  p['images'][0]['url'] if p['images'] else 'default',
+            'contentName': p['name'],
+            'contentId' :  p['id'],
+            'contentDesc': p['description']
+            })
+
+        # if there are still more playlists to get
+        while lim + startAt < numPLs:
+            startAt += lim
+            plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
+
+            for p in plInfo['items']:
+                info.append({
+                    'contentImg': p['images'][0]['url'] if p['images'] else 'default',
+                    'contentName': p['name'],
+                    'contentId': p['id'],
+                    'contentDesc': p['description']
+                })
+
+        playlists = createCollectionItems(info, 'playlist')
+
+        return JsonResponse({'playlists': playlists}, status=200)
+
+    return HttpResponse("no") # need to find a way to trigger ajax if we type the url
+
+def playlist(request, playlist_id):
+
+    if not validUser():
+        return redirect('splash')
+
+    if isAjaxRequest(request):
+        startAt = 0
+        lim = 100
+        pNo = 1
+
+        slInfo = sp.playlist_items(playlist_id=playlist_id, limit=lim, offset=startAt)
+        numSongs = slInfo['total'] # total number of songs in a playlist
+
+        info = []
+
+
+        for s in slInfo['items']:
+            info.append({
+                "songNum":       pNo,
+                "songName":     s['track']['name'],
+                "songId":       s['track']['id'],
+                "songArtist":   s['track']['artists'][0]['name'],
+                "artistId":     s['track']['artists'][0]['id'],
+                "songLength":   s['track']['duration_ms']
+            })
+
+            pNo += 1
+
+        while lim + startAt < numSongs:
+            startAt += lim
+            slInfo = sp.playlist_items(playlist_id=playlist_id, limit=lim, offset=startAt)
+            for s in slInfo['items']:
+                info.append({
+                    "songNum":      pNo,
+                    "songName":     s['track']['name'],
+                    "songId":       s['track']['id'],
+                    "songArtist":   s['track']['artists'][0]['name'],
+                    "artistId":     s['track']['artists'][0]['id'],
+                    "songLength":   s['track']['duration_ms']
+                })
+
+                pNo += 1
+
+        songs = createSongList(info, 'playlist')
+
+        return JsonResponse({'songs': songs}, status=200)
+
+    return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this

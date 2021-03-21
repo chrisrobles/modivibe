@@ -17,5 +17,11 @@ urlpatterns = [
     path('nextTrack', views.nextTrack, name='nextTrack'),
     path('previousTrack', views.previousTrack, name='previousTrack'),
     path('setShuffle', views.setShuffle, name='setShuffle'),
-    path('setRepeat', views.setRepeat, name='setRepeat')
+    path('setRepeat', views.setRepeat, name='setRepeat'),
+
+    # user collections and music collections (albums, artists, playlists, podcasts)
+    # url should follow:    my/{collection_type}s
+    #                       {collection_type}/<str:type_id>
+    path('my/playlists', views.myplaylists, name='myplaylists'),
+    path('playlist/<str:playlist_id>', views.playlist, name='playlist')
 ]
