@@ -39,7 +39,6 @@ body {
 
 .footer {
     z-index: 1;
-    height: 50px;
     padding: 15px;
     background-color: #1c1c1c;
     box-shadow: inset 0 0 0 1px black;
@@ -48,16 +47,77 @@ body {
 .playbar {
     border: 0;
     margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-content: center;
 }
 
-.playbackContainer {
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%);
+.playbarLeft {
+    margin: 0 10px;
+    display: flex;
+    align-content: center;
+    flex: 1;
 }
 
-.volumeContainer {
+.playbarLeft p {
+    padding: 0;
+    margin: 0;
+}
+
+.playbarLeft .trackInfoContainer {
     float: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+}
+
+.playbar #trackImage {
+    background-color: black;
+    border: 1px solid black;
+}
+
+.playbarLeft #trackName {
+    font-weight: bold;
+}
+
+.playbarLeft #trackArtist {
+    font-weight: normal;
+}
+
+.playbarMiddle {
+    margin: 0 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-flow: wrap;
+    flex-direction: column;
+    flex: 1;
+}
+
+.playbarMiddle button {
+    background: none;
+    border: 0;
+}
+
+.playbarMiddle button:focus {
+    outline: none;
+}
+
+.playbarMiddle #repeatDot {
+    position: absolute;
+    font-size: x-small;
+    display: none;
+}
+
+.playbarRight {
+    margin: 0 10px;
+    display: flex;
+    justify-content: flex-end;
+    align-content: center;
+    flex-flow: wrap;
+    flex: 1;
 }
 
 h1 {
@@ -98,11 +158,22 @@ a:hover, a:active, a:focus {
 
 /* Rules for using icons as white on a dark background. */
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light:hover { color: rgba(150, 150, 150, 1); }
+.material-icons.md-light:focus { color: rgba(150, 150, 150, 1); }
+.material-icons.md-light:active { color: rgba(125, 125, 125, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
+.material-icons.md-light.md-inactive:hover { color: rgba(255, 255, 255, 0.4); }
+.material-icons.md-light.md-inactive:focus { color: rgba(255, 255, 255, 0.4); }
+.material-icons.md-light.md-inactive:active { color: rgba(255, 255, 255, 0.5); }
 
 .material-icons:hover {
     cursor: default;
 }
+
+/*MDC Sliders*/
+.mdc-slider.mdc-slider--discrete { display: flex; justify-content: center; }
+
+
 
 
 
