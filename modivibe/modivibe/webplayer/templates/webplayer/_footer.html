@@ -1,23 +1,48 @@
 <fieldset class="playbar">
-    <span class="playbackContainer">
-        <span id="shuffleControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">shuffle</span>
-        <span id="previousTrackControl" class="material-icons md-36 md-light" aria-label="Previous Track">skip_previous</span>
-        <span id="playbackControl" class="material-icons md-36 md-light" aria-label="Play">play_circle</span>
-        <span id="nextTrackControl" class="material-icons md-36 md-light" aria-label="Next Track">skip_next</span>
-        <span id="loopTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop</span>
-        <span id="queueControl" class="material-icons md-36 md-light" aria-label="Queue">queue</span>
+    <span class="playbarLeft">
+        <img id="trackImage" src="" alt="Track Album Cover" width="64" height="64">
+        <div class="trackInfoContainer">
+            <p id="trackName">Track Name</p>
+            <p id="trackArtist">Track Artist</p>
+        </div>
     </span>
-    <span class="volumeContainer">
-        <label for="volumeControl">VOLUME:</label>
-        <input type="number" id="volumeControl" placeholder="0-100" step="10" min="0" max="100" style="width: 75px" aria-label="Volume"></input>
+    <span class="playbarMiddle">
+        <div class="trackControllers">
+            <button id="shuffleTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">shuffle</button>
+            <button id="previousTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Previous Track">skip_previous</button>
+            <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_circle</button>
+            <button id="nextTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Next Track">skip_next</button>
+            <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
+        </div>
+    </span>
+    <span class="playbarRight">
+        <div class="volumeController">
+            <div class="mdc-slider mdc-slider--discrete">
+                <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
+                <input class="mdc-slider__input" type="range" value="100" min="0" max="100" step="1" name="volume" aria-label="Volume Slider">
+                <div class="mdc-slider__track">
+                <div class="mdc-slider__track--inactive"></div>
+                <div class="mdc-slider__track--active">
+                  <div class="mdc-slider__track--active_fill"></div>
+                </div>
+                </div>
+                <div class="mdc-slider__thumb">
+                <div class="mdc-slider__thumb-knob"></div>
+                </div>
+            </div>
+        </div>
     </span>
 </fieldset>
 
-<script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
     let deviceID;
+    let deviceState;
+    let repeatStatus;
     let isPlaying = false;
+    let isShuffled = false;
+    let initializeStates = true;
 
+    // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = '{{ userAccessCode }}';
         const player = new Spotify.Player({
@@ -34,6 +59,48 @@
         // Playback status updates
         player.addListener('player_state_changed', state => {
             console.log(state);
+            deviceState = state;
+
+            // Update Track Name in Player
+            $('#trackName').text(deviceState['track_window']['current_track']['name']);
+
+            // Update Track Artists in Player
+            let i;
+            let artists = "";
+            let artistsList = deviceState['track_window']['current_track']['artists'];
+            for(i = 0; i < artistsList.length; i++){
+                artists += artistsList[i]['name'];
+                if (i != artistsList.length - 1) artists += ", ";
+            }
+            $('#trackArtist').text(artists)
+
+            // Update Track Image in Player
+            $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
+
+            if(initializeStates) {
+
+                // This will only run once!
+                initializeStates = false;
+
+                // Track controls are now available
+                $('#playbackControl').removeClass('md-inactive');
+                $('#previousTrackControl').removeClass('md-inactive');
+                $('#nextTrackControl').removeClass('md-inactive')
+
+                // Set Shuffle Status
+                isShuffled = deviceState['shuffle'];
+                if (isShuffled) $('#shuffleTrackControl').removeClass('md-inactive');
+                else $('#shuffleTrackControl').addClass('md-inactive');
+
+                // Set Repeat Status
+                repeatStatus = deviceState['repeat_mode'];
+                switch(repeatStatus) {
+                    case 0: $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','inline'); break; // Loop Track
+                    case 1: $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Context
+                    case 2: $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Off
+                    default: break;
+                }
+            }
         });
 
         // Ready
@@ -41,22 +108,7 @@
             console.log('Ready with Device ID', device_id);
             deviceID = device_id;
             // Trigger playback transfer to Modivibe
-            console.log('Attempting to transfer playback');
-            $.ajax({
-                type: "POST",
-                url: "{% url 'transferPlayback' %}",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    device_id: deviceID,
-                },
-                success: function(response) {
-                    if (response == 'True') {
-                        console.log('Successfully transferred playback');
-                    } else {
-                        console.log('Failed to resume playback');
-                    }
-                }
-            });
+            transferPlayback();
         });
 
         // Not Ready
@@ -68,17 +120,35 @@
         player.connect();
     }
 
-    // Update with the actual API call and flipping the 'md-inactive' class,
-    //  model after how playbackControl does it for the play button
-    $('#shuffleControl').on('click', function() {
-        console.log('Shuffle control clicked');
+    // Button event bindings
+    $('#playbackControl').on('click', togglePlayback);
+    $('.mdc-slider__input').on('change', setVolume);
+    $('#previousTrackControl').on('click', previousTrack);
+    $('#nextTrackControl').on('click', nextTrack);
+    $('#shuffleTrackControl').on('click', toggleShuffle);
+    $('#repeatTrackControl').on('click', toggleRepeat);
 
-        // Below doesn't work need to find another way
-        // $('#shuffleControl').classList.remove('md-inactive');
-        // $('#shuffleControl').classList.add('md-inactive');
-    });
+    // Button event functions
+    function transferPlayback() {
+        console.log('Attempting to transfer playback');
+        $.ajax({
+            type: "POST",
+            url: "{% url 'transferPlayback' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log('Successfully transferred playback');
+                } else {
+                    console.log('Failed to resume playback');
+                }
+            }
+        });
+    }
 
-    $('#playbackControl').on('click', function() {
+    function togglePlayback(event){
         if (!isPlaying) {
             console.log('Requesting playback resume');
             $.ajax({
@@ -121,10 +191,9 @@
                 }
             });
         }
+    }
 
-    });
-
-    $('#volumeControl').on('change', function() {
+    function setVolume(event) {
        console.log('Attempting to set volume');
        $.ajax({
             type: "POST",
@@ -137,14 +206,37 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully set volume');
+                    if ($('.mdc-slider__input').val() <= 0) { $('#volumeIcon').text('volume_mute'); }
+                    else if ($('.mdc-slider__input').val() <= 49) { $('#volumeIcon').text('volume_down'); }
+                    else if ($('.mdc-slider__input').val() <= 100) { $('#volumeIcon').text('volume_up'); }
                 } else {
                     console.log('Failed to set volume');
                 }
             }
         });
-    });
+    }
 
-    $('#previousTrackControl').on('click', function() {
+    function getVolume() {
+     console.log('Attempting to retrieve volume');
+       $.ajax({
+            type: "POST",
+            url: "{% url 'getVolume' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+            },
+            success: function(response) {
+                if (response != 'False') {
+                    console.log('Successfully retrieved volume');
+                    console.log(response);
+                } else {
+                    console.log('Failed to retrieve volume');
+                }
+            }
+        });
+    }
+
+    function previousTrack(event) {
         console.log('Attempting to play previous track');
         $.ajax({
             type: "POST",
@@ -161,9 +253,9 @@
                 }
             }
         });
-    });
+    }
 
-    $('#nextTrackControl').on('click', function() {
+    function nextTrack(event) {
         console.log('Attempting to play next track');
         $.ajax({
             type: "POST",
@@ -180,22 +272,80 @@
                 }
             }
         });
-    });
+    }
 
-    // Update with the actual API call and flipping the 'md-inactive' class,
-    //  model after how playbackControl does it for the play button
-    $('#loopTrackControl').on('click', function() {
-        console.log('Loop control clicked');
+    function toggleShuffle(event){
+        if (!isShuffled) {
+            console.log('Attempting to enable shuffle');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'setShuffle' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    shuffle_status: 'enabled'
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully enabled shuffle');
+                        isShuffled = true;
+                        $('#shuffleTrackControl').removeClass('md-inactive');
+                    } else {
+                        console.log('Failed to enable shuffle');
+                    }
+                }
+            });
 
-        // Below doesn't work need to find another way
-        // $('#loopTrackControl').classList.remove('md-inactive');
-        // $('#loopTrackControl').classList.add('md-inactive');
-    });
+        } else {
+            console.log('Attempting to disable shuffle');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'setShuffle' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    shuffle_status: 'disabled'
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully disabled shuffle');
+                        isShuffled = false;
+                        $('#shuffleTrackControl').addClass('md-inactive');
+                    } else {
+                        console.log('Failed to disable shuffle');
+                    }
+                }
+            });
+        }
+    }
 
-    // Update with the actual API call and flipping the 'md-inactive' class,
-    //  model after how playbackControl does it for the play button
-    $('#queueControl').on('click', function() {
-        console.log('Queue control clicked');
-    });
+    function toggleRepeat(event) {
+        console.log('Attempting to toggle repeat state');
+        repeatStatus += 1;
+        if (repeatStatus > 2 || repeatStatus < 0) repeatStatus = 0;
+        $.ajax({
+                type: "POST",
+                url: "{% url 'setRepeat' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    repeat_status: repeatStatus
+                },
+                success: function(response) {
+                    if (response != 'False') {
+                        console.log('Successfully toggled repeat state');
+                        switch(response) {
+                            case 'track': $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','inline'); break;
+                            case 'context': $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','none'); break;
+                            case 'off': $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break;
+                            default: break;
+                        }
+                    } else {
+                        console.log('Failed to toggle repeat state');
+                        repeatStatus -= 1;
+                    }
+                }
+        });
+    }
 
 </script>
