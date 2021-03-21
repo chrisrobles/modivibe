@@ -179,15 +179,17 @@ def playlist(request, playlist_id):
         slInfo = sp.playlist_items(playlist_id=playlist_id, limit=lim, offset=startAt)
         numSongs = slInfo['total'] # total number of songs in a playlist
 
-        num_artist_songname_dur = []
+        info = []
 
 
         for s in slInfo['items']:
-            num_artist_songname_dur.append({
-                "songNo": pNo,
-                "artist": s['track']['artists'][0]['name'],
-                "songName":   s['track']['name'],
-                "length": s['track']['duration_ms']
+            info.append({
+                "songNum":       pNo,
+                "songName":     s['track']['name'],
+                "songId":       s['track']['id'],
+                "songArtist":   s['track']['artists'][0]['name'],
+                "artistId":     s['track']['artists'][0]['id'],
+                "songLength":   s['track']['duration_ms']
             })
 
             pNo += 1
@@ -196,15 +198,19 @@ def playlist(request, playlist_id):
             startAt += lim
             slInfo = sp.playlist_items(playlist_id=playlist_id, limit=lim, offset=startAt)
             for s in slInfo['items']:
-                num_artist_songname_dur.append({
-                    "songNo": pNo,
-                    "artist": s['track']['artists'][0]['name'],
-                    "songName": s['track']['name'],
-                    "length": s['track']['duration_ms']
+                info.append({
+                    "songNum":      pNo,
+                    "songName":     s['track']['name'],
+                    "songId":       s['track']['id'],
+                    "songArtist":   s['track']['artists'][0]['name'],
+                    "artistId":     s['track']['artists'][0]['id'],
+                    "songLength":   s['track']['duration_ms']
                 })
 
                 pNo += 1
 
-        return JsonResponse({'songlist': num_artist_songname_dur}, status=200)
+        songs = createSongList(info, 'playlist')
+
+        return JsonResponse({'songs': songs}, status=200)
 
     return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this

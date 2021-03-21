@@ -16,7 +16,9 @@ urlpatterns = [
     path('nextTrack', views.nextTrack, name='nextTrack'),
     path('previousTrack', views.previousTrack, name='previousTrack'),
 
-    # user collections (albums, artists, playlists, podcasts)
+    # user collections and music collections (albums, artists, playlists, podcasts)
+    # url should follow:    my/{collection_type}s
+    #                       {collection_type}/<str:type_id>
     path('my/playlists', views.myplaylists, name='myplaylists'),
     path('playlist/<str:playlist_id>', views.playlist, name='playlist')
 ]
