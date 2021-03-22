@@ -13,6 +13,24 @@
             <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_circle</button>
             <button id="nextTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Next Track">skip_next</button>
             <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
+
+            <button id="helperButtonControl">click me</button>
+        </div>
+        <div id="progressBarContainer">
+            <div id="currentTimeLabel">00:00</div>
+
+             <!-- Input element for progress bar - min=0 starting value of
+            every song - max length will change per song so leave empty -->
+            <input
+              type="range"
+              id="progressBarControl"
+              min="0"
+              max=""
+              value="0"
+              onchange="changeProgressBar()"
+            />
+
+            <div class="totalTimeLabel">04:20</div>
         </div>
     </span>
     <span class="playbarRight">
@@ -127,6 +145,8 @@
     $('#nextTrackControl').on('click', nextTrack);
     $('#shuffleTrackControl').on('click', toggleShuffle);
     $('#repeatTrackControl').on('click', toggleRepeat);
+
+    $('#helperButtonControl').on('click', helperButton);
 
     // Button event functions
     function transferPlayback() {
@@ -346,6 +366,28 @@
                     }
                 }
         });
+    }
+
+    function helperButton() {
+     // console.log('Attempting to get current track info');
+     //   $.ajax({
+     //        type: "GET",
+     //        url: "{% url 'helperButton' %}",
+     //        data: {
+     //            csrfmiddlewaretoken: '{{ csrf_token }}',
+     //            device_id: deviceID,
+     //        },
+     //        success: function(response) {
+     //            if (response != 'False') {
+     //                console.log('Successfully retrieved current track info');
+     //                console.log(response);
+     //            } else {
+     //                console.log('Failed to retrieve current track info');
+     //            }
+     //        }
+     //    });
+
+        console.log(deviceState)
     }
 
 </script>
