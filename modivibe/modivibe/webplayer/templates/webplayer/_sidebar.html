@@ -1,17 +1,10 @@
-SIDEBAR
-<!-- Just for testing hover effects -->
-
 <br><br>
-<span id="sideBarTest">
-    <span class="material-icons sideBarLink">home</span>
-    <a href="#" class="sideBarLink">Home</a>
-</span>
+
 <!-- Temporary until we get the navbar in, just use the same url and make sure the id matches
-the js file -->
-<div><a id="MyPlaylists" href="{% url 'myplaylists' %}">Playlists</a></div>
+the js file
+<div><a id="MyPlaylists" href="{% url 'myplaylists' %}">Playlists</a></div>-->
 
 <style>
-
     /* The side navigation menu */
     .sidenav {
         /* 0 width - change this with JavaScript */
@@ -56,9 +49,11 @@ the js file -->
     .btn {
       height: 25px;
       text-align: center;
+        text-decoration: none;
       width: 200px;
       cursor: pointer;
         padding-top: 10px;
+        padding-bottom: 10px;
         margin: 10px 10px 20px 10px;
     }
 
@@ -103,14 +98,41 @@ the js file -->
 </style>
 
 <nav id="mySidenav" class="sidenav">
-      <ul style="list-style-type: none; padding: 0; margin: 0;">
-         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
-         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
-         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
-         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
-         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
-         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
-      </ul>
+   <ul style="list-style-type: none; padding: 0; margin: 0;">
+      <li>
+          <a style="text-decoration: none;" href="#">
+            <div class="btn btn-three">
+                <span><span class="material-icons" style="vertical-align: -4px;">home</span>Home</span>
+            </div>
+          </a>
+      </li>
+       <a id="MyPlaylists" style="text-decoration: none;" href="{% url 'myplaylists' %}">
+            <div class="btn btn-three">
+                <span><span class="material-icons" style="vertical-align: -4px;">home</span>Playlists</span>
+            </div>
+          </a>
+      </li>
+      <li>
+          <a href="#" style="text-decoration: none;">
+            <div class="btn btn-three">Playlists</div>
+          </a>
+      </li>
+      <li>
+          <a href="#" style="text-decoration: none;">
+            <div class="btn btn-three">Playlists</div>
+          </a>
+      </li>
+      <li>
+          <a href="#" style="text-decoration: none;">
+            <div class="btn btn-three">Playlists</div>
+          </a>
+      </li>
+      <li>
+          <a href="#">
+            <div class="btn btn-three">Playlists</div>
+          </a>
+      </li>
+   </ul>
 </nav>
 
 <script>
