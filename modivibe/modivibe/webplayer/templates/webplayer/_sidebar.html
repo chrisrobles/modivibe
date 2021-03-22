@@ -1,5 +1,6 @@
 SIDEBAR
 <!-- Just for testing hover effects -->
+
 <br><br>
 <span id="sideBarTest">
     <span class="material-icons sideBarLink">home</span>
@@ -8,3 +9,120 @@ SIDEBAR
 <!-- Temporary until we get the navbar in, just use the same url and make sure the id matches
 the js file -->
 <div><a id="MyPlaylists" href="{% url 'myplaylists' %}">Playlists</a></div>
+
+<style>
+
+    /* The side navigation menu */
+    .sidenav {
+        /* 0 width - change this with JavaScript */
+        width: auto;
+    }
+    .extend {
+      display: inline-block;
+      background-color: transparent;
+      border: none;
+      color: #000000;
+      text-align: center;
+      font-size: 15px;
+      transition: all 0.5s;
+      cursor: pointer;
+    }
+
+    .extend span {
+      cursor: pointer;
+      display: inline-block;
+      position: relative;
+      transition: 0.5s;
+    }
+
+    .extend span:after {
+      content: '\00bb';
+      position: absolute;
+      opacity: 0;
+      top: 0;
+      right: -20px;
+      transition: 0.5s;
+    }
+
+    .extend:hover span {
+      padding-right: 25px;
+    }
+
+    .extend:hover span:after {
+        opacity: 1;
+        right: 0;
+    }
+    @import 'https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300';
+    .btn {
+      height: 25px;
+      text-align: center;
+      width: 200px;
+      cursor: pointer;
+        padding-top: 10px;
+        margin: 10px 10px 20px 10px;
+    }
+
+    .btn-three {
+      color: #FFF;
+      transition: all 0.5s;
+      position: relative;
+    }
+    .btn-three::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background-color: rgba(255,255,255,0.1);
+      transition: all 0.3s;
+    }
+    .btn-three:hover::before {
+      opacity: 0 ;
+      transform: scale(0.5,0.5);
+    }
+    .btn-three::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0;
+      transition: all 0.3s;
+      border: 1px solid rgba(255,255,255,0.5);
+      transform: scale(1.2,1.2);
+    }
+    .btn-three:hover::after {
+      opacity: 1;
+      transform: scale(1,1);
+    }
+
+</style>
+
+<nav id="mySidenav" class="sidenav">
+      <ul style="list-style-type: none; padding: 0; margin: 0;">
+         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
+         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
+         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
+         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
+         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
+         <li><div class="box-3"><div class="btn btn-three"><span>HOVER ME</span></div></div></li>
+      </ul>
+</nav>
+
+<script>
+    function openNav() {
+      if (document.getElementById("mySidenav").hidden == true) {
+          document.getElementById("mySidenav").hidden = false;
+          document.getElementById("mySidenav").style.transition = "width 2s";
+          document.getElementById("mySidenav").style.width = "auto";
+      }
+      else {
+          document.getElementById("mySidenav").hidden = true;
+          document.getElementById("mySidenav").style.width = "0px";
+      }
+    }
+</script>
