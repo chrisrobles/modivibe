@@ -5,6 +5,9 @@
             <p id="trackName">Track Name</p>
             <p id="trackArtist">Track Artist</p>
         </div>
+
+        <button id="helperButtonControl">click me</button>
+
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
@@ -13,27 +16,22 @@
             <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_circle</button>
             <button id="nextTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Next Track">skip_next</button>
             <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
-
-            <button id="helperButtonControl">click me</button>
         </div>
         <div id="progressBarContainer">
             <div id="currentTimeLabel">00:00</div>
-
-             <!-- Input element for progress bar - min=0 starting value of
-            every song - max length will change per song so leave empty -->
             <input
               type="range"
               id="progressBarControl"
               min="0"
               max=""
               value="0"
-              onchange="changeProgressBar()"
             />
-
             <div class="totalTimeLabel">04:20</div>
         </div>
     </span>
     <span class="playbarRight">
+        <button id="queueControl" class="material-icons md-36 md-light md-inactive" aria-label="Queue">queue</button>
+
         <div class="volumeController">
             <div class="mdc-slider mdc-slider--discrete">
                 <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
@@ -147,6 +145,8 @@
     $('#repeatTrackControl').on('click', toggleRepeat);
 
     $('#helperButtonControl').on('click', helperButton);
+    $('#progressBarControl').on('change', progressBarControlTest);
+
 
     // Button event functions
     function transferPlayback() {
@@ -388,6 +388,10 @@
      //    });
 
         console.log(deviceState)
+    }
+
+    function progressBarControlTest() {
+        console.log(document.getElementById("progressBarControl").value);
     }
 
 </script>
