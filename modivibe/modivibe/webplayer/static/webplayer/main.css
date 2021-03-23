@@ -122,6 +122,15 @@ body {
     flex: 1;
 }
 
+.playbarRight button {
+    background: none;
+    border: 0;
+}
+
+.playbarRight button:focus {
+    outline: none;
+}
+
 h1 {
     color: white;
 }
@@ -160,16 +169,17 @@ a:hover, a:active, a:focus {
     appearance: none;
 
     height: 5px;
-    background: darkgrey;
     width: 70%;
+    background: darkgrey;
+    border-radius: 30px;
+    margin: 0px 10px 0px 10px;
 }
 
-/* style to remove blue shade of the progress bar when clicked on/selected */
+/* Removes the focus border when clicking on the progress bar */
 #progressBarControl:focus {
     outline: none;
 }
 
-/* style for the progress bar's slider thumb */
 #progressBarControl::-webkit-slider-thumb {
     -webkit-appearance: none;
 
@@ -179,21 +189,12 @@ a:hover, a:active, a:focus {
     border-radius: 30px;
 }
 
-/* style for the progress bar's runnable track */
 #progressBarControl-bar::-webkit-slider-runnable-track {
     -webkit-appearance: none;
     appearance: none;
 
     max-height: 5px;
     border-radius: 30px;
-}
-
-#currentTimeLabel {
-
-}
-
-#totalTimeLabel {
-
 }
 
 /* Google Material Icons stuff */
