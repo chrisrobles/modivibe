@@ -35,6 +35,29 @@ body {
     flex: 1;
 }
 
+.DirectionalButtons{
+    margin: 0 10px;
+    display: flex;
+    align-content: center;
+    flex: 1;
+}
+
+.TopBarLeft {
+    margin: 0 10px;
+    justify-content: center;
+    align-content: center;
+    flex-flow: wrap;
+    flex: 1;
+    display: flex;
+}
+.TopBarRight {
+    margin: 0 10px;
+    justify-content: center;
+    align-content: center;
+    flex-flow: wrap;
+    flex: none;
+    display: flex;
+}
 
 .center {
     display: flex;

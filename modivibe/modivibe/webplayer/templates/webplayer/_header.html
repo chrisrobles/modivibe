@@ -1,8 +1,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
  MODIVIBE
 <style>
 
 * {box-sizing: border-box;}
+
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -71,12 +73,31 @@ body {
 }
 </style>
 
-
 <fieldset class = "TopBar">
+    <span class = "TopBarLeft">
+        <div class="DirectionalButtons">
+           <button onClick="window.location.reload();" class="material-icons md-18 md-dark" aria-label="back">arrow_back_ios</button>
+           <button onClick="window.location.reload();" class="material-icons md-18 md-dark" aria-label="forward">arrow_forward_ios</button>
+        </div>
+    </span>
+
+    <span class = "TopBarRight">
         <div class="search-container">
             <form action="/action_page.php">
                 <input type="text" placeholder="Artists, Songs, Playlists.." name="search">
                 <button type="submit"><i class="fa fa-search"></i></button>
             </form>
         </div>
+    </span>
 </fieldset>
+
+<script>
+    $.ajax({
+                type: "POST",
+                url: "{% url 'setRepeat' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+})
+
+</script>
