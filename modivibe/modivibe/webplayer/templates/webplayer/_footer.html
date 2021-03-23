@@ -18,7 +18,7 @@
             <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
         </div>
         <div id="progressBarContainer">
-            <div id="currentTimeLabel">00:00</div>
+            <div id="progressTimeLabel">00:00</div>
             <input
               type="range"
               id="progressBarControl"
@@ -26,7 +26,7 @@
               max=""
               value="0"
             />
-            <div class="totalTimeLabel">04:20</div>
+            <div id="durationTimeLabel"></div>
         </div>
     </span>
     <span class="playbarRight">
@@ -147,7 +147,6 @@
     $('#helperButtonControl').on('click', helperButton);
     $('#progressBarControl').on('change', progressBarControlTest);
 
-
     // Button event functions
     function transferPlayback() {
         console.log('Attempting to transfer playback');
@@ -161,6 +160,7 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully transferred playback');
+                    document.getElementById("durationTimeLabel").innerHTML = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -387,11 +387,13 @@
      //        }
      //    });
 
-        console.log(deviceState)
+        console.log(deviceState);
     }
 
     function progressBarControlTest() {
         console.log(document.getElementById("progressBarControl").value);
-    }
-
+        test();
+        console.log(millisToMinutesAndSeconds(deviceState.duration));
+    };
+    
 </script>
