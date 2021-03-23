@@ -4,14 +4,39 @@
 <head>
     <meta charset="UTF-8">
     <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
-    <title>Modivibe</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'webplayer/splash.css' %}">
+    <title>Modivibe - An Alternative Spotify Player</title>
 </head>
 <body>
-    <h1>MODIVIBE</h1>
+    <nav>
+        <ul class="splashNav">
+            <!--Change to an image at a later time, requires more work-->
+            <li><a class="logo" href="#" > MODIVIBE </a></li>
+
+            <!--The not logo buttons-->
+            <div class="navButtons">
+                <li> <a href="#">Overview</a></li>
+                <li ><a href="{{ loginurl }}" >Login with Spotify</a></li>
+            </div>
+        </ul>
+    </nav>
+    <div class="overviewText">
+        <h1 class="Modivibe Splash Title">Modivibe Alpha</h1>
+        <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+            magna aliqua. Ipsum dolor sit amet consectetur adipiscing elit. Tristique risus nec feugiat in fermentum posuere
+            urna nec tincidunt. Gravida cum sociis natoque penatibus et magnis dis parturient montes. Id diam vel quam
+            elementum pulvinar etiam. Sagittis id consectetur purus ut. Aliquet nibh praesent tristique magna sit. Augue ut
+            lectus arcu bibendum at varius. Morbi tristique senectus et netus. Urna nec tincidunt praesent semper feugiat.
+            Fringilla est ullamcorper eget nulla. Turpis egestas sed tempus urna.
+        </p>
+    </div>
+
     <p>
-        Description text
+<!--        Description text-->
     </p>
-    <a href="{{ loginurl }}">LOGIN</a>
+
+<!--    <a href="{{ loginurl }}">Login With Spotify</a>-->
 </body>
 </html>
 
