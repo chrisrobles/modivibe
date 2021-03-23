@@ -18,7 +18,6 @@ def validUser():
 def isAjaxRequest(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
-
 # After logging in, we're redirected to this redirect uri
 # Verifies that a valid code is given and redirects user to proper page
 # Does not require an html page
@@ -42,7 +41,6 @@ def redirectToHome(request):
 
     # valid token is obtained
     return redirect('webplayer')
-
 
 # Helper function to return a dictionary containing device info
 # Expects:
@@ -71,7 +69,6 @@ def transferPlayback(request):
         response = False
     return HttpResponse(response)
 
-
 # Resumes or pauses playback for a specific device
 # Expects:
 #   device_id [STRING] (generated device id)
@@ -91,7 +88,6 @@ def setPlayback(request):
         response = False
     return HttpResponse(response)
 
-
 # Sets volume for a specific device
 # Expects:
 #   device_id [STRING] (generated device id)
@@ -105,7 +101,6 @@ def setVolume(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
-
 
 # Searches user devices to find Modivibe and determine set volume
 # Expects:
@@ -130,7 +125,6 @@ def nextTrack(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
-
 
 # Skips to previous track in user's queue
 # Excepts:
@@ -162,7 +156,6 @@ def setShuffle(request):
         response = False
     return HttpResponse(response)
 
-
 # Sets repeat status for a specific device (3 modes)
 # Excepts:
 #   device_id [STRING] (generated device id)
@@ -179,6 +172,17 @@ def setRepeat(request):
     try:
         sp.repeat(state=repeatState, device_id=deviceID)
         response = repeatState
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
+# Helper while developing the progress bar
+def helperButton(request):
+    response = False
+    deviceID = request.POST['device_id']
+    try:
+        sp.current_playback(device_id=deviceID)
+        response = True
     except SpotifyException:
         response = False
     return HttpResponse(response)

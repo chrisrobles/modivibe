@@ -45,20 +45,22 @@ the js file
     }
     @import 'https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300';
     .btn {
-      height: 25px;
+      height: auto;
       text-align: center;
-        text-decoration: none;
+      text-decoration: none;
       width: 200px;
       cursor: pointer;
-        padding-top: 10px;
-        padding-bottom: 10px;
-        margin: 10px 10px 20px 10px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      margin: 10px 10px 10px 10px;
+      border-radius: 10px 10px 10px 10px;
     }
 
     .btn-three {
       color: #FFF;
       transition: all 0.5s;
       position: relative;
+      border-radius: 10px 10px 10px 10px;
     }
     .btn-three::before {
       content: '';
@@ -70,10 +72,12 @@ the js file
       z-index: 1;
       background-color: rgba(255,255,255,0.1);
       transition: all 0.3s;
+      border-radius: 10px 10px 10px 10px;
     }
     .btn-three:hover::before {
       opacity: 0 ;
       transform: scale(0.5,0.5);
+      border-radius: 10px 10px 10px 10px;
     }
     .btn-three::after {
       content: '';
@@ -87,6 +91,7 @@ the js file
       transition: all 0.3s;
       border: 1px solid rgba(255,255,255,0.5);
       transform: scale(1.2,1.2);
+      border-radius: 10px 10px 10px 10px;
     }
     .btn-three:hover::after {
       opacity: 1;
