@@ -72,26 +72,6 @@
         player.addListener('account_error', ({message}) => { console.error(message); });
         player.addListener('playback_error', ({message}) => { console.error(message); });
 
-    // Button event functions
-    function playBackControl() {
-        console.log('Attempting to change track position');
-        $.ajax({
-            type: "POST",
-            url: "{% url 'transferPlayback' %}",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                device_id: deviceID,
-            },
-            success: function(response) {
-                if (response == 'True') {
-
-                } else {
-                    console.log('Failed to change track position');
-                }
-            }
-        });
-    }
-
         // Playback status updates
         player.addListener('player_state_changed', state => {
             console.log(state);
@@ -168,11 +148,11 @@
     $('#progressBarControl').on('change', progressBarControlTest);
 
     // Button event functions
-    function progressControl() {
+    function transferPlayback() {
         console.log('Attempting to transfer playback');
         $.ajax({
             type: "POST",
-            url: "{% url 'progressControl' %}",
+            url: "{% url 'transferPlayback' %}",
             data: {
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 device_id: deviceID,
@@ -180,8 +160,8 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully transferred playback');
-
-                    document.getElementById("durationTimeLabel").innerHTML = millisToMinutesAndSeconds(deviceState['duration']);
+                    document.getElementById("durationTimeLabel").innerHTML = millisToMinutesAndSeconds(deviceState.duration);
+                    console.log
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -408,15 +388,15 @@
      //        }
      //    });
 
-        console.log('test', [deviceState][0].duration);
+        console.log(deviceState);
     }
 
-    // function progressBarControlTest() {
-    //     progressBar = document.getElementById("progressBarControl");
-    //
-    //     console.log(progressBar.value);
-    //     console.log(millisToMinutesAndSeconds(deviceState.duration));
-    // }
+    function progressBarControlTest() {
+        progressBar = document.getElementById("progressBarControl");
+
+        console.log(progressBar.value);
+        console.log(millisToMinutesAndSeconds(deviceState.duration));
+    }
 
     // Temp
     function updateTrackProgressValue() {
