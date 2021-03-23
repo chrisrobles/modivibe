@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'webplayer/splash.css' %}">
-    <title>Modivibe - An Alternative Spotify Player</title>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
+        <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css' %}">
+        <script src="{% static 'lib/bootstrap/js/bootstrap.min.js'%}"></script>
+        <link rel="stylesheet" type="text/css" href="{% static 'webplayer/splash.css' %}">
+        <title>Modivibe - An Alternative Spotify Player</title>
+    </head>
     <nav>
         <ul class="splashNav">
             <!--Change to an image at a later time, requires more work-->
@@ -20,23 +21,65 @@
             </div>
         </ul>
     </nav>
-    <div class="overviewText">
-        <h1 class="Modivibe Splash Title">Modivibe Alpha</h1>
-        <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-            magna aliqua. Ipsum dolor sit amet consectetur adipiscing elit. Tristique risus nec feugiat in fermentum posuere
-            urna nec tincidunt. Gravida cum sociis natoque penatibus et magnis dis parturient montes. Id diam vel quam
-            elementum pulvinar etiam. Sagittis id consectetur purus ut. Aliquet nibh praesent tristique magna sit. Augue ut
-            lectus arcu bibendum at varius. Morbi tristique senectus et netus. Urna nec tincidunt praesent semper feugiat.
-            Fringilla est ullamcorper eget nulla. Turpis egestas sed tempus urna.
-        </p>
-    </div>
-
-    <p>
-<!--        Description text-->
-    </p>
-
-<!--    <a href="{{ loginurl }}">Login With Spotify</a>-->
-</body>
+    <body>
+        <div class='container-fluid overviewText'>
+            <div class='row align-items-center'>
+                <div class='col-6'>
+                    <h1>Welcome to Modivibe!</h1>
+                    <h5>
+                        Modivibe is a more customizable, web-based alternative to Spotify. Connect with your Spotify account for free now!
+                    </h5>
+                    <button class="btn btn-lg" href="{{ loginurl }}">Connect</button>
+                </div>
+                <div class='col-6 align-self-center'>
+                    <p>put graphic here</p>
+                </div>
+            </div>
+            <div class='row align-items-center'>
+                <div class='col-6'>
+                    <p>put graphic here</p>
+                </div>
+                <div class='col-6'>
+                    <h5>
+                        <h1>In Browser Music Playback</h1>
+                        <h5>Listen to songs in browser with the standard play/pause, skip, shuffle, repeat, and volume controls.</h5>
+                    </h5>
+                </div>
+            </div>
+            <div class='row align-items-center'>
+                <div class='col-6'>
+                    <h5>
+                        <h1>User Controlled Shuffle</h1>
+                        <h5>A new shuffle algorithm created that works off of the user's preferences.</h5>
+                    </h5>
+                </div>
+                <div class='col-6'>
+                    <p>put graphic here</p>
+                </div>
+            </div>
+            <div class='row align-items-center'>
+                <div class='col-6'>
+                    <p>put graphic here</p>
+                </div>
+                <div class='col-6'>
+                    <h5>
+                        <h1>Privacy Policy</h1>
+                        <h5>We collect user's data from Spotify in order to give a personalized experience with the user's information. We do not sell or give any of the user's data to a third party. However, we do use 3rd party software such as Spotify API and Google Analytics (provides anonymous information about how users interact with our website). This website also implements Cookies in order to remember user prefrences. By using this website you agree to having your data collected and used in the way we described.</h5>
+                    </h5>
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-center foot">
+            <div class='col-4' style='text-align: left;'>
+                <p style='font-size: medium; font-weight: 400;'>&nbsp;&nbsp;©Modivibe 2021</p>
+            </div>
+            <div class='col-4'>
+                <p>{social media icons}</p>
+            </div>
+            <div class='col-4'>
+                <p>{powered by spotify picture and symbol}</p>
+            </div>
+        </div>
+    </body>
 </html>
 
