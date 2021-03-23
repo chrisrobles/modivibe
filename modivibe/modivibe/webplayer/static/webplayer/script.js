@@ -24,4 +24,16 @@ $(document).ready(function() {
             }
         });
     });
+
+    $(document).on("click","#myAlbums",function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: $(this).attr("href"),
+            type: "Get",
+            success: function (response) {
+                $(".content").first().html(response.myAlbums);
+            }
+        });
+    });
 });

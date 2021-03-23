@@ -5,6 +5,8 @@
             <p id="trackName">Track Name</p>
             <p id="trackArtist">Track Artist</p>
         </div>
+
+<!--        <button id="helperButtonControl">click me</button> -->
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
@@ -14,8 +16,20 @@
             <button id="nextTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Next Track">skip_next</button>
             <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
         </div>
+        <div id="progressBarContainer">
+            <span id="progressTimeLabel" style="font-size: 12px">00:00</span>
+            <input
+              type="range"
+              id="progressBarControl"
+              min="0"
+              max=""
+              value="0"
+            />
+            <span id="durationTimeLabel" style="font-size: 12px"></span>
+        </div>
     </span>
     <span class="playbarRight">
+        <button id="queueControl" class="material-icons md-36 md-light md-inactive" aria-label="Queue">queue</button>
         <div class="volumeController">
             <div class="mdc-slider mdc-slider--discrete">
                 <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
@@ -128,6 +142,9 @@
     $('#shuffleTrackControl').on('click', toggleShuffle);
     $('#repeatTrackControl').on('click', toggleRepeat);
 
+    // $('#helperButtonControl').on('click', helperButton);
+    // $('#progressBarControl').on('change', updateProgressBarSliderThumb);
+
     // Button event functions
     function transferPlayback() {
         console.log('Attempting to transfer playback');
@@ -141,6 +158,10 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully transferred playback');
+
+                    // This sometimes throws a deviceState undefined error and I have no idea why. Will fix later
+                    //  (think it's a timing issue)
+                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -151,6 +172,10 @@
     function togglePlayback(event){
         if (!isPlaying) {
             console.log('Requesting playback resume');
+
+            // Want to do this label update elsewhere - putting it here for now. I was having trouble with transferPlayback()
+            document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+
             $.ajax({
                 type: "POST",
                 url: "{% url 'setPlayback' %}",
@@ -347,5 +372,33 @@
                 }
         });
     }
+
+    // function helperButton() {
+    //  console.log('Attempting to get current track info');
+    //    $.ajax({
+    //         type: "GET",
+    //         url: "{% url 'helperButton' %}",
+    //         data: {
+    //             csrfmiddlewaretoken: '{{ csrf_token }}',
+    //             device_id: deviceID,
+    //         },
+    //         success: function(response) {
+    //             if (response != 'False') {
+    //                 console.log('Successfully retrieved current track info');
+    //                 console.log(response);
+    //             } else {
+    //                 console.log('Failed to retrieve current track info');
+    //             }
+    //         }
+    //     });
+    //
+    //     // console.log(deviceState);
+    // }
+
+    // To do
+    // function updateProgressBarSliderThumb () {
+    //     progressBar = document.getElementById("progressBarControl");
+    //
+    // }
 
 </script>

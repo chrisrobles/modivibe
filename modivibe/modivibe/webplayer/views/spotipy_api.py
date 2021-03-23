@@ -18,7 +18,6 @@ def validUser():
 def isAjaxRequest(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
-
 # After logging in, we're redirected to this redirect uri
 # Verifies that a valid code is given and redirects user to proper page
 # Does not require an html page
@@ -42,7 +41,6 @@ def redirectToHome(request):
 
     # valid token is obtained
     return redirect('webplayer')
-
 
 # Helper function to return a dictionary containing device info
 # Expects:
@@ -71,7 +69,6 @@ def transferPlayback(request):
         response = False
     return HttpResponse(response)
 
-
 # Resumes or pauses playback for a specific device
 # Expects:
 #   device_id [STRING] (generated device id)
@@ -91,7 +88,6 @@ def setPlayback(request):
         response = False
     return HttpResponse(response)
 
-
 # Sets volume for a specific device
 # Expects:
 #   device_id [STRING] (generated device id)
@@ -105,7 +101,6 @@ def setVolume(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
-
 
 # Searches user devices to find Modivibe and determine set volume
 # Expects:
@@ -130,7 +125,6 @@ def nextTrack(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
-
 
 # Skips to previous track in user's queue
 # Excepts:
@@ -162,7 +156,6 @@ def setShuffle(request):
         response = False
     return HttpResponse(response)
 
-
 # Sets repeat status for a specific device (3 modes)
 # Excepts:
 #   device_id [STRING] (generated device id)
@@ -179,6 +172,17 @@ def setRepeat(request):
     try:
         sp.repeat(state=repeatState, device_id=deviceID)
         response = repeatState
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
+# Helper while developing the progress bar
+def helperButton(request):
+    response = False
+    deviceID = request.POST['device_id']
+    try:
+        sp.current_playback(device_id=deviceID)
+        response = True
     except SpotifyException:
         response = False
     return HttpResponse(response)
@@ -275,3 +279,51 @@ def playlist(request, playlist_id):
         return JsonResponse({'songs': songs}, status=200)
 
     return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this
+
+def mySavedAlbums(request):
+    #check if user is authenticated
+
+    if not validUser():
+        return redirect('splash')
+
+    if isAjaxRequest(request):
+        startAt = 0
+        lim = 50 #max that the api allows
+
+        albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
+        # pp = pprint.PrettyPrinter(indent = 4)
+        # pp.pprint(albumInfo)
+        numAlbums = albumInfo['total'] #total # of albums the user has saved
+
+        info = []
+
+        for a in albumInfo['items']:
+            info.append({
+                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+                'contentName': a['album']['name'],
+                'contentId': a['album']['id'],
+                'contentDesc': [],
+                'artist': a['album']['artists'][0]['name'],
+                'artistId': a['album']['artists'][0]['id'],
+                'albumDate': a['album']['release_date']
+            })
+
+
+        while lim + startAt < numAlbums:
+            startAt += lim
+            albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
+
+            for a in albumInfo['items']:
+                info.append({
+                    'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+                    'contentName': a['name'],
+                    'contentId': a['id'],
+                    'contentDesc': a['description'],
+                    'artist': a['album']['artists']['name'],
+                    'artistId': a['album']['artists']['id'],
+                    'albumDate': a['release_date']
+                })
+
+        userAlbums = createCollectionItems(info, 'album')
+        return JsonResponse({'myAlbums': userAlbums}, status=200)
+    return HttpResponse(":eyesbutfaster:") # fix this

@@ -22,7 +22,83 @@ body {
     padding: 15px;
     background-color: #1c1c1c;
     box-shadow: inset 0 0 0 1px black;
+    display :flex;
 }
+
+
+.TopBar {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex : 1;
+}
+.search-container{
+    margin: 0 10px;
+    display: flex;
+    align-content: center;
+    flex: 1;
+}
+
+.DirectionalButtons{
+    margin: 0 10px;
+    display: flex;
+    align-content: center;
+    flex: 1;
+}
+
+.TopBarLeft {
+    margin: 0 10px;
+    justify-content: center;
+    align-content: center;
+    flex-flow: wrap;
+    flex: 1;
+    display: flex;
+}
+.TopBarRight {
+    margin: 0 10px;
+    justify-content: center;
+    align-content: center;
+    flex-flow: wrap;
+    flex: none;
+    display: flex;
+}
+
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+
+.autocomplete-items div:hover {
+  background-color: #e9e9e9;
+}
+
+.autocomplete-active {
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
+
+
 
 .center {
     display: flex;
@@ -101,6 +177,8 @@ body {
     flex-flow: wrap;
     flex-direction: column;
     flex: 1;
+
+    align-items: center;
 }
 
 .playbarMiddle button {
@@ -127,6 +205,15 @@ body {
     flex: 1;
 }
 
+.playbarRight button {
+    background: none;
+    border: 0;
+}
+
+.playbarRight button:focus {
+    outline: none;
+}
+
 h1 {
     color: white;
 }
@@ -148,6 +235,49 @@ a:hover, a:active, a:focus {
 #sideBarTest {
   display: flex;
   align-items: center;
+}
+
+#progressBarContainer {
+    width: 100%;
+    margin: auto;
+
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#progressBarControl {
+    -webkit-appearance: none;
+    appearance: none;
+
+    height: 5px;
+    width: 70%;
+    background: darkgrey;
+    border-radius: 30px;
+    margin: 0px 10px 0px 10px;
+}
+
+/* Removes the focus border when clicking on the progress bar */
+#progressBarControl:focus {
+    outline: none;
+}
+
+#progressBarControl::-webkit-slider-thumb {
+    -webkit-appearance: none;
+
+    height: 13px;
+    width: 13px;
+    background: white;
+    border-radius: 30px;
+}
+
+#progressBarControl-bar::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    appearance: none;
+
+    max-height: 5px;
+    border-radius: 30px;
 }
 
 /* Google Material Icons stuff */
