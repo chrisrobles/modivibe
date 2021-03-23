@@ -1,30 +1,62 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+
 body{
     height: 100vh;
     width: 100vw;
+    /*margin: 0;*/
+    /*overflow: hidden;*/
+    background-color: darkgrey;
+    font-family: Roboto, sans-serif;
+}
+
+nav {
+    background: #1c1c1c;
+    padding: 15px;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+.logo{
+    font-size: 30px;
+}
+
+.splashNav{
+    list-style-type: none;
+    padding: 0;
     margin: 0;
-    overflow: hidden;
     display: flex;
-    flex-direction: column;
-    background: rgb(198,198,198);
-    background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(0,0,0,1) 95%, rgba(0,0,0,1) 100%);
+    justify-content: space-between;
 }
-
-.header{
-    height: 10vh;
-    width: 100vw;
-    background: rgb(0,255,0);
-    /*display: flex;*/
-}
-
-.headerLeft{
-
-}
-
-.headerRight{
+.splashContainer{
+    display: flex;
     flex: 1;
+    justify-content: flex-start;
 }
-.content{
-    flex: auto;
-    padding: 5px 25px;
 
+.navButtons{
+    display: flex;
+}
+
+.navButtons li{
+    margin: 0 10px;
+    align-self: flex-end;
+}
+
+.splashButton{
+    margin: 0 10px;
+}
+
+.splashRedirect.button{
+}
+
+.overviewText{
+    color: white;
 }
