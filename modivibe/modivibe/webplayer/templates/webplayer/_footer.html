@@ -161,6 +161,7 @@
                 if (response == 'True') {
                     console.log('Successfully transferred playback');
                     document.getElementById("durationTimeLabel").innerHTML = millisToMinutesAndSeconds(deviceState.duration);
+                    console.log
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -391,9 +392,20 @@
     }
 
     function progressBarControlTest() {
-        console.log(document.getElementById("progressBarControl").value);
-        test();
+        progressBar = document.getElementById("progressBarControl");
+
+        console.log(progressBar.value);
         console.log(millisToMinutesAndSeconds(deviceState.duration));
-    };
-    
+    }
+
+    // Temp
+    function updateTrackProgressValue() {
+        progressBar = document.getElementById("progressBarControl");
+
+        // progressBar.max = song.duration;
+        // progressBar.value = song.currentTime;
+
+
+    }
+
 </script>

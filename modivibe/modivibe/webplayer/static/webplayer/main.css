@@ -94,6 +94,7 @@ body {
     flex-flow: wrap;
     flex-direction: column;
     flex: 1;
+
     align-items: center;
 }
 
@@ -121,15 +122,6 @@ body {
     flex: 1;
 }
 
-.playbarRight button {
-    background: none;
-    border: 0;
-}
-
-.playbarRight button:focus {
-    outline: none;
-}
-
 h1 {
     color: white;
 }
@@ -154,10 +146,11 @@ a:hover, a:active, a:focus {
 }
 
 #progressBarContainer {
-    display: flex;
     width: 100%;
     margin: auto;
+
     overflow: hidden;
+    display: flex;
     justify-content: center;
     align-items: center;
 }
@@ -167,17 +160,16 @@ a:hover, a:active, a:focus {
     appearance: none;
 
     height: 5px;
-    width: 85%;
     background: darkgrey;
-    border-radius: 30px;
-    margin: 0px 10px 0px 10px;
+    width: 70%;
 }
 
-/* Removes the focus border that pops up if you click on the progress bar */
+/* style to remove blue shade of the progress bar when clicked on/selected */
 #progressBarControl:focus {
     outline: none;
 }
 
+/* style for the progress bar's slider thumb */
 #progressBarControl::-webkit-slider-thumb {
     -webkit-appearance: none;
 
@@ -187,19 +179,20 @@ a:hover, a:active, a:focus {
     border-radius: 30px;
 }
 
+/* style for the progress bar's runnable track */
 #progressBarControl-bar::-webkit-slider-runnable-track {
     -webkit-appearance: none;
     appearance: none;
 
-    max-height: 20px;
+    max-height: 5px;
     border-radius: 30px;
 }
 
-#progressTimeLabel {
+#currentTimeLabel {
 
 }
 
-#durationTimeLabel {
+#totalTimeLabel {
 
 }
 

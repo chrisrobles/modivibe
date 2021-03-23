@@ -1,5 +1,4 @@
 // Utility functions for general use in the app
-
 // Converts milliseconds to a MM:SS format
 function millisToMinutesAndSeconds(millis) {
   let minutes = Math.floor(millis / 60000);
