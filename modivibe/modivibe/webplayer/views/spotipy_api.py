@@ -279,3 +279,51 @@ def playlist(request, playlist_id):
         return JsonResponse({'songs': songs}, status=200)
 
     return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this
+
+def mySavedAlbums(request):
+    #check if user is authenticated
+
+    if not validUser():
+        return redirect('splash')
+
+    if isAjaxRequest(request):
+        startAt = 0
+        lim = 50 #max that the api allows
+
+        albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
+        # pp = pprint.PrettyPrinter(indent = 4)
+        # pp.pprint(albumInfo)
+        numAlbums = albumInfo['total'] #total # of albums the user has saved
+
+        info = []
+
+        for a in albumInfo['items']:
+            info.append({
+                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+                'contentName': a['album']['name'],
+                'contentId': a['album']['id'],
+                'contentDesc': [],
+                'artist': a['album']['artists'][0]['name'],
+                'artistId': a['album']['artists'][0]['id'],
+                'albumDate': a['album']['release_date']
+            })
+
+
+        while lim + startAt < numAlbums:
+            startAt += lim
+            albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
+
+            for a in albumInfo['items']:
+                info.append({
+                    'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+                    'contentName': a['name'],
+                    'contentId': a['id'],
+                    'contentDesc': a['description'],
+                    'artist': a['album']['artists']['name'],
+                    'artistId': a['album']['artists']['id'],
+                    'albumDate': a['release_date']
+                })
+
+        userAlbums = createCollectionItems(info, 'album')
+        return JsonResponse({'myAlbums': userAlbums}, status=200)
+    return HttpResponse(":eyesbutfaster:") # fix this
