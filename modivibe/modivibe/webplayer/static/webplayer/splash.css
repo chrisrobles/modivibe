@@ -79,3 +79,6 @@ h1{
 .foot p{
     margin: 0 !important;
 }
+.btn {
+    background: white;
+}
