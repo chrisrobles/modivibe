@@ -1,0 +1,81 @@
+* {
+    /*box-sizing: border-box;
+    padding: 0;
+    margin: 0;*/
+}
+
+
+body{
+    height: 100%;
+    /*height: 100vh;
+    width: 100vw;
+    /*margin: 0;*/
+    /*overflow: hidden;*/
+    background-color: darkgrey;
+    background: linear-gradient( #1c1c1c 33%, darkgrey ) fixed no-repeat;
+    font-family: Roboto, sans-serif;
+}
+
+nav {
+    background: #1c1c1c;
+    padding: 15px;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+.logo{
+    font-size: 30px;
+}
+
+.splashNav{
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+}
+.splashContainer{
+    /*display: flex;
+    flex: 1;
+    justify-content: flex-start;*/
+}
+
+.navButtons{
+    display: flex;
+}
+
+.navButtons li{
+    margin: 0 10px;
+    align-self: flex-end;
+}
+
+.splashButton{
+    margin: 0 10px;
+}
+
+.splashRedirect.button{
+}
+
+.overviewText{
+    color: white;
+    text-align: center;
+}
+h1{
+    font-weight:600;
+}
+.row {
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+.foot{
+    background-color: darkgrey;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important; 
+    text-align: center;
+}
+.foot p{
+    margin: 0 !important;
+}
