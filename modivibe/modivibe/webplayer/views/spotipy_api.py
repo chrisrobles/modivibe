@@ -315,15 +315,16 @@ def mySavedAlbums(request):
 
             for a in albumInfo['items']:
                 info.append({
-                    'contentImg': a['images'][0]['url'] if a['images'] else 'default',
-                    'contentName': a['name'],
-                    'contentId': a['id'],
-                    'contentDesc': a['description'],
-                    'artist': a['album']['artists']['name'],
-                    'artistId': a['album']['artists']['id'],
-                    'albumDate': a['release_date']
-                })
+                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+                'contentName': a['album']['name'],
+                'contentId': a['album']['id'],
+                'contentDesc': [],
+                'artist': a['album']['artists'][0]['name'],
+                'artistId': a['album']['artists'][0]['id'],
+                'albumDate': a['album']['release_date']
+            })
 
+            
         userAlbums = createCollectionItems(info, 'album')
         return JsonResponse({'myAlbums': userAlbums}, status=200)
     return HttpResponse(":eyesbutfaster:") # fix this
