@@ -2,29 +2,40 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
-    <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css'%}">
-    <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap-reboot.min.css'%}">
-    <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap-grid.min.css'%}">
-    <script src="{% static 'lib/bootstrap/js/bootstrap.min.js'%}"></script>
-    <script src="{% static 'webplayer/script.js' %}" async></script>
-    <script src="{% static 'webplayer/util.js' %}" async></script>
-
-    <link rel="stylesheet" type="text/css" href="{% static 'webplayer/main.css' %}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
-    {% if title %} <title>Modivibe - {{ title }}</title>
-    {% else %} <title>Modivibe</title>
-    {% endif %}
-</head>
-<body>
-    <div class="header">{% include 'webplayer/_header.html' %}</div>
-    <div class="center">
-        <div class="sidebar">{% include 'webplayer/_sidebar.html' %}</div>
-        <div class="content">{% block content %}{% endblock content %}</div>
-    </div>
-    <div class="footer">{% include 'webplayer/_footer.html' %}</div>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
+        <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css'%}">
+        <script src="{% static 'lib/bootstrap/js/bootstrap.min.js'%}"></script>
+        <script src="{% static 'webplayer/script.js' %}" async></script>
+        <link rel="stylesheet" type="text/css" href="{% static 'webplayer/main.css' %}">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
+        <script src="https://sdk.scdn.co/spotify-player.js"></script>
+        <script src="{% static 'webplayer/util.js' %}" async></script>
+        {% if title %} <title>Modivibe - {{ title }}</title>
+        {% else %} <title>Modivibe</title>
+        {% endif %}
+    </head>
+    <body>
+        <div class="min-vh-100 p-0 d-flex flex-column overflow-hidden">
+            <div class="container-fluid no-gutters d-flex flex-column flex-fill" style="overflow-y: auto !important; overflow-x:hidden !important;">
+                <div class="row flex-shrink-0">
+                    <div class="col-12">
+                        <div class="header">{% include 'webplayer/_header.html' %}</div>
+                    </div>
+                </div>
+                <div class="row flex-fill">
+                    <div class="col-12 no-gutters center overflow-auto flex-shrink-1 position-relative" style="overflow-x: hidden;">
+                        <div class="sidebar">{% include 'webplayer/_sidebar.html' %}</div>
+                        <div class="content">{% block content %}{% endblock content %}</div>
+                    </div>
+                </div>
+                <div class="row flex-shrink-1">
+                    <div class="col-12">
+                        <div class="footer" style="bottom: 0; position: fixed; width: 100%;">{% include 'webplayer/_footer.html' %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

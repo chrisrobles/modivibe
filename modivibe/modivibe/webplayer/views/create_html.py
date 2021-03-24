@@ -20,14 +20,27 @@
 #                       podcast
 def createCollectionItems(info, type):
     htmlStr = \
-        f'''<section class="CollectionContent">
-                <h1 class="ContentHeader">{type.capitalize() + 's'}</h1>
-                <section class="ContentItems">
+        f'''<div class="container-fluid">
+                <section class="CollectionContent">
+                    <div class="row">
+                        <div class="col-12">
+                            <h1 class="ContentHeader">{type.capitalize() + 's'}</h1>
+                        </div>
+                    </div>
+                    <section class="ContentItems">
+                        <div class="row">
     '''
+    count = 0
     for c in info:
         htmlStr += createItem(c, type)
+        count += 1
+        if(count == 3):
+            count = 0
+            htmlStr += "</div><div class='row'>"
+    
+    htmlStr += "</div>"
 
-    htmlStr += "\n</section>\n</section>"
+    htmlStr += "\n</section>\n</section></div>"
 
     return htmlStr
 
@@ -50,20 +63,31 @@ def createCollectionItems(info, type):
 #                       artist
 #                       podcast
 def createItem(info, type):
-    htmlStr = \
-        f'''\n<div class="ContentItem" id="{info['contentId']}">
-                    <img class="ContentImage" src="{info['contentImg']}"><br>
-                    <a class="{type}Link" href="{type + '/' + info['contentId']}" data-name="{info['contentName']}">{info['contentName']}</a> '''
-
+    htmlStr = ""
     if (type == 'album'):
         htmlStr += \
-            f'''\n<div class="ContentArtist">
+        f'''\n
+        <div class="ContentItem" id="{info['contentId']}">
+            <img class="ContentImage" src="{info['contentImg']}"><br>
+            <a class="{type}Link" href="{type + '/' + info['contentId']}" data-name="{info['contentName']}">{info['contentName']}</a> '''
+        htmlStr += \
+            f'''\n
+            <div class="ContentArtist">
                     <a class="artistLink" id="{info['artistId']}" href="artist/{info['artistId']}">
                         {info['artist']}
                     </a>
                     <span> - {info['albumDate']}</span>
                 </div>
             '''
+    elif (type == 'playlist'):
+        htmlStr += \
+        f'''\n
+        <div style="padding-bottom: 20px;" class="col-4">
+            <div class="ContentItem" id="{info['contentId']}">
+            <img class="ContentImage" src="{info['contentImg']}"><br>
+            <a class="{type}Link" style="text-align:center;" href="{type + '/' + info['contentId']}" data-name="{info['contentName']}"><h3>{info['contentName']}</h3></a> '''
+        #htmlStr += f'\n<div class="ContentDesc">{info["contentDesc"]}</div></div>'
+        htmlStr += "</div>"
     else:
         htmlStr += f'\n<div class="ContentDesc">{info["contentDesc"]}</div>'
 
