@@ -28,9 +28,17 @@ def createCollectionItems(info, type):
                         </div>
                     </div>
                     <section class="ContentItems">
+                        <div class="row">
     '''
+    count = 0
     for c in info:
         htmlStr += createItem(c, type)
+        count += 1
+        if(count == 3):
+            count = 0
+            htmlStr += "</div><div class='row'>"
+    
+    htmlStr += "</div>"
 
     htmlStr += "\n</section>\n</section></div>"
 
@@ -74,11 +82,12 @@ def createItem(info, type):
     elif (type == 'playlist'):
         htmlStr += \
         f'''\n
-        <div class="col-4">
+        <div style="padding-bottom: 20px;" class="col-4">
             <div class="ContentItem" id="{info['contentId']}">
             <img class="ContentImage" src="{info['contentImg']}"><br>
-            <a class="{type}Link" href="{type + '/' + info['contentId']}" data-name="{info['contentName']}">{info['contentName']}</a> '''
-        htmlStr += f'\n<div class="ContentDesc">{info["contentDesc"]}</div></div>'
+            <a class="{type}Link" style="text-align:center;" href="{type + '/' + info['contentId']}" data-name="{info['contentName']}"><h3>{info['contentName']}</h3></a> '''
+        #htmlStr += f'\n<div class="ContentDesc">{info["contentDesc"]}</div></div>'
+        htmlStr += "</div>"
     else:
         htmlStr += f'\n<div class="ContentDesc">{info["contentDesc"]}</div>'
 
