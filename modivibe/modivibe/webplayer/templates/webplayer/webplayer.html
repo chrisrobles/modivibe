@@ -38,4 +38,24 @@
             </div>
         </div>
     </body>
+<script>
+    $(document).on('click', '#playPlaylistButton', function(e) {
+        console.log('Attempting to play playlist: ' + $(this).data('uri'));
+       $.ajax({
+           type: 'POST',
+           url: "{% url 'setPlayback' %}",
+           data: {
+               csrfmiddlewaretoken: '{{ csrf_token }}',
+               device_id: deviceID,
+               status: 'play',
+               context_uri: $(this).data('uri')
+           },
+           success: function(response) {
+               if (response === 'True') {
+                   console.log('Successfully played requested playlist');
+               }
+           }
+       });
+    });
+</script>
 </html>
