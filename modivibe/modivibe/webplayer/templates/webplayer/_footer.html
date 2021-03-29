@@ -91,6 +91,11 @@
             // Update Track Image in Player
             $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
 
+            // Update Play/Pause button and toggle variable
+            isPlaying = !deviceState['paused'];
+            let playbackStatus = isPlaying ? 'pause' : 'play_arrow';
+            $('#playbackControl').text(playbackStatus);
+
             if(initializeStates) {
 
                 // This will only run once!
@@ -170,52 +175,29 @@
     }
 
     function togglePlayback(event){
-        if (!isPlaying) {
-            console.log('Requesting playback resume');
 
-            // Want to do this label update elsewhere - putting it here for now. I was having trouble with transferPlayback()
-            document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
 
-            $.ajax({
-                type: "POST",
-                url: "{% url 'setPlayback' %}",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    device_id: deviceID,
-                    status: 'play'
-                },
-                success: function(response) {
-                    if (response == 'True') {
-                        console.log('Successfully resuming playback');
-                        $('#playbackControl').text('pause');
-                        isPlaying = true;
-                    } else {
-                        console.log('Failed to resume playback');
-                    }
+        let playbackRequest = (isPlaying) ? 'pause' : 'play';
+        console.log(`Requesting playback: ${playbackRequest}`);
+        // ryan: Want to do this label update elsewhere - putting it here for now. I was having trouble with transferPlayback()
+        document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'setPlayback' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+                status: playbackRequest
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log(`Success: ${playbackRequest}`);
+                } else {
+                    console.log(`Failed: ${playbackRequest}`);
                 }
-            });
-
-        } else {
-            console.log('Requesting playback pause');
-            $.ajax({
-                type: "POST",
-                url: "{% url 'setPlayback' %}",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    device_id: deviceID,
-                    status: 'pause'
-                },
-                success: function(response) {
-                    if (response == 'True') {
-                        console.log('Successfully pausing playback');
-                        $('#playbackControl').text('play_arrow');
-                        isPlaying = false;
-                    } else {
-                        console.log('Failed to pause playback');
-                    }
-                }
-            });
-        }
+            }
+        });
     }
 
     function setVolume(event) {
