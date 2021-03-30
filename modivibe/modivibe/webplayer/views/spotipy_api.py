@@ -72,14 +72,16 @@ def transferPlayback(request):
 # Resumes or pauses playback for a specific device
 # Expects:
 #   device_id [STRING] (generated device id)
-#   status [STRING] ('play' || 'pause')
+#   status [STRING] ('play' || 'pause') DEFAULT: 'play'
+#   context_uri [STRING] (uri for provided track/playlist/album/etc) DEFAULT: None
 def setPlayback(request):
     response = False
     deviceID = request.POST['device_id']
-    songStatus = request.POST['status']
+    songStatus = request.POST.get('status', 'play')
+    contextURI = request.POST.get('context_uri', None)
     try:
         if songStatus == 'play':
-            sp.start_playback(device_id=deviceID)
+            sp.start_playback(device_id=deviceID, context_uri=contextURI)
             response = True
         elif songStatus == 'pause':
             sp.pause_playback(device_id=deviceID)
@@ -274,7 +276,7 @@ def playlist(request, playlist_id):
 
                 pNo += 1
 
-        songs = createSongList(info, 'playlist')
+        songs = createSongList(info, 'playlist', playlist_id)
 
         return JsonResponse({'songs': songs}, status=200)
 
