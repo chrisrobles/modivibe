@@ -11,6 +11,8 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
                     4. artist: artist name
                     5. artistId: id to artist
                     6. albumDate: album release date
+                Else if type == podcast, include:
+                    7. publisher: owner of podcast
 
     2. type:    Type of collection as a string, should be (exact match):
                     1. album
@@ -47,6 +49,10 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
                         {{ item.artist }}
                     </a>
                     <span> - {{ item.albumDate }}</span>
+            </div>
+            {% elif type == "podcast" %}
+            <div class="ContentPublisher" style="text-align:center;">
+                {{ item.publisher }}
             </div>
             {% endif %}
             </div>

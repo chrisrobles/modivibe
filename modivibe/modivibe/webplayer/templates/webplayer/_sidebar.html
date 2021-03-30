@@ -105,7 +105,7 @@
             </div>
           </a>
       </li>
-       <a class="SideBarUserCollection" id="MyPlaylists" style="text-decoration: none;" href="{% url 'myplaylists' %}">
+       <a class="SideBarUserCollection" id="MyPlaylists" style="text-decoration: none;" href="{% url 'myPlaylists' %}">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">playlist_play</span> Playlists</span>
             </div>
@@ -126,7 +126,7 @@
           </a>
       </li>
       <li>
-          <a style="text-decoration: none;" href="#">
+          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myArtists' %}">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">music_note</span> Artists</span>
             </div>
@@ -136,6 +136,13 @@
           <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myAlbums' %} " id="myAlbums">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">album</span> Albums</span>
+            </div>
+          </a>
+      </li>
+       <li>
+          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myPodcasts' %}">
+            <div class="btn btn-three">
+                <span><span class="material-icons" style="vertical-align: -4px;">ondemand_video</span> Podcasts</span>
             </div>
           </a>
       </li>

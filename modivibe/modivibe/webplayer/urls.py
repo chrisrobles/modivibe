@@ -22,8 +22,13 @@ urlpatterns = [
 
     # user collections and music collections (albums, artists, playlists, podcasts)
     # url should follow:    my/{collection_type}s
-    #                       {collection_type}/<str:type_id>
-    path('my/playlists', views.myplaylists, name='myplaylists'),
-    path('playlist/<str:playlist_id>', views.playlist, name='playlist'),
+    path('my/playlists', views.myPlaylists, name='myPlaylists'),
     path('my/albums', views.mySavedAlbums, name='myAlbums'),
+    path('my/artists', views.myArtists, name='myArtists'),
+    path('my/podcasts', views.myPodcasts, name='myPodcasts'),
+
+    # displays an item's page
+    # url should follow:    {collection_type}/<str:type_id>
+    path('playlist/<str:playlist_id>', views.playlist, name='playlist'),
+
 ]

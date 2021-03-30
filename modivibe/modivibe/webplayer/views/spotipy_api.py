@@ -192,7 +192,7 @@ def helperButton(request):
 
 # Display all of the current user's playlists
 # my/playlists
-def myplaylists(request):
+def myPlaylists(request):
     # check a user is authenticated
     # also refreshes token if expired
     if not validUser():
@@ -225,7 +225,7 @@ def myplaylists(request):
                 'contentId': p['id']
             })
 
-    if(isAjaxRequest(request)):
+    if isAjaxRequest(request):
         collection = render_to_string('webplayer/collectionItems.html', context={"info" : info, "type": "playlist", "ajax": True})
         return JsonResponse({'collection': collection}, status=200)
     else:
@@ -290,8 +290,6 @@ def mySavedAlbums(request):
     lim = 50 #max that the api allows
 
     albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
-    # pp = pprint.PrettyPrinter(indent = 4)
-    # pp.pprint(albumInfo)
     numAlbums = albumInfo['total'] #total # of albums the user has saved
 
     info = []
@@ -326,3 +324,74 @@ def mySavedAlbums(request):
         return JsonResponse({'collection': collection}, status=200)
     else:
         return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "album", "ajax": False})
+
+def myArtists(request):
+
+    if not validUser():
+        return redirect('splash')
+
+    lim = 50
+    artistInfo = sp.current_user_followed_artists(limit=lim)
+    info = []
+
+    for a in artistInfo['artists']['items']:
+        info.append({
+            'contentImg':  a['images'][0]['url'] if a['images'] else 'default',
+            'contentName': a['name'],
+            'contentId' :  a['id']
+        })
+
+    while artistInfo['artists']['next']:
+        lastArtistReceived = artistInfo['artists']['cursors']['after']
+        artistInfo = sp.current_user_followed_artists(limit=lim, after=lastArtistReceived)
+
+        for a in artistInfo['artists']['items']:
+            info.append({
+                'contentImg':   a['images'][0]['url'] if a['images'] else 'default',
+                'contentName':  a['name'],
+                'contentId':    a['id']
+            })
+
+    if isAjaxRequest(request):
+        collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": True})
+        return JsonResponse({'collection': collection}, status=200)
+    else:
+        return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": False})
+
+def myPodcasts(request):
+
+    if not validUser():
+        return redirect('splash')
+
+    startAt = 0
+    lim = 50
+
+    podcastInfo = sp.current_user_saved_shows(limit=lim, offset=startAt)
+    total = podcastInfo['total']
+    info = []
+
+    for p in podcastInfo['items']:
+        info.append({
+            'contentImg':   p['show']['images'][0]['url'] if p['show']['images'] else 'default',
+            'contentName':  p['show']['name'],
+            'contentId':    p['show']['id'],
+            'publisher':    p['show']['publisher']
+        })
+
+    while lim + startAt < total:
+        startAt += lim
+        podcastInfo = sp.current_user_saved_shows(limit=lim, offset=startAt)
+
+        for p in podcastInfo['items']:
+            info.append({
+                'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else 'default',
+                'contentName': p['show']['name'],
+                'contentId': p['show']['id'],
+                'publisher': p['show']['publisher']
+            })
+
+    if isAjaxRequest(request):
+        collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "podcast", "ajax": True})
+        return JsonResponse({'collection': collection}, status=200)
+    else:
+        return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "podcast", "ajax": False})
