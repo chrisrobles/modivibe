@@ -113,12 +113,17 @@ def createItem(info, type): # DEPRECATED
 #                       artist (for an artists top songs)
 #
 # NOTE: Podcast is not part of this. How an episode displays information is different than a song.
-def createSongList(info, type):
+def createSongList(info, type, context_uri):
     if not info:
         return 'Empty songlist.'
 
+    if context_uri and type:
+        context_uri = 'spotify:%s:%s' % (type, context_uri)
+
     htmlStr = \
-        f'<section class="CollectionSongs">\n'
+        f'''
+        <button id='playPlaylistButton' data-uri='{context_uri}'>PLAY {type.upper()}</button>
+        <section class="CollectionSongs">\n'''
 
     htmlStr += \
         f'''<div class="SongHeader">
