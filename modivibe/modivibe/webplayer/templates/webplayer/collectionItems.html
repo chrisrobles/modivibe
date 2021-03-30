@@ -1,0 +1,65 @@
+{% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
+<!-- IMPORTANT: no spaces between anything for the extends argument -->
+
+<!--
+In spotipy_api.py, each view must provide the context dictionary with (exact keys):
+    1. info:    List of dictionaries containing (exact keys):
+                    1. contentImg: link to main content image (ex: album cover)
+                    2. contentName: content name
+                    3. contentId: id to content
+                If type == album, must also include:
+                    4. artist: artist name
+                    5. artistId: id to artist
+                    6. albumDate: album release date
+
+    2. type:    Type of collection as a string, should be (exact match):
+                    1. album
+                    2. playlist
+                    3. artist
+                    4. podcast
+
+    3. ajax:    True if page will be updated through an ajax request, false if not
+-->
+
+{% block content %}
+<div class="container-fluid">
+    <section class="CollectionContent">
+<!--    This header will probably be replaced with it's own dedicated contentHeader.html file -->
+        <div class="row">
+            <div class="col-12">
+                <h1 class="ContentHeader">{{ type|capfirst|add:"s" }}</h1>
+            </div>
+        </div>
+        <section class="ContentItems">
+        <div class="row">
+        {% for item in info %}
+            <div style="padding-bottom: 20px;" class="col-4">
+                <div class="ContentItem" id="{{ item.contentId }}">
+                    <img class="ContentImage" src="{{ item.contentImg }}">
+                    <a class="ItemLink" style="text-align:center;" href="/{{ type }}/{{ item.contentId }}">
+                        <h3>{{ item.contentName }}</h3>
+                    </a>
+                </div>
+
+            {% if type == "album"%}
+            <div class="ContentArtist" style="text-align:center;">
+                    <a class="ItemLink" id="{{ item.artistId }}" href="/artist/{{ item.artistId }}">
+                        {{ item.artist }}
+                    </a>
+                    <span> - {{ item.albumDate }}</span>
+            </div>
+            {% endif %}
+            </div>
+
+
+            {% if forloop.counter|divisibleby:3 %}
+        </div>
+        <div class="row">
+            {% endif %}
+
+        {% endfor %}
+        </div>
+        </section>
+    </section>
+</div>
+{% endblock content %}

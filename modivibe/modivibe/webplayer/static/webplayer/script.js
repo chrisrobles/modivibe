@@ -1,20 +1,20 @@
 $(document).ready(function() {
-    $(document).on("click", "#MyPlaylists", function(e) {
+    window.history.replaceState({}, "", "/webplayer");
+    $(document).on("click", ".SideBarUserCollection", function(e) {
         e.preventDefault();
 
         $.ajax({
             url: $(this).attr("href"),
             type: "GET",
             success: function(response) {
-                  $(".content").first().html(response.playlists);
+                  $(".content").first().html(response.collection);
             }
         });
 
     });
 
-    $(document).on("click", ".playlistLink", function(e) {
+    $(document).on("click", ".ItemLink", function(e) {
         e.preventDefault();
-        let playlistName = $(this).attr("data-name");
 
         $.ajax({
             url: $(this).attr("href"),
@@ -25,15 +25,15 @@ $(document).ready(function() {
         });
     });
 
-    $(document).on("click","#myAlbums",function(e) {
-        e.preventDefault();
-
-        $.ajax({
-            url: $(this).attr("href"),
-            type: "Get",
-            success: function (response) {
-                $(".content").first().html(response.myAlbums);
-            }
-        });
-    });
+//    $(document).on("click","#myAlbums",function(e) {
+//        e.preventDefault();
+//
+//        $.ajax({
+//            url: $(this).attr("href"),
+//            type: "Get",
+//            success: function (response) {
+//                $(".content").first().html(response.myAlbums);
+//            }
+//        });
+//    });
 });

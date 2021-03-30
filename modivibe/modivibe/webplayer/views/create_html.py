@@ -18,7 +18,7 @@
 #                       playlist
 #                       artist
 #                       podcast
-def createCollectionItems(info, type):
+def createCollectionItems(info, type): # DEPRECATED
     htmlStr = \
         f'''<div class="container-fluid">
                 <section class="CollectionContent">
@@ -62,11 +62,12 @@ def createCollectionItems(info, type):
 #                       playlist
 #                       artist
 #                       podcast
-def createItem(info, type):
+def createItem(info, type): # DEPRECATED
     htmlStr = ""
     if (type == 'album'):
         htmlStr += \
         f'''\n
+        <div style="padding-bottom: 20px;" class="col-4">
         <div class="ContentItem" id="{info['contentId']}">
             <img class="ContentImage" src="{info['contentImg']}"><br>
             <a class="{type}Link" href="{type + '/' + info['contentId']}" data-name="{info['contentName']}">{info['contentName']}</a> '''
@@ -78,6 +79,7 @@ def createItem(info, type):
                     </a>
                     <span> - {info['albumDate']}</span>
                 </div>
+            </div>
             '''
     elif (type == 'playlist'):
         htmlStr += \

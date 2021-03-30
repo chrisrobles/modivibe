@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from ..SpotifyApiObjs import sp, auth_manager
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
+from django.template.loader import render_to_string
 import pprint
 from webplayer.views.create_html import *
 
@@ -195,41 +196,38 @@ def myplaylists(request):
     if not validUser():
         return redirect('splash')
 
-    if isAjaxRequest(request):
-        startAt = 0
-        lim = 50 # 50 is max for api request
+    startAt = 0
+    lim = 50 # 50 is max for api request
 
+    plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
+    numPLs = plInfo['total']    # total number of playlists the user has
+
+    info = []
+
+    for p in plInfo['items']:
+        info.append({
+        'contentImg':  p['images'][0]['url'] if p['images'] else 'default',
+        'contentName': p['name'],
+        'contentId' :  p['id']
+        })
+
+        # if there are still more playlists to get
+    while lim + startAt < numPLs:
+        startAt += lim
         plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
-        numPLs = plInfo['total']    # total number of playlists the user has
-
-        info = []
 
         for p in plInfo['items']:
             info.append({
-            'contentImg':  p['images'][0]['url'] if p['images'] else 'default',
-            'contentName': p['name'],
-            'contentId' :  p['id'],
-            'contentDesc': p['description']
+                'contentImg': p['images'][0]['url'] if p['images'] else 'default',
+                'contentName': p['name'],
+                'contentId': p['id']
             })
 
-        # if there are still more playlists to get
-        while lim + startAt < numPLs:
-            startAt += lim
-            plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
-
-            for p in plInfo['items']:
-                info.append({
-                    'contentImg': p['images'][0]['url'] if p['images'] else 'default',
-                    'contentName': p['name'],
-                    'contentId': p['id'],
-                    'contentDesc': p['description']
-                })
-
-        playlists = createCollectionItems(info, 'playlist')
-
-        return JsonResponse({'playlists': playlists}, status=200)
-
-    return HttpResponse("no") # need to find a way to trigger ajax if we type the url
+    if(isAjaxRequest(request)):
+        collection = render_to_string('webplayer/collectionItems.html', context={"info" : info, "type": "playlist", "ajax": True})
+        return JsonResponse({'collection': collection}, status=200)
+    else:
+        return render(request, 'webplayer/collectionItems.html', context={"info" : info, "type": "playlist", "ajax": False})
 
 def playlist(request, playlist_id):
 
@@ -286,45 +284,43 @@ def mySavedAlbums(request):
     if not validUser():
         return redirect('splash')
 
-    if isAjaxRequest(request):
-        startAt = 0
-        lim = 50 #max that the api allows
+    startAt = 0
+    lim = 50 #max that the api allows
 
+    albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
+    # pp = pprint.PrettyPrinter(indent = 4)
+    # pp.pprint(albumInfo)
+    numAlbums = albumInfo['total'] #total # of albums the user has saved
+
+    info = []
+
+    for a in albumInfo['items']:
+        info.append({
+            'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+            'contentName': a['album']['name'],
+            'contentId': a['album']['id'],
+            'artist': a['album']['artists'][0]['name'],
+            'artistId': a['album']['artists'][0]['id'],
+            'albumDate': a['album']['release_date'][0:4]
+        })
+
+    while lim + startAt < numAlbums:
+        startAt += lim
         albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
-        # pp = pprint.PrettyPrinter(indent = 4)
-        # pp.pprint(albumInfo)
-        numAlbums = albumInfo['total'] #total # of albums the user has saved
-
-        info = []
 
         for a in albumInfo['items']:
             info.append({
-                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
-                'contentName': a['album']['name'],
-                'contentId': a['album']['id'],
-                'contentDesc': [],
-                'artist': a['album']['artists'][0]['name'],
-                'artistId': a['album']['artists'][0]['id'],
-                'albumDate': a['album']['release_date']
-            })
-
-
-        while lim + startAt < numAlbums:
-            startAt += lim
-            albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
-
-            for a in albumInfo['items']:
-                info.append({
-                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
-                'contentName': a['album']['name'],
-                'contentId': a['album']['id'],
-                'contentDesc': [],
-                'artist': a['album']['artists'][0]['name'],
-                'artistId': a['album']['artists'][0]['id'],
-                'albumDate': a['album']['release_date']
-            })
-
+            'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+            'contentName': a['album']['name'],
+            'contentId': a['album']['id'],
+            'artist': a['album']['artists'][0]['name'],
+            'artistId': a['album']['artists'][0]['id'],
+            'albumDate': a['album']['release_date'][0:4]
+        })
             
-        userAlbums = createCollectionItems(info, 'album')
-        return JsonResponse({'myAlbums': userAlbums}, status=200)
-    return HttpResponse(":eyesbutfaster:") # fix this
+
+    if isAjaxRequest(request):
+        collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "album", "ajax": True})
+        return JsonResponse({'collection': collection}, status=200)
+    else:
+        return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "album", "ajax": False})
