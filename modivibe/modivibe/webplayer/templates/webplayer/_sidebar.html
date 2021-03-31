@@ -1,7 +1,3 @@
-<!-- Temporary until we get the navbar in, just use the same url and make sure the id matches
-the js file
-<div><a id="MyPlaylists" href="{% url 'myplaylists' %}">Playlists</a></div>-->
-
 <style>
     /* The side navigation menu */
     .sidenav {
@@ -109,7 +105,7 @@ the js file
             </div>
           </a>
       </li>
-       <a id="MyPlaylists" style="text-decoration: none;" href="{% url 'myplaylists' %}">
+       <a class="SideBarUserCollection" id="MyPlaylists" style="text-decoration: none;" href="{% url 'myPlaylists' %}">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">playlist_play</span> Playlists</span>
             </div>
@@ -130,16 +126,23 @@ the js file
           </a>
       </li>
       <li>
-          <a style="text-decoration: none;" href="#">
+          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myArtists' %}">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">music_note</span> Artists</span>
             </div>
           </a>
       </li>
       <li>
-          <a style="text-decoration: none;" href="{% url 'myAlbums' %} " id="myAlbums">
+          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myAlbums' %} " id="myAlbums">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">album</span> Albums</span>
+            </div>
+          </a>
+      </li>
+       <li>
+          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myPodcasts' %}">
+            <div class="btn btn-three">
+                <span><span class="material-icons" style="vertical-align: -4px;">ondemand_video</span> Podcasts</span>
             </div>
           </a>
       </li>
