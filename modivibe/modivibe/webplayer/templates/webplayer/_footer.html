@@ -1,9 +1,9 @@
 <fieldset class="playbar">
     <span class="playbarLeft">
-        <img class="Album" id="trackImage" src="" alt="Track Album Cover" width="64" height="64">
+        <img class="Album" id="trackImage" src="" alt="Track Album Cover" width="64" height="64" data-uri="">
         <div class="trackInfoContainer">
-            <p class="Song" id="trackName">Track Name</p>
-            <p class="Artist" id="trackArtist">Track Artist</p>
+            <p class="Song" id="trackName" data-uri="">Track Name</p>
+            <span id="trackArtistContainer">Track Artist(s)</span>
         </div>
 
 <!--        <button id="helperButtonControl">click me</button> -->
@@ -76,19 +76,23 @@
             deviceState = state;
 
             // Update Track Name in Player
+            let trackURI = deviceState['track_window']['current_track']['uri'].split(':')[2] // extract third split of spotify:track:ID
+            $('#trackName').attr('data-uri', trackURI);
             $('#trackName').text(deviceState['track_window']['current_track']['name']);
 
             // Update Track Artists in Player
-            let i;
             let artists = "";
             let artistsList = deviceState['track_window']['current_track']['artists'];
-            for(i = 0; i < artistsList.length; i++){
-                artists += artistsList[i]['name'];
+            for(let i = 0; i < artistsList.length; i++){
+                let artistURI = artistsList[i]['uri'].split(':')[2]; // extract third split of spotify:artist:ID
+                artists += `<a class="Artist" href="artist/${artistURI}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
                 if (i != artistsList.length - 1) artists += ", ";
             }
-            $('#trackArtist').text(artists)
+            $('#trackArtistContainer').html(artists)
 
             // Update Track Image in Player
+            let albumURI = deviceState['track_window']['current_track']['album']['uri'].split(':')[2]; // extract third split of spotify:album:ID
+            $('#trackImage').attr('data-uri', albumURI)
             $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
 
             // Update Play/Pause button and toggle variable
@@ -119,6 +123,9 @@
                     case 2: $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Off
                     default: break;
                 }
+
+                // Enable the footer since we've loaded in all necessary data
+                $('.footer').slideToggle();
             }
         });
 
