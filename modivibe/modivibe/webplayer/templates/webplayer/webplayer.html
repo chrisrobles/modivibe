@@ -37,6 +37,13 @@
                 </div>
             </div>
         </div>
+        <div class="mouse-menu">
+            <ul>
+                <li><button>Option 1</button></li>
+                <li><button>Option 2</button></li>
+                <li><button>Option 3</button></li>
+            </ul>
+        </div>
     </body>
 <script>
     $(document).on('click', '#playPlaylistButton', function(e) {
@@ -56,6 +63,78 @@
                }
            }
        });
+    });
+
+    $(document).on('contextmenu', function(e) {
+        if (e.ctrlKey) return; // Temporary method for overcoming the mouse-menu
+        e.preventDefault(); // Prevent browser right-click menu
+        $('.mouse-menu').hide();
+
+        // Determine mouse-menu options depending on click context
+        let clickTarget = e.target;
+        if ($(clickTarget).hasClass('Artist') || $(clickTarget).hasClass('SongArtist') || $(clickTarget).parents('.Artist, .SongArtist').length) {
+            $('.mouse-menu ul').html(`
+                <li><button>Play Artist</button></li>
+                <li><button>Follow Artist</button></li>
+                <li><button>Go to Artist</button></li>
+            `);
+        }
+        else if ($(clickTarget).hasClass('Playlist') || $(clickTarget).parents('.Playlist').length) {
+            $('.mouse-menu ul').html(`
+                <li><button>Play Playlist</button></li>
+                <li><button>Add to Queue</button></li>
+                <li><button>Go to Playlist</button></li>
+            `);
+        }
+        else if ($(clickTarget).hasClass('Album') || $(clickTarget).parents('.Album').length) {
+            $('.mouse-menu ul').html(`
+                <li><button>Play Album</button></li>
+                <li><button>Add to Queue</button></li>
+                <li><button>Go to Album</button></li>
+            `);
+        }
+        else if ($(clickTarget).hasClass('Podcast') || $(clickTarget).parents('.Podcast').length) {
+            $('.mouse-menu ul').html(`
+                <li><button>Play Podcast</button></li>
+                <li><button>Go to Podcast</button></li>
+            `);
+        }
+        else if ($(clickTarget).hasClass('Song') || $(clickTarget).parents('.Song').length) {
+            $('.mouse-menu ul').html(`
+                <li><button>Play Song</button></li>
+                <li><button>Add to Queue</button></li>
+                <li><button>Add to Playlist</button></li>
+                <li><button>Add to Liked Songs</button></li>
+                <li><button>Go to Artist</button></li>
+                <li><button>Go to Album</button></li>
+            `);
+        } else {
+            return;
+        }
+
+        // Ensure horizontal calculation of menu remains on the page
+        let mouseX = e.pageX;
+        let menuWidth = $('.mouse-menu').width();
+        if (window.innerWidth < mouseX + menuWidth) {
+            mouseX = mouseX - menuWidth;
+        }
+
+        // Ensure vertical calculation of the menu remains on the page
+        let mouseY = e.pageY;
+        let menuHeight = $('.mouse-menu').height();
+        if (window.innerHeight < mouseY + menuHeight) {
+            mouseY = mouseY - menuHeight;
+        }
+
+        $('.mouse-menu').css('left', mouseX).css('top', mouseY);
+        $('.mouse-menu').show();
+    });
+
+    $(document).on('click', function(e) {
+        if ($('.mouse-menu').is(':visible')) {
+            if ($(e.target).parents('.mouse-menu').length) return;
+            $('.mouse-menu').hide();
+        }
     });
 </script>
 </html>
