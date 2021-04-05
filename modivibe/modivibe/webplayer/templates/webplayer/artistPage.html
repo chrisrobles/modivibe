@@ -1,0 +1,62 @@
+{% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
+<!-- IMPORTANT: no spaces between anything for the extends argument -->
+
+
+{% block content %}
+<style>
+
+
+    .ArtistItemsSelectors {
+        background-color: rgba(255,255,255,0.05);
+    }
+</style>
+
+<div class="ArtistMain container-fluid">
+    <section class="ArtistHeader">
+        <img src="{{header.artistImg}}">
+        <span class="ArtistInfo">
+                {{ header.artistName }}
+        </span>
+        <span> {{ header.artistFollowers }}</span>
+
+    </section>
+    <div class="row">
+        <section class="InteractionBar">
+            interaction bar
+        </section>
+    </div>
+    <div class="row">
+        <section class="ArtistItemsSelectors">
+            <a class="ArtistItems col-12" style="text-decoration: none;"
+               href="{% url 'artist' artist_id=header.artistId %}">
+                <div class="ArtistItemButton btn btn-three">
+                    <span> Top Songs </span>
+                </div>
+            </a>
+            <a class="ArtistItems col-12" style="text-decoration: none;"
+               href="{% url 'artistAlbums' artist_id=header.artistId %}">
+                <div class="ArtistItemButton btn btn-three">
+                    <span> Albums </span>
+                </div>
+            </a>
+            <a class="ArtistItems col-12" style="text-decoration: none;"
+               href="{% url 'artistRelated' artist_id=header.artistId %}">
+                <div class="ArtistItemButton btn btn-three">
+                    <span> Related Artists </span>
+                </div>
+            </a>
+        </section>
+    </div>
+    <div class="row">
+        <section class="ArtistItemsContent">
+<!--        eventually this will either create the song list or just insert the content string   -->
+            {% if contentType == "songs" %}
+            {{content}}
+            {% else %}
+                {{content}}
+            {% endif %}
+        </section>
+    </div>
+
+</div>
+{% endblock content %}

@@ -20,7 +20,24 @@ $(document).ready(function() {
             url: $(this).attr("href"),
             type: "GET",
             success: function(response) {
-                $(".content").first().html(response.songs);
+                $(".content").first().html(response.page);
+            }
+        });
+    });
+
+    $(document).on("click", ".ArtistItems", function(e) {
+        e.preventDefault();
+        console.log("artist item request");
+
+        $.ajax({
+            url: $(this).attr("href"),
+            type: "GET",
+            data: {
+                'fromArtistPage': true
+            },
+            success: function(response) {
+                $(".ArtistItemsContent").first().html(response.content);
+                console.log("artist item inserted");
             }
         });
     });

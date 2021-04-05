@@ -1,5 +1,5 @@
 # This file is for any python function related to creating html to insert through an ajax request
-
+# will probably turn into a helper file
 
 # Create a collection of items to display.
 #
@@ -143,8 +143,8 @@ def createSongList(info, type, context_uri):
         htmlStr += \
             f'''    <div class="Song">
                         <span class="SongNumber">{song['songNum']}</span>
-                        <span class="SongName"><a href="placeholder/{song['songId']}">{song['songName']}</a></span>
-                        <span class="SongArtist"><a href="artist/{song['artistId']}">{song['songArtist']}</a></span>
+                        <span class="SongName"><a class="ItemLink"href="placeholder/{song['songId']}">{song['songName']}</a></span>
+                        <span class="SongArtist"><a class="ItemLink" href="artist/{song['artistId']}">{song['songArtist']}</a></span>
                         <span class="SongLength">{convertToMinSec(song['songLength'])}</span>
                     </div>
     '''
@@ -159,14 +159,9 @@ def createSongList(info, type, context_uri):
 
 # Convert integer length of a song in milliseconds to string of minutes and seconds
 def convertToMinSec(length):
-    ms = length % 1000
     length //= 1000
     min = length // 60
     sec = length % 60
-
-    if sec > 60:
-        min += 1
-        sec %= 60
 
     min = str(min)
     sec = str(sec)
@@ -175,3 +170,14 @@ def convertToMinSec(length):
         sec = '0' + sec
 
     return (min + ':' + sec)
+
+# gets information needed to create a header for an artist
+def getArtistHeaderInfo(sp, artist_id):
+    ar = sp.artist(artist_id)
+    return {
+        'artistName': ar['name'],
+        'artistImg': ar['images'][0]['url'] if ar['images'] else 'default',
+        'artistFollowers': ar['followers']['total'],
+        'artistId': ar['id']
+    }
+
