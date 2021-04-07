@@ -80,9 +80,14 @@ def setPlayback(request):
     deviceID = request.POST['device_id']
     songStatus = request.POST.get('status', 'play')
     contextURI = request.POST.get('context_uri', None)
+    offsetURI = request.POST.get('offset_uri', None)
+
     try:
-        if songStatus == 'play':
+        if songStatus == 'play' and not offsetURI:
             sp.start_playback(device_id=deviceID, context_uri=contextURI)
+            response = True
+        elif songStatus == 'play' and offsetURI:
+            sp.start_playback(device_id=deviceID, context_uri=contextURI, offset={"uri": offsetURI})
             response = True
         elif songStatus == 'pause':
             sp.pause_playback(device_id=deviceID)
@@ -252,6 +257,7 @@ def playlist(request, playlist_id):
                 "songNum":       pNo,
                 "songName":     s['track']['name'],
                 "songId":       s['track']['id'],
+                "songURI":      s['track']['uri'],
                 "songArtist":   s['track']['artists'][0]['name'],
                 "artistId":     s['track']['artists'][0]['id'],
                 "songLength":   s['track']['duration_ms']
@@ -267,6 +273,7 @@ def playlist(request, playlist_id):
                     "songNum":      pNo,
                     "songName":     s['track']['name'],
                     "songId":       s['track']['id'],
+                    "songURI":      s['track']['uri'],
                     "songArtist":   s['track']['artists'][0]['name'],
                     "artistId":     s['track']['artists'][0]['id'],
                     "songLength":   s['track']['duration_ms']
@@ -274,7 +281,7 @@ def playlist(request, playlist_id):
 
                 pNo += 1
 
-        songs = createSongList(info, 'playlist', playlist_id)
+        songs = createSongList(info, 'playlist', 'spotify:playlist:'+playlist_id)
 
         return JsonResponse({'songs': songs}, status=200)
 

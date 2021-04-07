@@ -76,7 +76,7 @@
             deviceState = state;
 
             // Update Track Name in Player
-            let trackURI = deviceState['track_window']['current_track']['uri'].split(':')[2] // extract third split of spotify:track:ID
+            let trackURI = deviceState['track_window']['current_track']['uri'];
             $('#trackName').attr('data-uri', trackURI);
             $('#trackName').text(deviceState['track_window']['current_track']['name']);
 
@@ -84,14 +84,14 @@
             let artists = "";
             let artistsList = deviceState['track_window']['current_track']['artists'];
             for(let i = 0; i < artistsList.length; i++){
-                let artistURI = artistsList[i]['uri'].split(':')[2]; // extract third split of spotify:artist:ID
+                let artistURI = artistsList[i]['uri'];
                 artists += `<a class="Artist" href="artist/${artistURI}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
                 if (i != artistsList.length - 1) artists += ", ";
             }
             $('#trackArtistContainer').html(artists)
 
             // Update Track Image in Player
-            let albumURI = deviceState['track_window']['current_track']['album']['uri'].split(':')[2]; // extract third split of spotify:album:ID
+            let albumURI = deviceState['track_window']['current_track']['album']['uri'];
             $('#trackImage').attr('data-uri', albumURI)
             $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
 
@@ -123,9 +123,6 @@
                     case 2: $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Off
                     default: break;
                 }
-
-                // Enable the footer since we've loaded in all necessary data
-                $('.footer').slideToggle();
             }
         });
 

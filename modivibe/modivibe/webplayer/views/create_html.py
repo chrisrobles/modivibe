@@ -117,12 +117,9 @@ def createSongList(info, type, context_uri):
     if not info:
         return 'Empty songlist.'
 
-    if context_uri and type:
-        context_uri = 'spotify:%s:%s' % (type, context_uri)
-
     htmlStr = \
         f'''
-        <button id='playPlaylistButton' data-uri='{context_uri}'>PLAY {type.upper()}</button>
+        <button class="PlayRequest" data-uri="{context_uri}">PLAY {type.upper()}</button>
         <section class="CollectionSongs">\n'''
 
     htmlStr += \
@@ -141,10 +138,10 @@ def createSongList(info, type, context_uri):
 
     for song in info:
         htmlStr += \
-            f'''    <div class="Song">
-                        <span class="SongNumber">{song['songNum']}</span>
+            f'''    <div class="Song" data-uri="{song['songURI']} data-parent-uri='{context_uri}">
+                        <span class="SongNumber PlayRequest" data-number="{song['songNum']}" data-uri="{song['songURI']}" data-parent-uri="{context_uri}">{song['songNum']}</span>
                         <span class="SongName"><a href="placeholder/{song['songId']}">{song['songName']}</a></span>
-                        <span class="SongArtist"><a href="artist/{song['artistId']}">{song['songArtist']}</a></span>
+                        <span class="SongArtist Artist"><a href="artist/{song['artistId']}" data-uri="{song['artistId']}">{song['songArtist']}</a></span>
                         <span class="SongLength">{convertToMinSec(song['songLength'])}</span>
                     </div>
     '''
