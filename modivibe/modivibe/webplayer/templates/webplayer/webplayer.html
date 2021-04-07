@@ -18,7 +18,7 @@
     </head>
     <body>
         <div class="min-vh-100 p-0 d-flex flex-column overflow-hidden">
-            <div class="container-fluid no-gutters d-flex flex-column flex-fill" style="overflow-y: auto !important; overflow-x:hidden !important;">
+            <div class="container-fluid no-gutters d-flex flex-column flex-fill">
                 <div class="row flex-shrink-0">
                     <div class="col-12">
                         <div class="header">{% include 'webplayer/_header.html' %}</div>
@@ -26,13 +26,17 @@
                 </div>
                 <div class="row flex-fill">
                     <div class="col-12 center overflow-auto flex-shrink-1 position-relative" style="overflow-x: hidden;">
-                        <div class="sidebar">{% include 'webplayer/_sidebar.html' %}</div>
-                        <div class="content">{% block content %}{% endblock content %}</div>
+                        <div class="sidebar">
+                            {% include 'webplayer/_sidebar.html' %}
+                        </div>
+                        <div class="content" style="overflow-x: hidden; overflow-y: auto;height: calc(100vh - 157px);">
+                            {% block content %}{% endblock content %}
+                        </div>
                     </div>
                 </div>
                 <div class="row flex-shrink-1">
                     <div class="col-12">
-                        <div class="footer" style="bottom: 0; position: fixed; width: 100%;">{% include 'webplayer/_footer.html' %}</div>
+                        <div class="footer" style="bottom: 0; position: fixed; width: 100%; box-sizing: border-box !important; height: auto">{% include 'webplayer/_footer.html' %}</div>
                     </div>
                 </div>
             </div>
