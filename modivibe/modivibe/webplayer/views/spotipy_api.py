@@ -170,13 +170,13 @@ def setShuffle(request):
 #   repeat_status [STRING] (0, 1, 2)
 def setRepeat(request):
     deviceID = request.POST['device_id']
-    repeatStatus = request.POST['repeat_status']
+    repeatStatus = request.POST.get('repeat_status', None)
     repeatStates = {
         '0': 'off',
         '1': 'context',
         '2': 'track'
     }
-    repeatState = repeatStates.get(repeatStatus, 'none')
+    repeatState = repeatStates.get(repeatStatus, None)
     try:
         sp.repeat(state=repeatState, device_id=deviceID)
         response = repeatState

@@ -55,6 +55,7 @@
     let isPlaying = false;
     let isShuffled = false;
     let initializeStates = true;
+    let repeatTimeout = false;
 
     // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -100,6 +101,15 @@
             let playbackStatus = isPlaying ? 'pause' : 'play_arrow';
             $('#playbackControl').text(playbackStatus);
 
+            // Update Repeat Status
+            repeatStatus = deviceState['repeat_mode'];
+            switch(repeatStatus) {
+                case 0: $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Off
+                case 1: $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Context
+                case 2: $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','inline'); break; // Loop Track
+                default: break;
+            }
+
             if(initializeStates) {
 
                 // This will only run once!
@@ -114,15 +124,6 @@
                 isShuffled = deviceState['shuffle'];
                 if (isShuffled) $('#shuffleTrackControl').removeClass('md-inactive');
                 else $('#shuffleTrackControl').addClass('md-inactive');
-
-                // Set Repeat Status
-                repeatStatus = deviceState['repeat_mode'];
-                switch(repeatStatus) {
-                    case 0: $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','inline'); break; // Loop Track
-                    case 1: $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Context
-                    case 2: $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break; // Loop Off
-                    default: break;
-                }
             }
         });
 
@@ -331,9 +332,11 @@
     }
 
     function toggleRepeat(event) {
-        console.log('Attempting to toggle repeat state');
+        if (repeatTimeout) return;
+        repeatTimeout = true;
         repeatStatus += 1;
         if (repeatStatus > 2 || repeatStatus < 0) repeatStatus = 0;
+        console.log(`Attempt to toggle Repeat state from ${deviceState['repeat_mode']} to ${repeatStatus}`);
         $.ajax({
                 type: "POST",
                 url: "{% url 'setRepeat' %}",
@@ -344,16 +347,12 @@
                 },
                 success: function(response) {
                     if (response != 'False') {
-                        console.log('Successfully toggled repeat state');
-                        switch(response) {
-                            case 'track': $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','inline'); break;
-                            case 'context': $('#repeatTrackControl').removeClass('md-inactive'); $('#repeatDot').css('display','none'); break;
-                            case 'off': $('#repeatTrackControl').addClass('md-inactive'); $('#repeatDot').css('display','none'); break;
-                            default: break;
-                        }
+                        console.log(`Successfully toggled repeat state to ${response}`);
+                        repeatTimeout = false;
                     } else {
                         console.log('Failed to toggle repeat state');
-                        repeatStatus -= 1;
+                        repeatStatus = deviceState['repeat_mode'];
+                        repeatTimeout = false;
                     }
                 }
         });
