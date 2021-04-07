@@ -226,10 +226,18 @@ body {
     list-style: none;
     padding: 0;
     margin: 0;
+    outline: 1px solid white;
 }
 
 .mouse-menu button {
     width: 100%;
+    background-color: #1c1c1c;
+    color: white;
+    padding: 2px 15px;
+}
+
+.mouse-menu button:hover {
+    background-color: black;
 }
 
 .CollectionSongs .Song:hover {
