@@ -56,6 +56,7 @@
     let isShuffled = false;
     let initializeStates = true;
     let repeatTimeout = false;
+    let shuffleTimeout = false;
 
     // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -110,6 +111,11 @@
                 default: break;
             }
 
+            // Update Shuffle Status
+            isShuffled = deviceState['shuffle'];
+            if (isShuffled) $('#shuffleTrackControl').removeClass('md-inactive');
+            else $('#shuffleTrackControl').addClass('md-inactive');
+
             if(initializeStates) {
 
                 // This will only run once!
@@ -119,11 +125,6 @@
                 $('#playbackControl').removeClass('md-inactive');
                 $('#previousTrackControl').removeClass('md-inactive');
                 $('#nextTrackControl').removeClass('md-inactive')
-
-                // Set Shuffle Status
-                isShuffled = deviceState['shuffle'];
-                if (isShuffled) $('#shuffleTrackControl').removeClass('md-inactive');
-                else $('#shuffleTrackControl').addClass('md-inactive');
             }
         });
 
@@ -287,48 +288,28 @@
     }
 
     function toggleShuffle(event){
-        if (!isShuffled) {
-            console.log('Attempting to enable shuffle');
-            $.ajax({
-                type: "POST",
-                url: "{% url 'setShuffle' %}",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    device_id: deviceID,
-                    shuffle_status: 'enabled'
-                },
-                success: function(response) {
-                    if (response == 'True') {
-                        console.log('Successfully enabled shuffle');
-                        isShuffled = true;
-                        $('#shuffleTrackControl').removeClass('md-inactive');
-                    } else {
-                        console.log('Failed to enable shuffle');
-                    }
+        if (shuffleTimeout) return;
+        shuffleTimeout = true;
+        let shuffleStatus = isShuffled ? 'disabled' : 'enabled';
+        console.log(`Attempting to change shuffle to "${shuffleStatus}"`);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'setShuffle' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+                shuffle_status: shuffleStatus
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log('Successfully toggled shuffle');
+                    shuffleTimeout = false;
+                } else {
+                    console.log('Failed to toggle shuffle');
+                    shuffleTimeout = false;
                 }
-            });
-
-        } else {
-            console.log('Attempting to disable shuffle');
-            $.ajax({
-                type: "POST",
-                url: "{% url 'setShuffle' %}",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    device_id: deviceID,
-                    shuffle_status: 'disabled'
-                },
-                success: function(response) {
-                    if (response == 'True') {
-                        console.log('Successfully disabled shuffle');
-                        isShuffled = false;
-                        $('#shuffleTrackControl').addClass('md-inactive');
-                    } else {
-                        console.log('Failed to disable shuffle');
-                    }
-                }
-            });
-        }
+            }
+        });
     }
 
     function toggleRepeat(event) {
