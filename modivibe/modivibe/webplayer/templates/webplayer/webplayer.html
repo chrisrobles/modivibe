@@ -86,7 +86,7 @@
 
         // Determine mouse-menu options depending on click context
         let clickTarget = e.target;
-        let dataURI = $(clickTarget).data('uri') ?? null;
+        let dataURI = $(clickTarget).attr('data-uri') ?? null;
         if ($(clickTarget).hasClass('Artist') || $(clickTarget).parents('.Artist').length) {
             if (dataURI === null) {
                 let parentDataURI = $(clickTarget).parents('.Artist')[0];

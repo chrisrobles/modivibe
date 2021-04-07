@@ -141,7 +141,7 @@ def createSongList(info, type, context_uri):
             f'''    <div class="Song" data-uri="{song['songURI']} data-parent-uri='{context_uri}">
                         <span class="SongNumber PlayRequest" data-number="{song['songNum']}" data-uri="{song['songURI']}" data-parent-uri="{context_uri}">{song['songNum']}</span>
                         <span class="SongName"><a href="placeholder/{song['songId']}">{song['songName']}</a></span>
-                        <span class="SongArtist Artist"><a href="artist/{song['artistId']}" data-uri="{song['artistId']}">{song['songArtist']}</a></span>
+                        <span class="SongArtist Artist"><a href="artist/{song['artistId']}" data-uri="spotify:artist:{song['artistId']}">{song['songArtist']}</a></span>
                         <span class="SongLength">{convertToMinSec(song['songLength'])}</span>
                     </div>
     '''
