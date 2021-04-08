@@ -1,0 +1,36 @@
+.ArtistItemButton {
+    width: inherit;
+    margin: 0;
+}
+
+.ArtistItemButton::after {
+    transform: unset;
+}
+
+.ArtistItems {
+    padding: inherit;
+}
+
+.ArtistItemsSelectors {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    text-align: center;
+}
+
+.ArtistHeader .row {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.ArtistHeaderCenter .ArtistHeaderImage {
+    max-width: 100%;
+    max-height: 320px;
+    width: auto;
+    height: auto;
+}

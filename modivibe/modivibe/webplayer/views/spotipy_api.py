@@ -400,32 +400,38 @@ def artist(request, artist_id):
     if not validUser():
         return redirect('splash')
 
-    content = []
     # create header info, turn this into a function
     header = getArtistHeaderInfo(sp, artist_id)
 
-    top = sp.artist_top_tracks(artist_id)
-    for song in top['tracks']:
-        content.append({
-            'songName':     song['name'],
-            'songId':       song['id'],
-            'songLength':   convertToMinSec(song['duration_ms']),
-            'songAlbum':    song['album']['name'],
-            'songAlbumId':  song['album']['id']
-        })
-
-    # song list will be created in artist page itself
-    # if already on artist page, just insert
-    if isAjaxRequest(request) and request.GET.get('fromArtistPage'):
-        return JsonResponse({"content": str(content)}, status=200)
-    # if coming from another page
-    elif isAjaxRequest(request):
+    # artist page is just their picture and information by default, tabs will be used to show anything
+    if isAjaxRequest(request):
         page = render_to_string('webplayer/artistPage.html',
-                        context={"header": header, "content": content, "contentType": "songs", "ajax": True})
+                        context={"header": header, "ajax": True, "loadContent": False})
         return JsonResponse({"page": page}, status=200)
     else:
         return render(request, 'webplayer/artistPage.html',
-                        context={"header": header, "content": content, "contentType": "songs", "ajax": False})
+                        context={"header": header, "ajax": False, "loadContent": False})
+
+def artistTopSongs(request, artist_id):
+    content = []
+    top = sp.artist_top_tracks(artist_id)
+    for song in top['tracks']:
+        content.append({
+            'songName': song['name'],
+            'songId': song['id'],
+            'songLength': convertToMinSec(song['duration_ms']),
+            'songAlbum': song['album']['name'],
+            'songAlbumId': song['album']['id']
+        })
+
+    if isAjaxRequest(request):
+        return JsonResponse({"content": str(content)}, status=200)
+    else:
+        # if not ajax, have to get header info and insert content string into template
+        header = getArtistHeaderInfo(sp, artist_id)
+        return render(request, 'webplayer/artistPage.html',
+                        context={"header": header, "content": content, "contentType": "topSongs",
+                                 "loadContent": True, "ajax": False})
 
 def artistAlbums(request, artist_id):
     if not validUser():
@@ -472,7 +478,7 @@ def artistAlbums(request, artist_id):
         header = getArtistHeaderInfo(sp, artist_id)
         return render(request, 'webplayer/artistPage.html',
                       context={"header": header, "content": content, "contentType": "albums",
-                               "ajax": False})
+                               "loadContent": True, "ajax": False})
 
 def artistRelated(request, artist_id):
     if not validUser():
@@ -496,5 +502,5 @@ def artistRelated(request, artist_id):
     else:
         header = getArtistHeaderInfo(sp, artist_id)
         return render(request, 'webplayer/artistPage.html',
-                      context={"header": header, "content": content, "contentType": "artists",
-                               "ajax": False})
+                      context={"header": header, "content": content, "contentType": "related",
+                               "loadContent": True, "ajax": False})

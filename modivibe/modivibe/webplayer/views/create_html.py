@@ -178,6 +178,7 @@ def getArtistHeaderInfo(sp, artist_id):
         'artistName': ar['name'],
         'artistImg': ar['images'][0]['url'] if ar['images'] else 'default',
         'artistFollowers': ar['followers']['total'],
-        'artistId': ar['id']
+        'artistId': ar['id'],
+        'artistGenres': ar['genres'][:7]
     }
 
