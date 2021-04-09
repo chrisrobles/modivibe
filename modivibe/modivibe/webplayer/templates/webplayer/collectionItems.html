@@ -36,7 +36,7 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
         <div class="row">
         {% for item in info %}
             <div style="padding-bottom: 20px;" class="col-4">
-                <div class="ContentItem" id="{{ item.contentId }}">
+                <div class="ContentItem {{ type|title }}" data-uri="spotify:{{ type }}:{{ item.contentId }}">
                     <img class="ContentImage" src="{{ item.contentImg }}">
                     <a class="ItemLink" style="text-align:center;" href="/{{ type }}/{{ item.contentId }}">
                         <h3>{{ item.contentName }}</h3>
@@ -44,8 +44,8 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
                 </div>
 
             {% if type == "album"%}
-            <div class="ContentArtist" style="text-align:center;">
-                    <a class="ItemLink" id="{{ item.artistId }}" href="/artist/{{ item.artistId }}">
+            <div class="ContentArtist Artist" style="text-align:center;" data-uri="spotify:artist:{{ item.artistId }}">
+                    <a class="ItemLink" href="/artist/{{ item.artistId }}">
                         {{ item.artist }}
                     </a>
                     <span> - {{ item.albumDate }}</span>
