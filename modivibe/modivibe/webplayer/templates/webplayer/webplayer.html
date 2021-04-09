@@ -41,25 +41,148 @@
                 </div>
             </div>
         </div>
+        <div class="mouse-menu">
+            <ul>
+                <li><button>Option 1</button></li>
+                <li><button>Option 2</button></li>
+                <li><button>Option 3</button></li>
+            </ul>
+        </div>
     </body>
 <script>
-    $(document).on('click', '#playPlaylistButton', function(e) {
-        console.log('Attempting to play playlist: ' + $(this).data('uri'));
-       $.ajax({
-           type: 'POST',
-           url: "{% url 'setPlayback' %}",
-           data: {
+    $(document).on('click', '.PlayRequest', function(e) {
+        let contextURI, offsetURI;
+        if ($(this).data('parent-uri')) {
+            contextURI = $(this).data('parent-uri');
+            offsetURI = $(this).data('uri');
+        } else {
+            contextURI = $(this).data('uri');
+            offsetURI = null;
+        }
+        console.log(`Attempting to play context "${contextURI}" with offset "${offsetURI}"`);
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'setPlayback' %}",
+            data: {
                csrfmiddlewaretoken: '{{ csrf_token }}',
                device_id: deviceID,
                status: 'play',
-               context_uri: $(this).data('uri')
-           },
-           success: function(response) {
+               context_uri: contextURI,
+               offset_uri: offsetURI
+            },
+            success: function(response) {
                if (response === 'True') {
-                   console.log('Successfully played requested playlist');
+                   console.log('Successfully played request');
+                   if ($('.mouse-menu').is(':visible')) {
+                       $('.mouse-menu').hide();
+                   }
                }
-           }
-       });
+            }
+        });
+    });
+
+    $(document).on('contextmenu', function(e) {
+        if (e.ctrlKey) return; // Temporary method for overcoming the mouse-menu
+        e.preventDefault(); // Prevent browser right-click menu
+        $('.mouse-menu').hide();
+
+
+        // Determine mouse-menu options depending on click context
+        let clickTarget = e.target;
+        let dataURI = $(clickTarget).attr('data-uri') ?? null;
+        if ($(clickTarget).hasClass('Artist') || $(clickTarget).parents('.Artist').length) {
+            if (dataURI === null) {
+                let parentDataURI = $(clickTarget).parents('.Artist')[0];
+                dataURI = parentDataURI ? $(parentDataURI).data('uri') : null;
+            }
+            $('.mouse-menu ul').html(`
+                <li><button class="PlayRequest" data-uri="${dataURI}">Play Artist</button></li>
+                <li><button>Follow Artist</button></li>
+                <li><button>Go to Artist</button></li>
+            `);
+        }
+        else if ($(clickTarget).hasClass('Playlist') || $(clickTarget).parents('.Playlist').length) {
+            if (dataURI === null) {
+                let parentDataURI = $(clickTarget).parents('.Playlist')[0];
+                dataURI = parentDataURI ? $(parentDataURI).data('uri') : null;
+            }
+            $('.mouse-menu ul').html(`
+                <li><button class="PlayRequest" data-uri="${dataURI}">Play Playlist</button></li>
+                <li><button>Add to Queue</button></li>
+                <li><button>Go to Playlist</button></li>
+            `);
+        }
+        else if ($(clickTarget).hasClass('Album') || $(clickTarget).parents('.Album').length) {
+            if (dataURI === null) {
+                let parentDataURI = $(clickTarget).parents('.Album')[0];
+                dataURI = parentDataURI ? $(parentDataURI).data('uri') : null;
+            }
+            $('.mouse-menu ul').html(`
+                <li><button class="PlayRequest" data-uri="${dataURI}">Play Album</button></li>
+                <li><button>Add to Queue</button></li>
+                <li><button>Go to Album</button></li>
+            `);
+        }
+        else if ($(clickTarget).hasClass('Podcast') || $(clickTarget).parents('.Podcast').length) {
+            if (dataURI === null) {
+                let parentDataURI = $(clickTarget).parents('.Podcast')[0];
+                dataURI = parentDataURI ? $(parentDataURI).data('uri') : null;
+            }
+            $('.mouse-menu ul').html(`
+                <li><button class="PlayRequest" data-uri="${dataURI}">Play Podcast</button></li>
+                <li><button>Go to Podcast</button></li>
+            `);
+        }
+        else if ($(clickTarget).hasClass('Song') || $(clickTarget).parents('.Song').length) {
+            $('.mouse-menu ul').html(`
+                <li><button>Add to Queue</button></li>
+                <li><button>Add to Playlist</button></li>
+                <li><button>Add to Liked Songs</button></li>
+                <li><button>Go to Artist</button></li>
+                <li><button>Go to Album</button></li>
+            `);
+        } else {
+            return;
+        }
+
+        // Ensure horizontal calculation of menu remains on the page
+        let mouseX = e.pageX;
+        let menuWidth = $('.mouse-menu').width();
+        if (window.innerWidth < mouseX + menuWidth) {
+            mouseX = mouseX - menuWidth;
+        }
+
+        // Ensure vertical calculation of the menu remains on the page
+        let mouseY = e.pageY;
+        let menuHeight = $('.mouse-menu').height();
+        if (window.innerHeight < mouseY + menuHeight) {
+            mouseY = mouseY - menuHeight;
+        }
+
+        $('.mouse-menu').css('left', mouseX).css('top', mouseY);
+        $('.mouse-menu').show();
+    });
+
+    $(document).on('click', function(e) {
+        if ($('.mouse-menu').is(':visible')) {
+            if ($(e.target).parents('.mouse-menu').length) return;
+            $('.mouse-menu').hide();
+        }
+    });
+
+    // Enables the material icon play arrow on the song list
+    $(document).on('mouseenter', '.SongItems > .Song', function(e) {
+        let $playNumber = $(this).find('.PlayRequest');
+        $playNumber.addClass('material-icons md-24 md-light');
+        $playNumber.text('play_arrow');
+    });
+
+    // Disables the material icon play arrow on the song list
+    $(document).on('mouseleave', '.SongItems > .Song', function(e) {
+        let $playNumber = $(this).find('.PlayRequest');
+        $playNumber.text($playNumber.data('number'));
+        $playNumber.removeClass('material-icons md-24 md-light');
     });
 </script>
 </html>
