@@ -126,23 +126,37 @@
         list-style: none;
         padding: 0;
         margin: 0;
+        width: 200px;
     }
 
     .Queue .QueueItem {
         background-color: #1c1c1c;
         margin: 5px 0;
-        padding: 5px;
         display: flex;
         align-content: space-between;
-        max-width: 200px;
     }
 
-    .Queue .Song, .Queue .ArtistContainer {
+    .Queue .QueueItem:hover {
+        background: #101010;
+    }
+
+    .Queue .TrackInfoContainer {
+        overflow: hidden;
+        align-self: center;
+    }
+
+    .Queue .Song {
+        font-weight: bold;
         margin: 0;
-        /* Temporary Hiding */
         overflow: hidden;
         white-space: nowrap;
-        text-overflow: ellipsis;
+    }
+
+    .Queue .ArtistContainer {
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: small;
     }
 
     .Queue .Album {
@@ -157,8 +171,21 @@
         padding-left: 0;
     }
 
+    .Queue #QueueCurrent .Album {
+        max-width: 64px;
+        max-height: 64px;
+    }
+
     .Queue .QueuePointer {
         align-self: center;
+    }
+
+    .Queue .TopShadow {
+        position: absolute;
+        width: inherit;
+        height: 75px;
+        background: linear-gradient(to top, transparent, black);
+        pointer-events: none;
     }
 
 </style>
@@ -223,16 +250,17 @@
         <button class="QueueToggle material-icons md-18 md-light">expand_less</button>
     </div>
     <ul class="QueueContainer">
+        <div class="TopShadow"></div>
         <li id="QueueLast2" class="QueueItem" data-uri="" parent-uri="">
             <img class="Album" src="" alt="Album" data-uri="">
-            <div>
+            <div class="TrackInfoContainer">
                 <p class="Song" data-uri="">Track Name</p>
                 <span class="ArtistContainer">Track Artist(s)</span>
             </div>
         </li>
         <li id="QueueLast1" class="QueueItem" data-uri="" parent-uri="">
             <img class="Album" src="" alt="Album" data-uri="">
-            <div>
+            <div class="TrackInfoContainer">
                 <p class="Song" data-uri="">Track Name</p>
                 <span class="ArtistContainer">Track Artist(s)</span>
             </div>
@@ -240,21 +268,21 @@
         <li id="QueueCurrent" class="QueueItem" data-uri="" parent-uri="">
             <span class="QueuePointer material-icons md-18 md-light">chevron_right</span>
             <img class="Album" src="" alt="Album" data-uri="">
-            <div>
+            <div class="TrackInfoContainer">
                 <p class="Song" data-uri="">Track Name</p>
                 <span class="ArtistContainer">Track Artist(s)</span>
             </div>
         </li>
         <li id="QueueNext1" class="QueueItem" data-uri="" parent-uri="">
             <img class="Album" src="" alt="Album" data-uri="">
-            <div>
+            <div class="TrackInfoContainer">
                 <p class="Song" data-uri="">Track Name</p>
                 <span class="ArtistContainer">Track Artist(s)</span>
             </div>
         </li>
         <li id="QueueNext2" class="QueueItem" data-uri="" parent-uri="">
             <img class="Album" src="" alt="Album" data-uri="">
-            <div>
+            <div class="TrackInfoContainer">
                 <p class="Song" data-uri="">Track Name</p>
                 <span class="ArtistContainer">Track Artist(s)</span>
             </div>
