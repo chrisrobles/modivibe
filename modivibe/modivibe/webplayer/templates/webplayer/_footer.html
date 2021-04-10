@@ -12,7 +12,7 @@
         <div class="trackControllers">
             <button id="shuffleTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">shuffle</button>
             <button id="previousTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Previous Track">skip_previous</button>
-            <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_circle</button>
+            <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_arrow</button>
             <button id="nextTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Next Track">skip_next</button>
             <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
         </div>
@@ -29,7 +29,7 @@
         </div>
     </span>
     <span class="playbarRight">
-        <button id="queueControl" class="material-icons md-36 md-light md-inactive" aria-label="Queue">queue</button>
+        <button class="ConnectionStatus material-icons md-24 md-light md-inactive">wifi_off</button>
         <div class="volumeController">
             <div class="mdc-slider mdc-slider--discrete">
                 <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
@@ -67,14 +67,16 @@
         });
 
         // Error handling
-        player.addListener('initialization_error', ({message}) => { console.error(message); });
-        player.addListener('authentication_error', ({message}) => { console.error(message); });
+        player.addListener('initialization_error', ({message}) => { $('.ConnectionStatus').text('wifi_off'); console.error(message);  });
+        player.addListener('authentication_error', ({message}) => { $('.ConnectionStatus').text('wifi_off'); console.error(message); });
         player.addListener('account_error', ({message}) => { console.error(message); });
         player.addListener('playback_error', ({message}) => { console.error(message); });
 
         // Playback status updates
         player.addListener('player_state_changed', state => {
             console.log(state);
+            if (state === null) $('.ConnectionStatus').text('wifi_off');
+            else $('.ConnectionStatus').text('wifi');
             deviceState = state;
 
             // Update Track Name in Player
@@ -179,11 +181,13 @@
             deviceID = device_id;
             // Trigger playback transfer to Modivibe
             transferPlayback();
+            $('.ConnectionStatus').text('wifi');
         });
 
         // Not Ready
         player.addListener('not_ready', ({device_id}) => {
             console.log('Device ID has gone offline', device_id);
+            $('.ConnectionStatus').text('wifi_off');
         });
 
         // Connect to the player!
@@ -197,6 +201,7 @@
     $('#nextTrackControl').on('click', nextTrack);
     $('#shuffleTrackControl').on('click', toggleShuffle);
     $('#repeatTrackControl').on('click', toggleRepeat);
+    $('.ConnectionStatus').on('click', transferPlayback);
 
     // $('#helperButtonControl').on('click', helperButton);
     // $('#progressBarControl').on('change', updateProgressBarSliderThumb);

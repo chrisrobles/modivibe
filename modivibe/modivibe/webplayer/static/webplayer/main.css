@@ -153,8 +153,8 @@ body {
 .playbar #trackImage {
     background-color: black;
     border: 1px solid black;
-    width: fit-content;
-    height: fit-content;
+    width: 64px !important;
+    height: 64px !important;
 }
 
 .playbarLeft #trackName {
