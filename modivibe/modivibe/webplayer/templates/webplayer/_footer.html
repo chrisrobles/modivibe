@@ -24,7 +24,6 @@
               min="0"
               max=""
               value="0"
-              onchange="progressBarSliderThumbChanged()"
             />
             <span id="durationTimeLabel" style="font-size: 12px"></span>
         </div>
@@ -80,18 +79,20 @@
 
         // Playback status updates
         player.addListener('player_state_changed', state => {
-            console.log(state);
+            // console.log(state);
+            console.log(state, "******* player_state_changed listener *******");
+
             if (state === null) $('.ConnectionStatus').text('wifi_off');
             else $('.ConnectionStatus').text('wifi');
             deviceState = state;
 
-            // ryan: temp for now
+            // ryan: temp for now - this listener gets called by the track controllers so updating positionMilliseconds
+            //                          here works "decently"
             positionMilliseconds = deviceState.position;
-            // console.log("positionMilliseconds", positionMilliseconds);
+            // console.log("positionMilliseconds", positionMilliseconds);x
 
-            // Need to find a way to stop using this listener... it's not working well for what I want to do
-
-            progressBar.max = deviceState.duration / 1000;
+            progressBar.max = deviceState.duration / 1000; // want it in seconds
+            console.log('progressBar.max (s): ', progressBar.max);
 
             // Update Track Name in Player
             let trackURI = deviceState['track_window']['current_track']['uri'];
@@ -178,7 +179,6 @@
             }
 
             if(initializeStates) {
-
                 // This will only run once!
                 initializeStates = false;
 
@@ -187,9 +187,8 @@
                 $('#previousTrackControl').removeClass('md-inactive');
                 $('#nextTrackControl').removeClass('md-inactive');
 
-                // temp for now
+                // ryan: temp for now - trying to always get the duration label to update correctly
                 document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
-
             }
         });
 
@@ -255,21 +254,21 @@
         // ryan: Want to do this label update elsewhere - putting it here for now. I was having trouble with transferPlayback()
         // document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
 
-        // Current time stuffs
+        // For the current progress label
         if (isPlaying) {
             // song is paused so stop the timer
             console.log('song is paused');
 
             // Stop adding milliseconds to the progress variable
             clearInterval(positionMillisecondsIntervalID);
-            console.log('positionMilliseconds:', positionMilliseconds);
+
+            console.log('positionMilliseconds after pausing: ', positionMilliseconds);
         } else {
             // song is playing so start the progress timer again
             console.log('song is playing');
 
-            // Start adding a millisecond to the progress variable every millisecond
-            positionMillisecondsIntervalID = setInterval(positionMillisecondsIncrease, 1);
-
+            // Start adding 1000 milliseconds to the progress variable every second
+            positionMillisecondsIntervalID = setInterval(positionMillisecondsUpdate, 1000);
         }
 
         $.ajax({
@@ -293,12 +292,11 @@
         });
     }
 
-    function positionMillisecondsIncrease() {
-        // console.log('setInterval(positionMillisecondsIncrease, 1) is firing');
+    function positionMillisecondsUpdate() {
+        // console.log('positionMillisecondsUpdate is firing');
 
-        // console.log("positionMilliseconds before adding 1", positionMilliseconds);
-        positionMilliseconds += 1;
-        // console.log("positionMilliseconds after adding 1", positionMilliseconds);
+        positionMilliseconds += 1000;
+        // console.log("positionMilliseconds after updating: ", positionMilliseconds);
     }
 
     function setVolume(event) {
@@ -450,6 +448,7 @@
         return artists;
     }
 
+    // ryan: Temp to use while playing with the API
     // function helperButton() {
     //  console.log('Attempting to get current track info');
     //
@@ -473,23 +472,23 @@
     //     // console.log(deviceState);
     // }
 
-    // Fires every half-second
-    setInterval(updateProgressBarThumbSliderPosition, 500);
+    // Fires every half-second to update the progress bar current progress time label
+    setInterval(updateProgressBarTimeLabel, 500);
 
-    function updateProgressBarThumbSliderPosition() {
-        // console.log("setInterval(updateProgressBarThumbSliderPosition) is firing");
+    function updateProgressBarTimeLabel() {
+        // console.log("setInterval(updateProgressBarTimeLabel) is firing");
 
         document.getElementById("progressTimeLabel").textContent = millisToMinutesAndSeconds(positionMilliseconds);
     }
 
-    function progressBarSliderThumbChanged() {
-        console.log('progressBarSliderThumbChanged()');
-
-        console.log('progressBar.value', progressBar.value);
-        console.log("seconds: ", progressBar.value / 1000);
-
-        progressBar.value = (positionMilliseconds / 1000);
-        console.log('progressBar.value after', progressBar.value);
-    }
+    // function progressBarSliderThumbChanged() {
+    //     console.log('progressBarSliderThumbChanged()');
+    //
+    //     console.log('progressBar.value', progressBar.value);
+    //     console.log("seconds: ", progressBar.value / 1000);
+    //
+    //     progressBar.value = (positionMilliseconds / 1000);
+    //     console.log('progressBar.value after', progressBar.value);
+    // }
 
 </script>
