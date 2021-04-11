@@ -123,11 +123,19 @@ def createSongList(info, type, context_uri):
         <section class="CollectionSongs">\n'''
 
     htmlStr += \
-        f'''<div class="SongHeader">
-                <span class="SongNumber">#</span>
-                <span class="SongName">Song</span>
-                <span class="SongArtist">Artist</span>
-                <span class="SongLength">Length</span>
+        f'''<div class="SongHeader row">
+                <div class ="col-1">
+                    <span class="SongNumber"><h3 style="color: white;">#</h3></span>
+                </div>
+                <div class="col-5">
+                    <span class="SongName"><h3 style="color: white;">Song</h3></span>
+                </div>
+                <div class="col-5">
+                    <span class="SongArtist"><h3 style="color: white;">Artist</h3></span>
+                </div>
+                <div class="col-1">
+                    <span class="SongLength"><h3 style="color: white;">Length</h3></span>
+                </div>
             </div>
     '''
 
@@ -138,11 +146,19 @@ def createSongList(info, type, context_uri):
 
     for song in info:
         htmlStr += \
-            f'''    <div class="Song" data-uri="{song['songURI']} data-parent-uri='{context_uri}">
-                        <span class="SongNumber PlayRequest" data-number="{song['songNum']}" data-uri="{song['songURI']}" data-parent-uri="{context_uri}">{song['songNum']}</span>
-                        <span class="SongName"><a href="placeholder/{song['songId']}">{song['songName']}</a></span>
-                        <span class="SongArtist Artist"><a href="artist/{song['artistId']}" data-uri="spotify:artist:{song['artistId']}">{song['songArtist']}</a></span>
-                        <span class="SongLength">{convertToMinSec(song['songLength'])}</span>
+            f'''    <div class="Song row" data-uri="{song['songURI']} data-parent-uri='{context_uri}">
+                        <div class="col-1">
+                            <span class="SongNumber PlayRequest" data-number="{song['songNum']}" data-uri="{song['songURI']}" data-parent-uri="{context_uri}">{song['songNum']}</span>
+                        </div>
+                        <div class="col-5">
+                            <span class="SongName"><a href="placeholder/{song['songId']}">{song['songName']}</a></span>
+                        </div>
+                        <div class="col-5">
+                            <span class="SongArtist Artist"><a href="artist/{song['artistId']}" data-uri="spotify:artist:{song['artistId']}">{song['songArtist']}</a></span>
+                        </div>
+                        <div class="col-1">
+                            <span class="SongLength">{convertToMinSec(song['songLength'])}</span>
+                        </div>
                     </div>
     '''
 
