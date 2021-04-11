@@ -49,6 +49,8 @@
 </fieldset>
 
 <script>
+    const PROGRESS_MS_UPDATE_INTERVAL_AMOUNT = 1000;
+
     const progressTimeLabel = document.getElementById("progressTimeLabel");
     const progressBarControl = document.getElementById('progressBarControl');
     const durationTimeLabel = document.getElementById("durationTimeLabel");
@@ -90,11 +92,11 @@
             // Progress bar stuff
             // ryan: temp for now - this listener gets called by the track controllers so updating progressMilliseconds
             //                          here works "decently", but it can probably go somewhere else
-            progressMilliseconds = deviceState.position;
-            // console.log("progressMilliseconds", progressMilliseconds);
+            // progressMilliseconds = deviceState.position;
+            // console.log("***** progressMilliseconds: ", progressMilliseconds);
 
             progressBarControl.max = deviceState.duration / 1000; // want it in seconds
-            console.log('progressBarControl.max (s): ', progressBarControl.max);
+            // console.log('progressBarControl.max (s): ', progressBarControl.max);
 
             // Update Track Name in Player
             let trackURI = deviceState['track_window']['current_track']['uri'];
@@ -192,6 +194,17 @@
                 // ryan: temp for now - trying to always get the duration label to update correctly
                 durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
             }
+
+            // Testing this for previous/next logic
+            // console.log('isPlaying: ', isPlaying);
+            if (isPlaying) {
+                console.log('isPlaying from the main listener: ', isPlaying);
+                // If true then set the progress
+                progressMilliseconds = deviceState.position;
+
+                // Start adding 1000 milliseconds to the progress variable every second
+                progressMillisecondsIntervalID = setInterval(progressMillisecondsUpdate, PROGRESS_MS_UPDATE_INTERVAL_AMOUNT);
+            }
         });
 
         // Ready
@@ -242,6 +255,8 @@
                     // ryan: This sometimes throws a deviceState undefined error and I have no idea why. Will fix later
                     //  (think it's a timing issue)
                     // durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
+
+                    progressMilliseconds = deviceState.position;
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -261,16 +276,16 @@
             // song is paused so stop the timer
             console.log('song is paused');
 
-            // Stop adding to the progress variable
+            // Stop increasing the progress variable
             clearInterval(progressMillisecondsIntervalID);
 
             console.log('progressMilliseconds after pausing: ', progressMilliseconds);
         } else {
             // song is playing so start the progress timer again
-            console.log('song is playing');
+            // console.log('song is playing');
 
-            // Start adding 1000 milliseconds to the progress variable every second
-            progressMillisecondsIntervalID = setInterval(progressMillisecondsUpdate, 1000);
+            // // Start adding 1000 milliseconds to the progress variable every second
+            // progressMillisecondsIntervalID = setInterval(progressMillisecondsUpdate, PROGRESS_MS_UPDATE_INTERVAL_AMOUNT);
         }
 
         $.ajax({
@@ -297,7 +312,7 @@
     function progressMillisecondsUpdate() {
         // console.log('progressMillisecondsUpdate is firing');
 
-        progressMilliseconds += 1000;
+        progressMilliseconds += PROGRESS_MS_UPDATE_INTERVAL_AMOUNT;
         console.log("progressMilliseconds after updating: ", progressMilliseconds);
     }
 
@@ -359,6 +374,10 @@
 
                     // ryan: temp for now - trying to always get the duration label to update correctly
                     durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
+
+                    // Progress bar resets
+                    //  restart the interval because of the auto-play (note: may be a setting in the future)
+                    // progressMillisecondsIntervalID = setInterval(progressMillisecondsUpdate, PROGRESS_MS_UPDATE_INTERVAL_AMOUNT);
                 } else {
                     console.log('Failed to play previous track');
                 }
