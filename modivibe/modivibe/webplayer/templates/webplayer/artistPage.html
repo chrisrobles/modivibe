@@ -65,7 +65,7 @@
     <div class="row">
         <section class="ArtistItemsContent">
             {% if loadContent %}
-                {{content}}
+                {{content|safe}}
             {% endif %}
         </section>
     </div>

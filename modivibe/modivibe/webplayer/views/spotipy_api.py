@@ -420,19 +420,28 @@ def artist(request, artist_id):
                         context={"header": header, "ajax": False, "loadContent": False})
 
 def artistTopSongs(request, artist_id):
-    content = []
+    info = []
     top = sp.artist_top_tracks(artist_id)
+    sn = 1
     for song in top['tracks']:
-        content.append({
+        info.append({
+            'songNum': sn,
             'songName': song['name'],
             'songId': song['id'],
-            'songLength': convertToMinSec(song['duration_ms']),
+            'songLength': song['duration_ms'],
             'songAlbum': song['album']['name'],
-            'songAlbumId': song['album']['id']
+            'songAlbumId': song['album']['id'],
+            'songURI': song['uri'],
+            'artistId': artist_id,
+            'songArtist': song['album']['artists'][0]['name']
         })
 
+        sn += 1
+
+    content = createSongList(info, 'artist', 'spotify:artist:'+artist_id)
+
     if isAjaxRequest(request):
-        return JsonResponse({"content": str(content)}, status=200)
+        return JsonResponse({"content": content}, status=200)
     else:
         # if not ajax, have to get header info and insert content string into template
         header = getArtistHeaderInfo(sp, artist_id)
