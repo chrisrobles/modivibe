@@ -1,101 +1,5 @@
 # This file is for any python function related to creating html to insert through an ajax request
-
-
-# Create a collection of items to display.
-#
-# param     info    List of dictionaries containing:
-#                       1. contentImg: link to main content image (ex: album cover)
-#                       2. contentName: content name
-#                       3. contentId: id to content
-#                       4. contentDesc: content description
-#                   If type == albums, must also include:
-#                       5. artist: artist name
-#                       6. artistId: id to artist
-#                       7. albumDate: album release date
-#
-# param     type    Type of collection, should be:
-#                       album
-#                       playlist
-#                       artist
-#                       podcast
-def createCollectionItems(info, type): # DEPRECATED
-    htmlStr = \
-        f'''<div class="container-fluid">
-                <section class="CollectionContent">
-                    <div class="row">
-                        <div class="col-12">
-                            <h1 class="ContentHeader">{type.capitalize() + 's'}</h1>
-                        </div>
-                    </div>
-                    <section class="ContentItems">
-                        <div class="row">
-    '''
-    count = 0
-    for c in info:
-        htmlStr += createItem(c, type)
-        count += 1
-        if(count == 3):
-            count = 0
-            htmlStr += "</div><div class='row'>"
-    
-    htmlStr += "</div>"
-
-    htmlStr += "\n</section>\n</section></div>"
-
-    return htmlStr
-
-# Create an album/artist/playlist/podcast item.
-# This item showcases the basic information of an object and links related to it.
-#
-# param     info    List of dictionaries containing:
-#                       1. contentImg: link to main content image (ex: album cover)
-#                       2. contentName: content name
-#                       3. contentId: id to content
-#                       4. contentDesc: content description
-#                   If type == albums, must also include:
-#                       5. artist: artist name
-#                       6. artistId: id to artist
-#                       7. albumDate: album release date
-#
-# param     type    Type of collection, should be:
-#                       album
-#                       playlist
-#                       artist
-#                       podcast
-def createItem(info, type): # DEPRECATED
-    htmlStr = ""
-    if (type == 'album'):
-        htmlStr += \
-        f'''\n
-        <div style="padding-bottom: 20px;" class="col-4">
-        <div class="ContentItem" id="{info['contentId']}">
-            <img class="ContentImage" src="{info['contentImg']}"><br>
-            <a class="{type}Link" href="{type + '/' + info['contentId']}" data-name="{info['contentName']}">{info['contentName']}</a> '''
-        htmlStr += \
-            f'''\n
-            <div class="ContentArtist">
-                    <a class="artistLink" id="{info['artistId']}" href="artist/{info['artistId']}">
-                        {info['artist']}
-                    </a>
-                    <span> - {info['albumDate']}</span>
-                </div>
-            </div>
-            '''
-    elif (type == 'playlist'):
-        htmlStr += \
-        f'''\n
-        <div style="padding-bottom: 20px;" class="col-4">
-            <div class="ContentItem" id="{info['contentId']}">
-            <img class="ContentImage" src="{info['contentImg']}"><br>
-            <a class="{type}Link" style="text-align:center;" href="{type + '/' + info['contentId']}" data-name="{info['contentName']}"><h3>{info['contentName']}</h3></a> '''
-        #htmlStr += f'\n<div class="ContentDesc">{info["contentDesc"]}</div></div>'
-        htmlStr += "</div>"
-    else:
-        htmlStr += f'\n<div class="ContentDesc">{info["contentDesc"]}</div>'
-
-    htmlStr += "</div>"
-
-    return htmlStr
+# will probably turn into a helper file
 
 # Create a list of songs based on the list of info given.
 #
@@ -172,14 +76,9 @@ def createSongList(info, type, context_uri):
 
 # Convert integer length of a song in milliseconds to string of minutes and seconds
 def convertToMinSec(length):
-    ms = length % 1000
     length //= 1000
     min = length // 60
     sec = length % 60
-
-    if sec > 60:
-        min += 1
-        sec %= 60
 
     min = str(min)
     sec = str(sec)
@@ -188,3 +87,15 @@ def convertToMinSec(length):
         sec = '0' + sec
 
     return (min + ':' + sec)
+
+# gets information needed to create a header for an artist
+def getArtistHeaderInfo(sp, artist_id):
+    ar = sp.artist(artist_id)
+    return {
+        'artistName': ar['name'],
+        'artistImg': ar['images'][0]['url'] if ar['images'] else 'default',
+        'artistFollowers': ar['followers']['total'],
+        'artistId': ar['id'],
+        'artistGenres': ar['genres'][:7]
+    }
+
