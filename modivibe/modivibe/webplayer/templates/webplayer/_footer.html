@@ -6,7 +6,7 @@
             <span id="trackArtistContainer">Track Artist(s)</span>
         </div>
 
-<!--        <button id="helperButtonControl">click me</button> -->
+<!--        <button id="helperButtonControl">click me</button>-->
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
@@ -24,6 +24,7 @@
               min="0"
               max=""
               value="0"
+              onchange="progressBarSliderThumbChanged()"
             />
             <span id="durationTimeLabel" style="font-size: 12px"></span>
         </div>
@@ -49,6 +50,8 @@
 </fieldset>
 
 <script>
+    const progressBar = document.querySelector('#progressBarControl');
+
     let deviceID;
     let deviceState;
     let repeatStatus;
@@ -57,6 +60,9 @@
     let initializeStates = true;
     let repeatTimeout = false;
     let shuffleTimeout = false;
+
+    let positionMilliseconds; // progression in MS of the current track
+    let positionMillisecondsIntervalID;
 
     // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -74,8 +80,16 @@
 
         // Playback status updates
         player.addListener('player_state_changed', state => {
-            console.log(state);
+            console.log(state, "*************************** player_state_changed listener *************");
             deviceState = state;
+
+            // ryan: temp for now
+            positionMilliseconds = deviceState.position;
+            // console.log("positionMilliseconds", positionMilliseconds);
+
+            // Need to find a way to stop using this listener... it's not working well for what I want to do
+
+            progressBar.max = deviceState.duration / 1000;
 
             // Update Track Name in Player
             let trackURI = deviceState['track_window']['current_track']['uri'];
@@ -124,7 +138,11 @@
                 // Track controls are now available
                 $('#playbackControl').removeClass('md-inactive');
                 $('#previousTrackControl').removeClass('md-inactive');
-                $('#nextTrackControl').removeClass('md-inactive')
+                $('#nextTrackControl').removeClass('md-inactive');
+
+                // temp for now
+                document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+
             }
         });
 
@@ -170,9 +188,9 @@
                 if (response == 'True') {
                     console.log('Successfully transferred playback');
 
-                    // This sometimes throws a deviceState undefined error and I have no idea why. Will fix later
+                    // ryan: This sometimes throws a deviceState undefined error and I have no idea why. Will fix later
                     //  (think it's a timing issue)
-                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+                    // document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -181,12 +199,28 @@
     }
 
     function togglePlayback(event){
-
-
         let playbackRequest = (isPlaying) ? 'pause' : 'play';
         console.log(`Requesting playback: ${playbackRequest}`);
+
         // ryan: Want to do this label update elsewhere - putting it here for now. I was having trouble with transferPlayback()
-        document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+        // document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+
+        // Current time stuffs
+        if (isPlaying) {
+            // song is paused so stop the timer
+            console.log('song is paused');
+
+            // Stop adding milliseconds to the progress variable
+            clearInterval(positionMillisecondsIntervalID);
+            console.log('positionMilliseconds:', positionMilliseconds);
+        } else {
+            // song is playing so start the progress timer again
+            console.log('song is playing');
+
+            // Start adding a millisecond to the progress variable every millisecond
+            positionMillisecondsIntervalID = setInterval(positionMillisecondsIncrease, 1);
+
+        }
 
         $.ajax({
             type: "POST",
@@ -199,11 +233,22 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log(`Success: ${playbackRequest}`);
+
+                    // temp for now
+                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log(`Failed: ${playbackRequest}`);
                 }
             }
         });
+    }
+
+    function positionMillisecondsIncrease() {
+        // console.log('setInterval(positionMillisecondsIncrease, 1) is firing');
+
+        // console.log("positionMilliseconds before adding 1", positionMilliseconds);
+        positionMilliseconds += 1;
+        // console.log("positionMilliseconds after adding 1", positionMilliseconds);
     }
 
     function setVolume(event) {
@@ -261,6 +306,8 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully played previous track');
+
+                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to play previous track');
                 }
@@ -280,6 +327,8 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully played next track');
+
+                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to play next track');
                 }
@@ -341,30 +390,44 @@
 
     // function helperButton() {
     //  console.log('Attempting to get current track info');
-    //    $.ajax({
-    //         type: "GET",
-    //         url: "{% url 'helperButton' %}",
-    //         data: {
-    //             csrfmiddlewaretoken: '{{ csrf_token }}',
-    //             device_id: deviceID,
-    //         },
-    //         success: function(response) {
-    //             if (response != 'False') {
-    //                 console.log('Successfully retrieved current track info');
-    //                 console.log(response);
-    //             } else {
-    //                 console.log('Failed to retrieve current track info');
-    //             }
-    //         }
-    //     });
+    //
+    //    // $.ajax({
+    //    //      type: "GET",
+    //    //      url: "{% url 'helperButton' %}",
+    //    //      data: {
+    //    //          csrfmiddlewaretoken: '{{ csrf_token }}',
+    //    //          device_id: deviceID,
+    //    //      },
+    //    //      success: function(response) {
+    //    //          if (response != 'False') {
+    //    //              console.log('Successfully retrieved current track info');
+    //    //              console.log(response);
+    //    //          } else {
+    //    //              console.log('Failed to retrieve current track info');
+    //    //          }
+    //    //      }
+    //    //  });
     //
     //     // console.log(deviceState);
     // }
 
-    // To do
-    // function updateProgressBarSliderThumb () {
-    //     progressBar = document.getElementById("progressBarControl");
-    //
-    // }
+    // Fires every half-second
+    setInterval(updateProgressBarThumbSliderPosition, 500);
+
+    function updateProgressBarThumbSliderPosition() {
+        // console.log("setInterval(updateProgressBarThumbSliderPosition) is firing");
+
+        document.getElementById("progressTimeLabel").textContent = millisToMinutesAndSeconds(positionMilliseconds);
+    }
+
+    function progressBarSliderThumbChanged() {
+        console.log('progressBarSliderThumbChanged()');
+
+        console.log('progressBar.value', progressBar.value);
+        console.log("seconds: ", progressBar.value / 1000);
+
+        progressBar.value = (positionMilliseconds / 1000);
+        console.log('progressBar.value after', progressBar.value);
+    }
 
 </script>
