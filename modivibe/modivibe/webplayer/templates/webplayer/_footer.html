@@ -49,7 +49,9 @@
 </fieldset>
 
 <script>
-    const progressBar = document.querySelector('#progressBarControl');
+    const progressTimeLabel = document.getElementById("progressTimeLabel");
+    const progressBarControl = document.getElementById('progressBarControl');
+    const durationTimeLabel = document.getElementById("durationTimeLabel");
 
     let deviceID;
     let deviceState;
@@ -59,9 +61,8 @@
     let initializeStates = true;
     let repeatTimeout = false;
     let shuffleTimeout = false;
-
-    let positionMilliseconds; // progression in MS of the current track
-    let positionMillisecondsIntervalID;
+    let progressMilliseconds; // current position of the current track
+    let progressMillisecondsIntervalID;
 
     // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -86,13 +87,14 @@
             else $('.ConnectionStatus').text('wifi');
             deviceState = state;
 
-            // ryan: temp for now - this listener gets called by the track controllers so updating positionMilliseconds
-            //                          here works "decently"
-            positionMilliseconds = deviceState.position;
-            // console.log("positionMilliseconds", positionMilliseconds);x
+            // Progress bar stuff
+            // ryan: temp for now - this listener gets called by the track controllers so updating progressMilliseconds
+            //                          here works "decently", but it can probably go somewhere else
+            progressMilliseconds = deviceState.position;
+            // console.log("progressMilliseconds", progressMilliseconds);
 
-            progressBar.max = deviceState.duration / 1000; // want it in seconds
-            console.log('progressBar.max (s): ', progressBar.max);
+            progressBarControl.max = deviceState.duration / 1000; // want it in seconds
+            console.log('progressBarControl.max (s): ', progressBarControl.max);
 
             // Update Track Name in Player
             let trackURI = deviceState['track_window']['current_track']['uri'];
@@ -188,7 +190,7 @@
                 $('#nextTrackControl').removeClass('md-inactive');
 
                 // ryan: temp for now - trying to always get the duration label to update correctly
-                document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+                durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
             }
         });
 
@@ -239,7 +241,7 @@
 
                     // ryan: This sometimes throws a deviceState undefined error and I have no idea why. Will fix later
                     //  (think it's a timing issue)
-                    // document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+                    // durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -252,23 +254,23 @@
         console.log(`Requesting playback: ${playbackRequest}`);
 
         // ryan: Want to do this label update elsewhere - putting it here for now. I was having trouble with transferPlayback()
-        // document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+        // durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
 
         // For the current progress label
         if (isPlaying) {
             // song is paused so stop the timer
             console.log('song is paused');
 
-            // Stop adding milliseconds to the progress variable
-            clearInterval(positionMillisecondsIntervalID);
+            // Stop adding to the progress variable
+            clearInterval(progressMillisecondsIntervalID);
 
-            console.log('positionMilliseconds after pausing: ', positionMilliseconds);
+            console.log('progressMilliseconds after pausing: ', progressMilliseconds);
         } else {
             // song is playing so start the progress timer again
             console.log('song is playing');
 
             // Start adding 1000 milliseconds to the progress variable every second
-            positionMillisecondsIntervalID = setInterval(positionMillisecondsUpdate, 1000);
+            progressMillisecondsIntervalID = setInterval(progressMillisecondsUpdate, 1000);
         }
 
         $.ajax({
@@ -283,8 +285,8 @@
                 if (response == 'True') {
                     console.log(`Success: ${playbackRequest}`);
 
-                    // temp for now
-                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+                    // ryan: temp for now - trying to always get the duration label to update correctly
+                    durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log(`Failed: ${playbackRequest}`);
                 }
@@ -292,11 +294,11 @@
         });
     }
 
-    function positionMillisecondsUpdate() {
-        // console.log('positionMillisecondsUpdate is firing');
+    function progressMillisecondsUpdate() {
+        // console.log('progressMillisecondsUpdate is firing');
 
-        positionMilliseconds += 1000;
-        // console.log("positionMilliseconds after updating: ", positionMilliseconds);
+        progressMilliseconds += 1000;
+        console.log("progressMilliseconds after updating: ", progressMilliseconds);
     }
 
     function setVolume(event) {
@@ -355,7 +357,8 @@
                 if (response == 'True') {
                     console.log('Successfully played previous track');
 
-                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+                    // ryan: temp for now - trying to always get the duration label to update correctly
+                    durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to play previous track');
                 }
@@ -376,7 +379,8 @@
                 if (response == 'True') {
                     console.log('Successfully played next track');
 
-                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
+                    // ryan: temp for now - trying to always get the duration label to update correctly
+                    durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to play next track');
                 }
@@ -472,13 +476,15 @@
     //     // console.log(deviceState);
     // }
 
-    // Fires every half-second to update the progress bar current progress time label
-    setInterval(updateProgressBarTimeLabel, 500);
+    // Fires every half-second
+    //  note: there is not a clearInterval() for this at the moment
+    setInterval(updateProgressBarLabelAndSlider, 500);
 
-    function updateProgressBarTimeLabel() {
-        // console.log("setInterval(updateProgressBarTimeLabel) is firing");
+    function updateProgressBarLabelAndSlider() {
+        // console.log("setInterval(updateProgressBarLabelAndSlider) is firing");
 
-        document.getElementById("progressTimeLabel").textContent = millisToMinutesAndSeconds(positionMilliseconds);
+        progressTimeLabel.textContent = millisToMinutesAndSeconds(progressMilliseconds);
+        progressBarControl.value = progressMilliseconds / 1000; // moves the slider as the value changes
     }
 
     // function progressBarSliderThumbChanged() {
@@ -487,7 +493,7 @@
     //     console.log('progressBar.value', progressBar.value);
     //     console.log("seconds: ", progressBar.value / 1000);
     //
-    //     progressBar.value = (positionMilliseconds / 1000);
+    //     progressBar.value = (progressMilliseconds / 1000);
     //     console.log('progressBar.value after', progressBar.value);
     // }
 
