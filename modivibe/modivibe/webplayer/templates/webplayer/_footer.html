@@ -1,6 +1,6 @@
 <fieldset class="playbar">
     <span class="playbarLeft">
-        <img class="Album" id="trackImage" src="" alt="Track Album Cover" width="64" height="64" data-uri="">
+        <img class="Album" id="trackImage" src="" alt="Album Cover" width="64" height="64" data-uri="">
         <div class="trackInfoContainer">
             <p class="Song" id="trackName" data-uri="">Track Name</p>
             <span id="trackArtistContainer">Track Artist(s)</span>
@@ -12,7 +12,7 @@
         <div class="trackControllers">
             <button id="shuffleTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">shuffle</button>
             <button id="previousTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Previous Track">skip_previous</button>
-            <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_circle</button>
+            <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_arrow</button>
             <button id="nextTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Next Track">skip_next</button>
             <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
         </div>
@@ -30,7 +30,7 @@
         </div>
     </span>
     <span class="playbarRight">
-        <button id="queueControl" class="material-icons md-36 md-light md-inactive" aria-label="Queue">queue</button>
+        <button class="ConnectionStatus material-icons md-24 md-light md-inactive">wifi_off</button>
         <div class="volumeController">
             <div class="mdc-slider mdc-slider--discrete">
                 <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
@@ -73,14 +73,16 @@
         });
 
         // Error handling
-        player.addListener('initialization_error', ({message}) => { console.error(message); });
-        player.addListener('authentication_error', ({message}) => { console.error(message); });
+        player.addListener('initialization_error', ({message}) => { $('.ConnectionStatus').text('wifi_off'); console.error(message);  });
+        player.addListener('authentication_error', ({message}) => { $('.ConnectionStatus').text('wifi_off'); console.error(message); });
         player.addListener('account_error', ({message}) => { console.error(message); });
         player.addListener('playback_error', ({message}) => { console.error(message); });
 
         // Playback status updates
         player.addListener('player_state_changed', state => {
-            console.log(state, "*************************** player_state_changed listener *************");
+            console.log(state);
+            if (state === null) $('.ConnectionStatus').text('wifi_off');
+            else $('.ConnectionStatus').text('wifi');
             deviceState = state;
 
             // ryan: temp for now
@@ -97,18 +99,12 @@
             $('#trackName').text(deviceState['track_window']['current_track']['name']);
 
             // Update Track Artists in Player
-            let artists = "";
-            let artistsList = deviceState['track_window']['current_track']['artists'];
-            for(let i = 0; i < artistsList.length; i++){
-                let artistURI = artistsList[i]['uri'];
-                artists += `<a class="Artist" href="artist/${artistURI}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
-                if (i != artistsList.length - 1) artists += ", ";
-            }
-            $('#trackArtistContainer').html(artists)
+            let artists = getArtistAsLinks(deviceState['track_window']['current_track']['artists']);
+            $('#trackArtistContainer').html(artists);
 
             // Update Track Image in Player
             let albumURI = deviceState['track_window']['current_track']['album']['uri'];
-            $('#trackImage').attr('data-uri', albumURI)
+            $('#trackImage').attr('data-uri', albumURI);
             $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
 
             // Update Play/Pause button and toggle variable
@@ -129,6 +125,57 @@
             isShuffled = deviceState['shuffle'];
             if (isShuffled) $('#shuffleTrackControl').removeClass('md-inactive');
             else $('#shuffleTrackControl').addClass('md-inactive');
+
+            // Update Queue - Last Song 2
+            if(deviceState['track_window']['previous_tracks'][0])
+            {
+                $('#QueueLast2 .Song').text(deviceState['track_window']['previous_tracks'][0]['name']);
+                $('#QueueLast2 .Album').attr('data-uri', deviceState['track_window']['previous_tracks'][0]['album']['uri']);
+                $('#QueueLast2 .Album').prop('src', deviceState['track_window']['previous_tracks'][0]['album']['images'][1]['url']);
+                $('#QueueLast2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['previous_tracks'][0]['artists']));
+                $('#QueueLast2').show();
+            } else {
+                $('#QueueLast2').hide();
+            }
+
+            // Update Queue - Last Song 1
+            if(deviceState['track_window']['previous_tracks'][1]) {
+                $('#QueueLast1 .Song').text(deviceState['track_window']['previous_tracks'][1]['name']);
+                $('#QueueLast1 .Album').attr('data-uri', deviceState['track_window']['previous_tracks'][1]['album']['uri']);
+                $('#QueueLast1 .Album').prop('src', deviceState['track_window']['previous_tracks'][1]['album']['images'][1]['url']);
+                $('#QueueLast1 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['previous_tracks'][1]['artists']));
+                $('#QueueLast1').show();
+            } else {
+                $('#QueueLast1').hide();
+            }
+
+            // Update Queue - Current Song
+            $('#QueueCurrent .Song').text(deviceState['track_window']['current_track']['name']);
+            $('#QueueCurrent .Album').attr('data-uri', albumURI);
+            $('#QueueCurrent .Album').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
+            $('#QueueCurrent .ArtistContainer').html(artists);
+
+            // Update Queue - Next Song 1
+            if (deviceState['track_window']['next_tracks'][0]['artists']) {
+                $('#QueueNext1 .Song').text(deviceState['track_window']['next_tracks'][0]['name']);
+                $('#QueueNext1 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][0]['album']['uri']);
+                $('#QueueNext1 .Album').prop('src', deviceState['track_window']['next_tracks'][0]['album']['images'][1]['url']);
+                $('#QueueNext1 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][0]['artists']));
+                $('#QueueNext1').show();
+            } else {
+                $('#QueueNext1').hide();
+            }
+
+            // Update Queue - Next Song 2
+            if (deviceState['track_window']['next_tracks'][1]['artists']) {
+                $('#QueueNext2 .Song').text(deviceState['track_window']['next_tracks'][1]['name']);
+                $('#QueueNext2 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][1]['album']['uri']);
+                $('#QueueNext2 .Album').prop('src', deviceState['track_window']['next_tracks'][1]['album']['images'][1]['url']);
+                $('#QueueNext2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][1]['artists']));
+                $('#QueueNext2').show();
+            } else {
+                $('#QueueNext2').show();
+            }
 
             if(initializeStates) {
 
@@ -152,11 +199,13 @@
             deviceID = device_id;
             // Trigger playback transfer to Modivibe
             transferPlayback();
+            $('.ConnectionStatus').text('wifi');
         });
 
         // Not Ready
         player.addListener('not_ready', ({device_id}) => {
             console.log('Device ID has gone offline', device_id);
+            $('.ConnectionStatus').text('wifi_off');
         });
 
         // Connect to the player!
@@ -170,6 +219,7 @@
     $('#nextTrackControl').on('click', nextTrack);
     $('#shuffleTrackControl').on('click', toggleShuffle);
     $('#repeatTrackControl').on('click', toggleRepeat);
+    $('.ConnectionStatus').on('click', transferPlayback);
 
     // $('#helperButtonControl').on('click', helperButton);
     // $('#progressBarControl').on('change', updateProgressBarSliderThumb);
@@ -386,6 +436,18 @@
                     }
                 }
         });
+    }
+
+    // Helper function for parsing artists from SpotifySDK into links
+    function getArtistAsLinks(artistsList) {
+        let artists = "";
+        for(let i = 0; i < artistsList.length; i++){
+            let artistURI = artistsList[i]['uri'];
+            let artistID = artistURI.split(':')[2];
+            artists += `<a class="Artist" href="artist/${artistID}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
+            if (i != artistsList.length - 1) artists += ", ";
+        }
+        return artists;
     }
 
     // function helperButton() {
