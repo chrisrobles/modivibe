@@ -94,6 +94,100 @@
       transform: scale(1,1);
     }
 
+    .Queue {
+        padding: 10px;
+    }
+
+    .Queue button {
+        background: none;
+        border: none;
+    }
+
+    .Queue button:focus {
+        outline: none;
+    }
+
+    .Queue .QueueTitleContainer {
+        display: flex;
+        border-bottom: 1px solid white;
+    }
+
+    .Queue .QueueTitle {
+        flex: 1;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .Queue .QueueSettings, .Queue .QueueToggle {
+        align-self: center;
+    }
+
+    .Queue .QueueContainer {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 200px;
+    }
+
+    .Queue .QueueItem {
+        background-color: #1c1c1c;
+        margin: 5px 0;
+        display: flex;
+        align-content: space-between;
+    }
+
+    .Queue .QueueItem:hover {
+        background: #101010;
+    }
+
+    .Queue .TrackInfoContainer {
+        overflow: hidden;
+        align-self: center;
+    }
+
+    .Queue .Song {
+        font-weight: bold;
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .Queue .ArtistContainer {
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        font-size: small;
+    }
+
+    .Queue .Album {
+        margin-right: 10px;
+        max-width: 48px;
+        max-height: 48px;
+        width: fit-content;
+        height: fit-content;
+    }
+
+    .Queue #QueueCurrent {
+        padding-left: 0;
+    }
+
+    .Queue #QueueCurrent .Album {
+        max-width: 64px;
+        max-height: 64px;
+    }
+
+    .Queue .QueuePointer {
+        align-self: center;
+    }
+
+    .Queue .TopShadow {
+        position: absolute;
+        width: inherit;
+        height: 75px;
+        background: linear-gradient(to top, transparent, black);
+        pointer-events: none;
+    }
+
 </style>
 
 <nav id="mySidenav" class="sidenav">
@@ -111,43 +205,90 @@
             </div>
           </a>
       </li>
+
       <li>
-          <a style="text-decoration: none;" href="#">
-            <div class="btn btn-three">
-                <span><span class="material-icons" style="vertical-align: -4px;">radio</span> Radio</span>
-            </div>
-          </a>
-      </li>
-      <li>
-          <a style="text-decoration: none;" href="{% url 'webplayer/settings' %}">
-            <div class="btn btn-three">
-                <span><span class="material-icons" style="vertical-align: -4px;">settings</span> Settings</span>
-            </div>
-          </a>
-      </li>
-      <li>
-          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myArtists' %}">
+          <a class="SideBarUserCollection" id="myArtists" style="text-decoration: none;" href="{% url 'myArtists' %}">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">music_note</span> Artists</span>
             </div>
           </a>
       </li>
       <li>
-          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myAlbums' %} " id="myAlbums">
+          <a class="SideBarUserCollection" id="myAlbums" style="text-decoration: none;" href="{% url 'myAlbums' %} " >
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">album</span> Albums</span>
             </div>
           </a>
       </li>
+<!--       <li>-->
+<!--          <a class="SideBarUserCollection" id="myPodcasts" style="text-decoration: none;" href="{% url 'myPodcasts' %}">-->
+<!--            <div class="btn btn-three">-->
+<!--                <span><span class="material-icons" style="vertical-align: -4px;">ondemand_video</span> Podcasts</span>-->
+<!--            </div>-->
+<!--          </a>-->
+<!--      </li>-->
+<!--       <li>-->
+<!--          <a style="text-decoration: none;" href="#">-->
+<!--            <div class="btn btn-three">-->
+<!--                <span><span class="material-icons" style="vertical-align: -4px;">radio</span> Radio</span>-->
+<!--            </div>-->
+<!--          </a>-->
+<!--      </li>-->
        <li>
-          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'myPodcasts' %}">
+          <a style="text-decoration: none;" href="{% url 'webplayer/settings' %}">
             <div class="btn btn-three">
-                <span><span class="material-icons" style="vertical-align: -4px;">ondemand_video</span> Podcasts</span>
+                <span><span class="material-icons" style="vertical-align: -4px;">settings</span> Settings</span>
             </div>
           </a>
-      </li>
+       </li>
    </ul>
 </nav>
+<section class="Queue">
+    <div class="QueueTitleContainer">
+        <button class="QueueSettings material-icons md-18 md-light">settings</button>
+        <span class="QueueTitle">QUEUE</span>
+        <button class="QueueToggle material-icons md-18 md-light">expand_less</button>
+    </div>
+    <ul class="QueueContainer">
+        <div class="TopShadow"></div>
+        <li id="QueueLast2" class="QueueItem" data-uri="" parent-uri="">
+            <img class="Album" src="" alt="Album" data-uri="">
+            <div class="TrackInfoContainer">
+                <p class="Song" data-uri="">Track Name</p>
+                <span class="ArtistContainer">Track Artist(s)</span>
+            </div>
+        </li>
+        <li id="QueueLast1" class="QueueItem" data-uri="" parent-uri="">
+            <img class="Album" src="" alt="Album" data-uri="">
+            <div class="TrackInfoContainer">
+                <p class="Song" data-uri="">Track Name</p>
+                <span class="ArtistContainer">Track Artist(s)</span>
+            </div>
+        </li>
+        <li id="QueueCurrent" class="QueueItem" data-uri="" parent-uri="">
+            <span class="QueuePointer material-icons md-18 md-light">chevron_right</span>
+            <img class="Album" src="" alt="Album" data-uri="">
+            <div class="TrackInfoContainer">
+                <p class="Song" data-uri="">Track Name</p>
+                <span class="ArtistContainer">Track Artist(s)</span>
+            </div>
+        </li>
+        <li id="QueueNext1" class="QueueItem" data-uri="" parent-uri="">
+            <img class="Album" src="" alt="Album" data-uri="">
+            <div class="TrackInfoContainer">
+                <p class="Song" data-uri="">Track Name</p>
+                <span class="ArtistContainer">Track Artist(s)</span>
+            </div>
+        </li>
+        <li id="QueueNext2" class="QueueItem" data-uri="" parent-uri="">
+            <img class="Album" src="" alt="Album" data-uri="">
+            <div class="TrackInfoContainer">
+                <p class="Song" data-uri="">Track Name</p>
+                <span class="ArtistContainer">Track Artist(s)</span>
+            </div>
+        </li>
+    </ul>
+</section>
 
 <script>
     function openNav() {
@@ -161,4 +302,17 @@
           document.getElementById("mySidenav").style.width = "0px";
       }
     }
+
+    // Toggles the Queue Visibility via arrows
+    $('.Queue .QueueToggle').on('click', function() {
+        let QueueContainer = $('.Queue .QueueContainer');
+        if ($(QueueContainer).is(':visible')) {
+            $(QueueContainer).slideUp();
+            $(this).text('expand_more');
+        }
+        else if (!$(QueueContainer).is(':visible')) {
+            $(QueueContainer).slideDown();
+            $(this).text('expand_less');
+        }
+    });
 </script>
