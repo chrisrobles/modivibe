@@ -49,7 +49,7 @@
 </fieldset>
 
 <script>
-    const PROGRESS_MS_UPDATE_INTERVAL_AMOUNT = 1000;
+    const UPDATE_PROGRESS_MS_INTERVAL_AMT = 1000;
 
     const progressTimeLabel = document.getElementById("progressTimeLabel");
     const progressBarControl = document.getElementById('progressBarControl');
@@ -63,8 +63,9 @@
     let initializeStates = true;
     let repeatTimeout = false;
     let shuffleTimeout = false;
-    let progressMilliseconds; // current position of the current track
-    let progressMillisecondsIntervalID;
+    let progressMsHelper;
+    let updateProgressMsHelperIntervalID;
+    let updateProgressBarLblSldrIntervalID;
 
     // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -89,14 +90,13 @@
             else $('.ConnectionStatus').text('wifi');
             deviceState = state;
 
-            // Progress bar stuff
-            // ryan: temp for now - this listener gets called by the track controllers so updating progressMilliseconds
-            //                          here works "decently", but it can probably go somewhere else
-            // progressMilliseconds = deviceState.position;
-            // console.log("***** progressMilliseconds: ", progressMilliseconds);
-
+            // Progress bar updates
+            // ryan: temp for now - This listener gets called by the track controllers so updating the progress bar stuff
+            //                          here works "decently", but it can probably be moved somewhere better.
+            //                      The reason why it's here is the reliance on the deviceState object.
             progressBarControl.max = deviceState.duration / 1000; // want it in seconds
-            // console.log('progressBarControl.max (s): ', progressBarControl.max);
+            progressMsHelper = deviceState.position; // current position of the current track
+            updateProgressBarLblSldr();
 
             // Update Track Name in Player
             let trackURI = deviceState['track_window']['current_track']['uri'];
@@ -194,17 +194,6 @@
                 // ryan: temp for now - trying to always get the duration label to update correctly
                 durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
             }
-
-            // Testing this for previous/next logic
-            // console.log('isPlaying: ', isPlaying);
-            if (isPlaying) {
-                console.log('isPlaying from the main listener: ', isPlaying);
-                // If true then set the progress
-                progressMilliseconds = deviceState.position;
-
-                // Start adding 1000 milliseconds to the progress variable every second
-                progressMillisecondsIntervalID = setInterval(progressMillisecondsUpdate, PROGRESS_MS_UPDATE_INTERVAL_AMOUNT);
-            }
         });
 
         // Ready
@@ -251,12 +240,6 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully transferred playback');
-
-                    // ryan: This sometimes throws a deviceState undefined error and I have no idea why. Will fix later
-                    //  (think it's a timing issue)
-                    // durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
-
-                    progressMilliseconds = deviceState.position;
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -268,24 +251,16 @@
         let playbackRequest = (isPlaying) ? 'pause' : 'play';
         console.log(`Requesting playback: ${playbackRequest}`);
 
-        // ryan: Want to do this label update elsewhere - putting it here for now. I was having trouble with transferPlayback()
-        // durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
-
-        // For the current progress label
         if (isPlaying) {
-            // song is paused so stop the timer
-            console.log('song is paused');
-
-            // Stop increasing the progress variable
-            clearInterval(progressMillisecondsIntervalID);
-
-            console.log('progressMilliseconds after pausing: ', progressMilliseconds);
+            // The song is paused so stop the progress bar timers
+            clearInterval(updateProgressMsHelperIntervalID);
+            clearInterval(updateProgressBarLblSldrIntervalID);
         } else {
-            // song is playing so start the progress timer again
-            // console.log('song is playing');
+            // The song is playing so start the progress bar timers
 
-            // // Start adding 1000 milliseconds to the progress variable every second
-            // progressMillisecondsIntervalID = setInterval(progressMillisecondsUpdate, PROGRESS_MS_UPDATE_INTERVAL_AMOUNT);
+            // ryan: Update intervals are tied together but I'm keeping the functions separate for now
+            updateProgressMsHelperIntervalID = setInterval(updateProgressMsHelper, UPDATE_PROGRESS_MS_INTERVAL_AMT);
+            updateProgressBarLblSldrIntervalID = setInterval(updateProgressBarLblSldr, UPDATE_PROGRESS_MS_INTERVAL_AMT);
         }
 
         $.ajax({
@@ -307,13 +282,6 @@
                 }
             }
         });
-    }
-
-    function progressMillisecondsUpdate() {
-        // console.log('progressMillisecondsUpdate is firing');
-
-        progressMilliseconds += PROGRESS_MS_UPDATE_INTERVAL_AMOUNT;
-        console.log("progressMilliseconds after updating: ", progressMilliseconds);
     }
 
     function setVolume(event) {
@@ -374,10 +342,6 @@
 
                     // ryan: temp for now - trying to always get the duration label to update correctly
                     durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
-
-                    // Progress bar resets
-                    //  restart the interval because of the auto-play (note: may be a setting in the future)
-                    // progressMillisecondsIntervalID = setInterval(progressMillisecondsUpdate, PROGRESS_MS_UPDATE_INTERVAL_AMOUNT);
                 } else {
                     console.log('Failed to play previous track');
                 }
@@ -471,6 +435,27 @@
         return artists;
     }
 
+    // For moving the progress/position bar while a track is playing
+    function updateProgressMsHelper() {
+        progressMsHelper += UPDATE_PROGRESS_MS_INTERVAL_AMT;
+    }
+
+    function updateProgressBarLblSldr() {
+        progressTimeLabel.textContent = millisToMinutesAndSeconds(progressMsHelper);
+        progressBarControl.value = progressMsHelper / 1000; // moves the slider as the value changes
+    }
+
+    // ryan: to-do
+    // function progressBarSliderThumbChanged() {
+    //     console.log('progressBarSliderThumbChanged()');
+    //
+    //     console.log('progressBar.value', progressBar.value);
+    //     console.log("seconds: ", progressBar.value / 1000);
+    //
+    //     progressBar.value = (progressMsHelper / 1000);
+    //     console.log('progressBar.value after', progressBar.value);
+    // }
+
     // ryan: Temp to use while playing with the API
     // function helperButton() {
     //  console.log('Attempting to get current track info');
@@ -493,27 +478,6 @@
     //    //  });
     //
     //     // console.log(deviceState);
-    // }
-
-    // Fires every half-second
-    //  note: there is not a clearInterval() for this at the moment
-    setInterval(updateProgressBarLabelAndSlider, 500);
-
-    function updateProgressBarLabelAndSlider() {
-        // console.log("setInterval(updateProgressBarLabelAndSlider) is firing");
-
-        progressTimeLabel.textContent = millisToMinutesAndSeconds(progressMilliseconds);
-        progressBarControl.value = progressMilliseconds / 1000; // moves the slider as the value changes
-    }
-
-    // function progressBarSliderThumbChanged() {
-    //     console.log('progressBarSliderThumbChanged()');
-    //
-    //     console.log('progressBar.value', progressBar.value);
-    //     console.log("seconds: ", progressBar.value / 1000);
-    //
-    //     progressBar.value = (progressMilliseconds / 1000);
-    //     console.log('progressBar.value after', progressBar.value);
     // }
 
 </script>
