@@ -33,7 +33,7 @@
         <div class="volumeController">
             <div class="mdc-slider mdc-slider--discrete">
                 <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
-                <input class="mdc-slider__input" type="range" value="100" min="0" max="100" step="1" name="volume" aria-label="Volume Slider">
+                <input class="mdc-slider__input" id="volumeSlider" type="range" value="100" min="0" max="100" step="1" name="volume" aria-label="Volume Slider">
                 <div class="mdc-slider__track">
                 <div class="mdc-slider__track--inactive"></div>
                 <div class="mdc-slider__track--active">
@@ -51,9 +51,9 @@
 <script>
     const UPDATE_PROGRESS_MS_INTERVAL_AMT = 1000;
 
-    const progressTimeLabel = document.getElementById("progressTimeLabel");
+    const progressTimeLabel = document.getElementById('progressTimeLabel');
     const progressBarControl = document.getElementById('progressBarControl');
-    const durationTimeLabel = document.getElementById("durationTimeLabel");
+    const durationTimeLabel = document.getElementById('durationTimeLabel');
 
     let deviceID;
     let deviceState;
@@ -95,7 +95,7 @@
             //          here works "decently", but can probably be moved somewhere better in the future.
             //       The reason why it's all here is the reliance on the deviceState object.
             durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
-            progressBarControl.max = deviceState.duration / 1000;
+            progressBarControl.max = deviceState.duration / 1000; // total duration of the current track
             progressMsHelper = deviceState.position; // current position of the current track
             updateProgressBarLblSldr(); // for the initial webplayer loading
 
@@ -215,6 +215,7 @@
 
     // Button event bindings
     $('#playbackControl').on('click', togglePlayback);
+    $('#volumeIcon').on('click', muteVolume);
     $('.mdc-slider__input').on('change', setVolume);
     $('#previousTrackControl').on('click', previousTrack);
     $('#nextTrackControl').on('click', nextTrack);
@@ -273,6 +274,32 @@
                     }
                 } else {
                     console.log(`Failed: ${playbackRequest}`);
+                }
+            }
+        });
+    }
+
+    function muteVolume(event) {
+       console.log('Attempting to mute volume');
+
+       $.ajax({
+            type: "POST",
+            url: "{% url 'setVolume' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+                volume: 0
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log('Successfully muted volume');
+
+                    $('#volumeIcon').text('volume_mute');
+                    document.getElementById('volumeSlider').value = 0;
+
+                    // ryan: to-do: Reclicking the volume icon reverts the volume change to what it was set to pre-mute
+                } else {
+                    console.log('Failed to set volume');
                 }
             }
         });
@@ -423,7 +450,7 @@
         return artists;
     }
 
-    // For moving the progress/position bar while a track is playing
+    // Helper function for the progress bar slider and time label
     function updateProgressMsHelper() {
         progressMsHelper += UPDATE_PROGRESS_MS_INTERVAL_AMT;
     }
@@ -444,28 +471,26 @@
     //     console.log('progressBar.value after', progressBar.value);
     // }
 
-    // ryan: Temp to use while playing with the API
-    // function helperButton() {
-    //  console.log('Attempting to get current track info');
-    //
-    //    // $.ajax({
-    //    //      type: "GET",
-    //    //      url: "{% url 'helperButton' %}",
-    //    //      data: {
-    //    //          csrfmiddlewaretoken: '{{ csrf_token }}',
-    //    //          device_id: deviceID,
-    //    //      },
-    //    //      success: function(response) {
-    //    //          if (response != 'False') {
-    //    //              console.log('Successfully retrieved current track info');
-    //    //              console.log(response);
-    //    //          } else {
-    //    //              console.log('Failed to retrieve current track info');
-    //    //          }
-    //    //      }
-    //    //  });
-    //
-    //     // console.log(deviceState);
+    // ryan: temp to use while playing with the API
+    // function helperButton(event) {
+    //    console.log('Attempting to mute volume');
+    //    $.ajax({
+    //         type: "POST",
+    //         url: "{% url 'setVolume' %}",
+    //         data: {
+    //             csrfmiddlewaretoken: '{{ csrf_token }}',
+    //             device_id: deviceID,
+    //             volume: 0
+    //         },
+    //         success: function(response) {
+    //             if (response == 'True') {
+    //                 console.log('Successfully muted volume');
+    //                 if ($('.mdc-slider__input').val() <= 0) { $('#volumeIcon').text('volume_mute'); }
+    //             } else {
+    //                 console.log('Failed to set volume');
+    //             }
+    //         }
+    //     });
     // }
 
 </script>
