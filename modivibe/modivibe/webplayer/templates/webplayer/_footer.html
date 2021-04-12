@@ -83,8 +83,7 @@
 
         // Playback status updates
         player.addListener('player_state_changed', state => {
-            // console.log(state);
-            console.log(state, "******* player_state_changed listener *******");
+            console.log(state);
 
             if (state === null) $('.ConnectionStatus').text('wifi_off');
             else $('.ConnectionStatus').text('wifi');
@@ -297,9 +296,9 @@
                     $('#volumeIcon').text('volume_mute');
                     document.getElementById('volumeSlider').value = 0;
 
-                    // ryan: to-do: Reclicking the volume icon reverts the volume change to what it was set to pre-mute
+                    // ryan: to-do: Re-clicking the volume icon reverts the volume change to what it was set to pre-mute
                 } else {
-                    console.log('Failed to set volume');
+                    console.log('Failed to mute volume');
                 }
             }
         });
