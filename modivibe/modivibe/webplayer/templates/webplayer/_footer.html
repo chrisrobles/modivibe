@@ -264,10 +264,13 @@
                     console.log(`Success: ${playbackRequest}`);
 
                     // ryan: temp for now - trying to always get the duration label to update correctly
-                    durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
+                    // durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
+
+                    console.log('isPlaying boolean:', isPlaying);
+                    console.log(`playbackRequest string: ${playbackRequest}`);
 
                     // ryan: Update intervals are tied together but I'm keeping the functions separate for now
-                    if (!isPlaying) {
+                    if (playbackRequest == 'pause') {
                         // The song is paused so stop the progress bar timers
                         clearInterval(updateProgressMsHelperIntervalID);
                         clearInterval(updateProgressBarLblSldrIntervalID);
