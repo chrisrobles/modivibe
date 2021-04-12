@@ -17,7 +17,7 @@
             <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
         </div>
         <div id="progressBarContainer">
-            <span id="progressTimeLabel" style="font-size: 12px">00:00</span>
+            <span id="progressTimeLabel" style="font-size: 12px"></span>
             <input
               type="range"
               id="progressBarControl"
@@ -91,12 +91,13 @@
             deviceState = state;
 
             // Progress bar updates
-            // ryan: temp for now - This listener gets called by the track controllers so updating the progress bar stuff
-            //                          here works "decently", but it can probably be moved somewhere better.
-            //                      The reason why it's here is the reliance on the deviceState object.
-            progressBarControl.max = deviceState.duration / 1000; // want it in seconds
+            // ryan: This listener gets called by the track controllers so updating the progress bar stuff
+            //          here works "decently", but can probably be moved somewhere better in the future.
+            //       The reason why it's all here is the reliance on the deviceState object.
+            durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
+            progressBarControl.max = deviceState.duration / 1000;
             progressMsHelper = deviceState.position; // current position of the current track
-            updateProgressBarLblSldr(); // only here for the initial webplayer/page loading
+            updateProgressBarLblSldr(); // for the initial webplayer loading
 
             // Update Track Name in Player
             let trackURI = deviceState['track_window']['current_track']['uri'];
@@ -190,9 +191,6 @@
                 $('#playbackControl').removeClass('md-inactive');
                 $('#previousTrackControl').removeClass('md-inactive');
                 $('#nextTrackControl').removeClass('md-inactive');
-
-                // ryan: temp for now - trying to always get the duration label to update correctly
-                durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
             }
         });
 
@@ -262,12 +260,6 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log(`Success: ${playbackRequest}`);
-
-                    // ryan: temp for now - trying to always get the duration label to update correctly
-                    // durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
-
-                    console.log('isPlaying boolean:', isPlaying);
-                    console.log(`playbackRequest string: ${playbackRequest}`);
 
                     // ryan: Update intervals are tied together but I'm keeping the functions separate for now
                     if (playbackRequest == 'pause') {
@@ -341,9 +333,6 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully played previous track');
-
-                    // ryan: temp for now - trying to always get the duration label to update correctly
-                    durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to play previous track');
                 }
@@ -363,9 +352,6 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully played next track');
-
-                    // ryan: temp for now - trying to always get the duration label to update correctly
-                    durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to play next track');
                 }
