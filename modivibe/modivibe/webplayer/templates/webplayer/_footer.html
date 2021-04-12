@@ -96,7 +96,7 @@
             //                      The reason why it's here is the reliance on the deviceState object.
             progressBarControl.max = deviceState.duration / 1000; // want it in seconds
             progressMsHelper = deviceState.position; // current position of the current track
-            updateProgressBarLblSldr();
+            updateProgressBarLblSldr(); // only here for the initial webplayer/page loading
 
             // Update Track Name in Player
             let trackURI = deviceState['track_window']['current_track']['uri'];
@@ -251,18 +251,6 @@
         let playbackRequest = (isPlaying) ? 'pause' : 'play';
         console.log(`Requesting playback: ${playbackRequest}`);
 
-        if (isPlaying) {
-            // The song is paused so stop the progress bar timers
-            clearInterval(updateProgressMsHelperIntervalID);
-            clearInterval(updateProgressBarLblSldrIntervalID);
-        } else {
-            // The song is playing so start the progress bar timers
-
-            // ryan: Update intervals are tied together but I'm keeping the functions separate for now
-            updateProgressMsHelperIntervalID = setInterval(updateProgressMsHelper, UPDATE_PROGRESS_MS_INTERVAL_AMT);
-            updateProgressBarLblSldrIntervalID = setInterval(updateProgressBarLblSldr, UPDATE_PROGRESS_MS_INTERVAL_AMT);
-        }
-
         $.ajax({
             type: "POST",
             url: "{% url 'setPlayback' %}",
@@ -277,6 +265,17 @@
 
                     // ryan: temp for now - trying to always get the duration label to update correctly
                     durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
+
+                    // ryan: Update intervals are tied together but I'm keeping the functions separate for now
+                    if (!isPlaying) {
+                        // The song is paused so stop the progress bar timers
+                        clearInterval(updateProgressMsHelperIntervalID);
+                        clearInterval(updateProgressBarLblSldrIntervalID);
+                    } else {
+                        // The song is playing so start the progress bar timers
+                        updateProgressMsHelperIntervalID = setInterval(updateProgressMsHelper, UPDATE_PROGRESS_MS_INTERVAL_AMT);
+                        updateProgressBarLblSldrIntervalID = setInterval(updateProgressBarLblSldr, UPDATE_PROGRESS_MS_INTERVAL_AMT);
+                    }
                 } else {
                     console.log(`Failed: ${playbackRequest}`);
                 }
