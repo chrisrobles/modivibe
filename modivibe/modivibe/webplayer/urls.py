@@ -30,5 +30,8 @@ urlpatterns = [
     # displays an item's page
     # url should follow:    {collection_type}/<str:type_id>
     path('playlist/<str:playlist_id>', views.playlist, name='playlist'),
-
+    path('artist/<str:artist_id>', views.artist, name='artist'),
+    path('artist/<str:artist_id>/topSongs', views.artistTopSongs, name='artistTopSongs'),
+    path('artist/<str:artist_id>/albums', views.artistAlbums, name='artistAlbums'),
+    path('artist/<str:artist_id>/related', views.artistRelated, name='artistRelated'),
 ]

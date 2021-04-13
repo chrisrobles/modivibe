@@ -1,0 +1,73 @@
+{% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
+<!-- IMPORTANT: no spaces between anything for the extends argument -->
+
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'webplayer/artistPage.css' %}">
+<div class="ArtistMain container-fluid">
+    <section class="ArtistHeader">
+        <div class="row">
+            <div class="ArtistHeaderLeft col-4">
+                <div><h2>{{ header.artistFollowers }}</h2></div>
+                <div><h4>Followers </h4></div>
+                <div><br>Follow/Unfollow Button</div>
+            </div>
+            <div class="ArtistHeaderCenter col-4">
+                <img class="ArtistHeaderImage" src="{{header.artistImg}}">
+                <div><h1>{{ header.artistName }}</h1></div>
+            </div>
+            <div class="ArtistHeaderRight col-4">
+                <div>
+                    <div><h2>Genres</h2>
+                        {% for g in header.artistGenres %}
+                        <h6><em>{{ g|capfirst }}</em></h6>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="row">
+        <section class="ArtistItemsSelectors">
+            <a class="ArtistItems col-4" style="text-decoration: none;"
+               href="{% url 'artistTopSongs' artist_id=header.artistId %}">
+                <div class="ArtistItemButton btn btn-three" data-tab="artistTopSongs"
+                {% if loadContent and contentType == "topSongs" %}
+                    style="background-color:rgba(255, 255, 255, 0.25);"
+                {% endif %}
+                >
+                    <span> Top Songs </span>
+                </div>
+            </a>
+            <a class="ArtistItems col-4" style="text-decoration: none;"
+               href="{% url 'artistAlbums' artist_id=header.artistId %}">
+                <div class="ArtistItemButton btn btn-three" data-tab="artistAlbums"
+                {% if loadContent and contentType == "albums" %}
+                    style="background-color:rgba(255, 255, 255, 0.25);"
+                {% endif %}
+                >
+                    <span> Albums </span>
+                </div>
+            </a>
+            <a class="ArtistItems col-4" style="text-decoration: none;"
+               href="{% url 'artistRelated' artist_id=header.artistId %}">
+                <div class="ArtistItemButton btn btn-three" data-tab="artistRelated"
+                {% if loadContent and contentType == "related" %}
+                    style="background-color:rgba(255, 255, 255, 0.25);"
+                {% endif %}
+                >
+                    <span> Related Artists </span>
+                </div>
+            </a>
+        </section>
+    </div>
+    <div class="row">
+        <section class="ArtistItemsContent">
+            {% if loadContent %}
+                {{content|safe}}
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock content %}
