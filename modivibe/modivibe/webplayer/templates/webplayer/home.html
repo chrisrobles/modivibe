@@ -2,4 +2,29 @@
 {% block content %}
     <h1>{{ title }}</h1>
     <a href="{% url 'webplayer/settings' %}">SETTINGS</a>
+
+<script>
+    recentPlay();
+
+
+
+function recentPlay() {
+    $.ajax({
+        type: "POST",
+        url: "{% url 'getRecentPlayed' %}",
+        data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            limit: 10,
+        },
+        success: function (response) {
+            if (response != 'False') {
+                console.log(response);
+            } else {
+                console.log('Failed to get recently played');
+            }
+        }
+    });
+}
+</script>
+
 {% endblock content %}

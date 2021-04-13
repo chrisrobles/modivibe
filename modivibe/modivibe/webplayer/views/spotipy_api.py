@@ -402,3 +402,25 @@ def myPodcasts(request):
         return JsonResponse({'collection': collection}, status=200)
     else:
         return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "podcast", "ajax": False})
+
+
+def getRecentPlayed(request):
+
+    limit = request.POST.get('limit',None)
+    try:
+        recentlyPlayedList = sp.current_user_recently_played(limit=limit)
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(recentlyPlayedList)
+
+        for a in recentlyPlayedList['items']:
+            info.append({
+                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+                'contentName': a['album']['name'],
+                'contentId': a['album']['id'],
+                'artist': a['album']['artists'][0]['name'],
+                'artistId': a['album']['artists'][0]['id'],
+            })
+        response = recentlyPlayedList
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
