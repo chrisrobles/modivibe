@@ -90,6 +90,7 @@
    background: #4CAF50; /* Green background */
    cursor: pointer; /* Cursor on hover */
    }
+
 </style>
 <div class="container-fluid">
    <div class = row>
@@ -97,7 +98,6 @@
          <h1 style="text-align: center">{{ title }}</h1>
       </div>
    </div>
-   <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
     <div class="row">
         <div class="col-sm-12">
             <h2>Basic Settings</h2>
@@ -105,42 +105,46 @@
     </div>
        <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
       <div class="row">
-         <input type="color" name="color" id="color" class="col-sm-12">
+         <div class="col-lg-6" style="text-align: center">
+            <input type="color" style="border: none;width: 256px;height: 128px;">
+            </div>
+         <div class="col-lg-6" style="text-align:center">
+            <h3>Color Selector</h3>
+            </div>
       </div>
    <div class="row">
-      <div class="col-sm-6" style="text-align: left">
+      <div class="col-sm-6" style="text-align: center">
          <label class="switch">
          <input type="checkbox">
          <span class="slider round"></span>
          </label>
       </div>
       <div class="col-sm-6" style="text-align: center">
-         One 1
+         <h3>Option 1</h3>
       </div>
    </div>
        <div class="row">
-      <div class="col-sm-6" style="text-align: left">
+      <div class="col-sm-6" style="text-align: center">
          <label class="switch">
          <input type="checkbox">
          <span class="slider round"></span>
          </label>
       </div>
       <div class="col-sm-6" style="text-align: center">
-         One 2
+         <h3>Option 2</h3>
       </div>
    </div>
        <div class="row">
-      <div class="col-sm-6" style="text-align: left">
+      <div class="col-sm-6" style="text-align: center">
          <label class="switch">
          <input type="checkbox">
          <span class="slider round"></span>
          </label>
       </div>
       <div class="col-sm-6" style="text-align: center">
-         Option 3
+         <h3>Option 3</h3>
       </div>
    </div>
-    <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
     <div class="row">
         <div class="col-sm-12">
             <h2>Advanced Recommendation Settings</h2>
