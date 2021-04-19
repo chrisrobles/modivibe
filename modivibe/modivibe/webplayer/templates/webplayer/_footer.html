@@ -66,6 +66,7 @@
     let progressMsHelper;
     let updateProgressMsHelperIntervalID;
     let updateProgressBarLblSldrIntervalID;
+    let volumeLevelBeforeClickingVolumeIcon;
 
     // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -281,6 +282,23 @@
     function muteVolume(event) {
        console.log('Attempting to mute volume');
 
+       // Save the current volume level in case the user re-clicks the volume icon to revert the mute
+       volumeLevelBeforeClickingVolumeIcon = $('.mdc-slider__input').val();
+       console.log('volumeLevelBeforeClickingVolumeIcon: ', volumeLevelBeforeClickingVolumeIcon);
+
+       let isCurrentlyMuted = (volumeLevelBeforeClickingVolumeIcon == 0) ? true : false;
+       console.log('isCurrentlyMuted: ', isCurrentlyMuted);
+
+
+       // If the user previously clicked the volume icon to mute, revert to the previous volume level
+       //  Otherwise mute the volume
+
+
+
+
+
+
+
        $.ajax({
             type: "POST",
             url: "{% url 'setVolume' %}",
@@ -292,6 +310,8 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully muted volume');
+
+
 
                     $('#volumeIcon').text('volume_mute');
                     document.getElementById('volumeSlider').value = 0;
