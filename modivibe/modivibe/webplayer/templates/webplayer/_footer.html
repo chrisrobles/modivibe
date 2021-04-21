@@ -32,8 +32,8 @@
         <button class="ConnectionStatus material-icons md-24 md-light md-inactive">wifi_off</button>
         <div class="volumeController">
             <div class="mdc-slider mdc-slider--discrete">
-                <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
-                <input class="mdc-slider__input" id="volumeSlider" type="range" value="100" min="0" max="100" step="1" name="volume" aria-label="Volume Slider">
+                <span id="volumeIcon" class="material-icons md-light md-36">volume_up</span>
+                <input class="mdc-slider__input" type="range" value="100" min="0" max="100" step="1" name="volume" aria-label="Volume Slider">
                 <div class="mdc-slider__track">
                 <div class="mdc-slider__track--inactive"></div>
                 <div class="mdc-slider__track--active">
@@ -66,6 +66,7 @@
     let progressMsHelper;
     let updateProgressMsHelperIntervalID;
     let updateProgressBarLblSldrIntervalID;
+    let volumeLvlBeforeClickToMute = 100;
 
     // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -279,29 +280,63 @@
     }
 
     function muteVolume(event) {
-       console.log('Attempting to mute volume');
+       console.log('Attempting to mute or unmute volume');
 
-       $.ajax({
-            type: "POST",
-            url: "{% url 'setVolume' %}",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                device_id: deviceID,
-                volume: 0
-            },
-            success: function(response) {
-                if (response == 'True') {
-                    console.log('Successfully muted volume');
+       // If already muted, don't overwrite the previously-saved current volume level
+       if ($('.mdc-slider__input').val() != 0) {
+           // Save the current volume level in case the user re-clicks the volume icon to revert the mute
+           volumeLvlBeforeClickToMute = $('.mdc-slider__input').val();
+       }
 
-                    $('#volumeIcon').text('volume_mute');
-                    document.getElementById('volumeSlider').value = 0;
+       let isCurrentlyMuted = ($('.mdc-slider__input').val() == 0) ? true : false;
 
-                    // ryan: to-do: Re-clicking the volume icon reverts the volume change to what it was set to pre-mute
-                } else {
-                    console.log('Failed to mute volume');
+       // If the volume is currently muted, revert to the previous volume level from when the icon was last clicked
+       //  Otherwise mute the volume
+       if (isCurrentlyMuted) {
+          $.ajax({
+                type: "POST",
+                url: "{% url 'setVolume' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    volume: volumeLvlBeforeClickToMute
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully unmuted volume');
+
+                        $('.mdc-slider__input').val(volumeLvlBeforeClickToMute);
+
+                        if ($('.mdc-slider__input').val() <= 0) { $('#volumeIcon').text('volume_mute'); }
+                        else if ($('.mdc-slider__input').val() <= 49) { $('#volumeIcon').text('volume_down'); }
+                        else if ($('.mdc-slider__input').val() <= 100) { $('#volumeIcon').text('volume_up'); }
+                    } else {
+                        console.log('Failed to unmute volume');
+                    }
                 }
-            }
-        });
+            });
+       } else {
+          $.ajax({
+                type: "POST",
+                url: "{% url 'setVolume' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    volume: 0
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully muted volume');
+
+                        $('.mdc-slider__input').val(0);
+
+                        $('#volumeIcon').text('volume_mute');
+                    } else {
+                        console.log('Failed to mute volume');
+                    }
+                }
+            });
+       }
     }
 
     function setVolume(event) {
