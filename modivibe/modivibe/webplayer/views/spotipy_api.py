@@ -82,12 +82,28 @@ def setPlayback(request):
     contextURI = request.POST.get('context_uri', None)
     offsetURI = request.POST.get('offset_uri', None)
 
+    contextType = None
+    if contextURI:
+        contextType = contextURI.split(':')[1]
+
     try:
         if songStatus == 'play' and not offsetURI:
             sp.start_playback(device_id=deviceID, context_uri=contextURI)
             response = True
         elif songStatus == 'play' and offsetURI:
-            sp.start_playback(device_id=deviceID, context_uri=contextURI, offset={"uri": offsetURI})
+            # If we're playing from the artist page, set the context to the top artist songs.
+            if contextType == 'artist':
+                artistTopTracks = sp.artist_top_tracks(artist_id=contextURI)
+                topTrackURIs = [offsetURI]
+                # Add top tracks to the current context and skip over the offset
+                for song in artistTopTracks['tracks']:
+                    currentURI = 'spotify:track:'+song['id']
+                    if currentURI == offsetURI:
+                        continue
+                    topTrackURIs.append('spotify:track:'+song['id'])
+                sp.start_playback(device_id=deviceID, uris=topTrackURIs, offset={"uri": offsetURI})
+            else:
+                sp.start_playback(device_id=deviceID, context_uri=contextURI, offset={"uri": offsetURI})
             response = True
         elif songStatus == 'pause':
             sp.pause_playback(device_id=deviceID)

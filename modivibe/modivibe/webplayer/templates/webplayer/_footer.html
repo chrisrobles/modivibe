@@ -161,7 +161,7 @@
             $('#QueueCurrent .ArtistContainer').html(artists);
 
             // Update Queue - Next Song 1
-            if (deviceState['track_window']['next_tracks'][0]['artists']) {
+            if (deviceState['track_window']['next_tracks'][0]) {
                 $('#QueueNext1 .Song').text(deviceState['track_window']['next_tracks'][0]['name']);
                 $('#QueueNext1 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][0]['album']['uri']);
                 $('#QueueNext1 .Album').prop('src', deviceState['track_window']['next_tracks'][0]['album']['images'][1]['url']);
@@ -172,14 +172,14 @@
             }
 
             // Update Queue - Next Song 2
-            if (deviceState['track_window']['next_tracks'][1]['artists']) {
+            if (deviceState['track_window']['next_tracks'][1]) {
                 $('#QueueNext2 .Song').text(deviceState['track_window']['next_tracks'][1]['name']);
                 $('#QueueNext2 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][1]['album']['uri']);
                 $('#QueueNext2 .Album').prop('src', deviceState['track_window']['next_tracks'][1]['album']['images'][1]['url']);
                 $('#QueueNext2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][1]['artists']));
                 $('#QueueNext2').show();
             } else {
-                $('#QueueNext2').show();
+                $('#QueueNext2').hide();
             }
 
             if(initializeStates) {
