@@ -82,12 +82,16 @@ body {
     </span>
 
 
-    <span class = "TopBarRight">
-        <form autocomplete="off" action="/action_page.php">
-  <div class="autocomplete" style="width:300px; text-align: right">
-    <input id="myInput" type="text" name="mySong" placeholder="Artists, Songs, Playlists.." style="border: 2px solid #808080; border-radius: 8px; ">
-  </div>
-</form>
+    <span class="TopBarRight">
+        <div class="SearchBar">
+            <form autocomplete="off" method="post">
+            <div class="autocomplete" style="width:300px; text-align: right">
+                <input id="searchInput" type="text" name="mySearch" placeholder="Search Spotify"
+                style="border: 2px solid #808080; border-radius: 8px; " maxlength="80" value>
+            </div>
+            </form>
+        </div>
+    </span>
 
 
 <script>

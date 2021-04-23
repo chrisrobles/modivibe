@@ -1,0 +1,4 @@
+{% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
+{% block content %}
+    {{res|linebreaks}}
+{% endblock content %}

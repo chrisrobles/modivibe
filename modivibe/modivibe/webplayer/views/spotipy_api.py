@@ -536,3 +536,29 @@ def artistRelated(request, artist_id):
         return render(request, 'webplayer/artistPage.html',
                       context={"header": header, "content": content, "contentType": "related",
                                "loadContent": True, "ajax": False})
+
+
+# Never insert search_value directly!!! (users would be able to insert html)
+def search(request, search_value):
+    sr = sp.search(search_value, type="track,album,artist,playlist", limit=1)
+
+    res = []
+    # tracks
+    for tr in sr['tracks']['items']:
+        res.append(tr['name'])
+
+    # albums
+    for al in sr['albums']['items']:
+        res.append(al['name'])
+
+    # artists
+    for ar in sr['artists']['items']:
+        res.append(ar['name'])
+
+    # playlists
+    for pl in sr['playlists']['items']:
+        res.append(pl['name'])
+
+    #print(pprint.pformat(sr))
+    print('\n'.join(res))
+    return JsonResponse({"searchResults": render_to_string('webplayer/search.html', context={"res": '\n'.join(res), "ajax": True})}, status=200)
