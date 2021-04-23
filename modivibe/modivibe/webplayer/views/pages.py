@@ -26,15 +26,3 @@ def home(request):
     }
     return render(request, 'webplayer/home.html', context)
 
-
-def settings(request):
-    try:
-        userAccessCode = auth_manager.get_access_token().get('access_token')
-    except:
-        return redirect('splash')
-
-    context = {
-        'title': 'Settings',
-        'userAccessCode': userAccessCode
-    }
-    return render(request, 'webplayer/settings.html', context)
