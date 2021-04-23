@@ -448,7 +448,7 @@ def artistTopSongs(request, artist_id):
             'songAlbum': song['album']['name'],
             'songAlbumId': song['album']['id'],
             'songURI': song['uri'],
-            'artistId': artist_id,
+            'artistId': song['album']['artists'][0]['id'],
             'songArtist': song['album']['artists'][0]['name']
         })
 
