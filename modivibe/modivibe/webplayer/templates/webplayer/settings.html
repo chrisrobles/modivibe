@@ -1,4 +1,7 @@
-{% extends 'webplayer/webplayer.html'%}
+{% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
+<!-- IMPORTANT: no spaces between anything for the extends argument -->
+
+
 {% block content %}
 <style>
    .switch {

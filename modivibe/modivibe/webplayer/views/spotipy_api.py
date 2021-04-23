@@ -536,3 +536,14 @@ def artistRelated(request, artist_id):
         return render(request, 'webplayer/artistPage.html',
                       context={"header": header, "content": content, "contentType": "related",
                                "loadContent": True, "ajax": False})
+
+
+def settings(request):
+    if not validUser():
+        return redirect('splash')
+
+    if isAjaxRequest(request):
+        page = render_to_string('webplayer/settings.html', context={"ajax": True})
+        return JsonResponse({"page": page}, status=200)
+    else:
+        return render(request, 'webplayer/settings.html', context={"ajax": False})
