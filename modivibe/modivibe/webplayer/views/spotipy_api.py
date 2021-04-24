@@ -539,28 +539,87 @@ def artistRelated(request, artist_id):
 
 # Never insert search_value directly!!! (users would be able to insert html)
 def search(request, search_value):
-    sr = sp.search(search_value, type="track,album,artist,playlist", limit=1)
+    if not validUser():
+        return redirect('splash')
 
-    res = []
+    sr = sp.search(search_value, type="track,album,artist,playlist", limit=6)
+
     # tracks
+    tracks = []
+    sn = 1
     for tr in sr['tracks']['items']:
-        res.append(tr['name'])
+        tracks.append({
+            'songNum': sn,
+            'songName': tr['name'],
+            'songId': tr['id'],
+            'songLength': tr['duration_ms'],
+            'songAlbum': tr['album']['name'],
+            'songAlbumId': tr['album']['id'],
+            'songURI': tr['uri'],
+            'artistId': tr['album']['artists'][0]['id'],
+            'songArtist': tr['album']['artists'][0]['name']
+        })
 
-    # albums
-    for al in sr['albums']['items']:
-        res.append(al['name'])
+        sn+=1
+
+    trackRes = createSongList(tracks, "playlist", None)
 
     # artists
+    artists = []
     for ar in sr['artists']['items']:
-        res.append(ar['name'])
+        artists.append({
+            'contentImg': ar['images'][0]['url'] if ar['images'] else 'default',
+            'contentName': ar['name'],
+            'contentId': ar['id']
+        })
+
+    artistRes = render_to_string('webplayer/collectionItems.html', context={"info": artists, "type": "artist", "ajax": True})
+
+    # albums
+    albums = []
+    for al in sr['albums']['items']:
+        albums.append({
+            'contentImg': al['images'][0]['url'] if al['images'] else 'default',
+            'contentName': al['name'],
+            'contentId': al['id'],
+            'artist': al['artists'][0]['name'],
+            'artistId': al['artists'][0]['id'],
+            'albumDate': al['release_date'][0:4]
+        })
+
+    albumRes = render_to_string('webplayer/collectionItems.html',
+                               context={"info": albums, "type": "album", "ajax": True})
 
     # playlists
+    playlists = []
     for pl in sr['playlists']['items']:
-        res.append(pl['name'])
+        playlists.append({
+            'contentImg': pl['images'][0]['url'] if pl['images'] else 'default',
+            'contentName': pl['name'],
+            'contentId': pl['id']
+        })
 
-    #print(pprint.pformat(sr))
-    print('\n'.join(res))
-    return JsonResponse({"searchResults": render_to_string('webplayer/search.html', context={"res": '\n'.join(res), "ajax": True})}, status=200)
+    playlistRes = render_to_string('webplayer/collectionItems.html',
+                                context={"info": playlists, "type": "playlist", "ajax": True})
+
+    if isAjaxRequest(request):
+        return JsonResponse(
+            {"searchResults": render_to_string('webplayer/search.html',
+                                               context={"tracks": trackRes,
+                                                        "artists": artistRes,
+                                                        "albums": albumRes,
+                                                        "playlists": playlistRes,
+                                                        "ajax": True})},
+            status=200
+        )
+    else:
+        return render(
+            request, 'webplayer/search.html', context={ "tracks": trackRes,
+                                                        "artists": artistRes,
+                                                        "albums": albumRes,
+                                                        "playlists": playlistRes,
+                                                        "ajax": False }
+        )
 
 def settings(request):
     if not validUser():

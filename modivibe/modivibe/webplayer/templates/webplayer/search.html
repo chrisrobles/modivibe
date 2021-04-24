@@ -1,4 +1,7 @@
 {% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
 {% block content %}
-    {{res|linebreaks}}
+{{tracks|safe}}
+{{artists|safe}}
+{{albums|safe}}
+{{playlists|safe}}
 {% endblock content %}
