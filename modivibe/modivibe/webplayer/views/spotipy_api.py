@@ -448,7 +448,7 @@ def artistTopSongs(request, artist_id):
             'songAlbum': song['album']['name'],
             'songAlbumId': song['album']['id'],
             'songURI': song['uri'],
-            'artistId': artist_id,
+            'artistId': song['album']['artists'][0]['id'],
             'songArtist': song['album']['artists'][0]['name']
         })
 
@@ -537,7 +537,6 @@ def artistRelated(request, artist_id):
                       context={"header": header, "content": content, "contentType": "related",
                                "loadContent": True, "ajax": False})
 
-
 # Never insert search_value directly!!! (users would be able to insert html)
 def search(request, search_value):
     sr = sp.search(search_value, type="track,album,artist,playlist", limit=1)
@@ -562,3 +561,13 @@ def search(request, search_value):
     #print(pprint.pformat(sr))
     print('\n'.join(res))
     return JsonResponse({"searchResults": render_to_string('webplayer/search.html', context={"res": '\n'.join(res), "ajax": True})}, status=200)
+
+def settings(request):
+    if not validUser():
+        return redirect('splash')
+
+    if isAjaxRequest(request):
+        page = render_to_string('webplayer/settings.html', context={"ajax": True})
+        return JsonResponse({"page": page}, status=200)
+    else:
+        return render(request, 'webplayer/settings.html', context={"ajax": False})
