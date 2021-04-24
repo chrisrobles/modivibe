@@ -200,6 +200,48 @@ def setRepeat(request):
         response = False
     return HttpResponse(response)
 
+
+# Sets the following status for a specific artist
+# Excepts:
+#   artist [STRING] (the artist uri)
+#   follow [STRING] ('true' || 'false')
+def toggleFollow(request):
+    response = False
+    artistURI = request.POST.get('artist', None)
+    follow = request.POST.get('follow', None)
+    artistURI = artistURI.split(':')[2]
+    artistList = [artistURI]
+
+    try:
+        if follow is None:
+            response = False
+        elif follow == 'true':
+            sp.user_follow_artists(ids=artistList)
+            response = True
+        elif follow == 'false':
+            sp.user_unfollow_artists(ids=artistList)
+            response = True
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
+
+# Checks if the user is following a specific artist.
+# If so, return the artist URI and follow status for asynchronous calls
+# Excepts:
+#   artist [STRING] (the artist uri)
+def isFollowing(request):
+    artistURI = request.POST.get('artist', None)
+    artistList = [artistURI]
+
+    try:
+        boolFollowList = sp.current_user_following_artists(ids=artistList)
+        response = JsonResponse({"artist": artistURI, "following": boolFollowList[0]}, status=200)
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
+
 # Helper while developing the progress bar
 def helperButton(request):
     response = False
@@ -210,6 +252,7 @@ def helperButton(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
+
 
 # Display all of the current user's playlists
 # my/playlists
