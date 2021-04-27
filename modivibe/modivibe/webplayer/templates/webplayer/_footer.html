@@ -84,7 +84,7 @@
 
         // Playback status updates
         player.addListener('player_state_changed', state => {
-            console.log(state, '**** player_state_changed ****');
+            console.log(state);
 
             if (state === null) $('.ConnectionStatus').text('wifi_off');
             else $('.ConnectionStatus').text('wifi');
