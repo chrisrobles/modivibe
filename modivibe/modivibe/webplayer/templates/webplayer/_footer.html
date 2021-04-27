@@ -84,7 +84,7 @@
 
         // Playback status updates
         player.addListener('player_state_changed', state => {
-            console.log(state);
+            console.log(state, '**** player_state_changed ****');
 
             if (state === null) $('.ConnectionStatus').text('wifi_off');
             else $('.ConnectionStatus').text('wifi');
@@ -393,6 +393,9 @@
             },
             success: function(response) {
                 if (response == 'True') {
+                    progressMsHelper = 0;
+                    updateProgressBarLblSldr();
+
                     console.log('Successfully played previous track');
                 } else {
                     console.log('Failed to play previous track');
@@ -412,6 +415,9 @@
             },
             success: function(response) {
                 if (response == 'True') {
+                    progressMsHelper = 0;
+                    updateProgressBarLblSldr();
+
                     console.log('Successfully played next track');
                 } else {
                     console.log('Failed to play next track');
