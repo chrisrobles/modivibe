@@ -1,5 +1,267 @@
-{% extends 'webplayer/webplayer.html'%}
+{% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
+<!-- IMPORTANT: no spaces between anything for the extends argument -->
+
+
 {% block content %}
-    <h1>{{ title }}</h1>
-    <a href="{% url 'webplayer' %}">HOME</a>
+<style>
+   .switch {
+   position: relative;
+   display: inline-block;
+   width: 60px;
+   height: 34px;
+   }
+   /* Hide default HTML checkbox */
+   .switch input {
+   opacity: 0;
+   width: 0;
+   height: 0;
+   }
+   /* The slider */
+   .slider {
+   position: absolute;
+   cursor: pointer;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-color: #ccc;
+   -webkit-transition: .4s;
+   transition: .4s;
+   }
+   .slider:before {
+   position: absolute;
+   content: "";
+   height: 26px;
+   width: 26px;
+   left: 4px;
+   bottom: 4px;
+   background-color: white;
+   -webkit-transition: .4s;
+   transition: .4s;
+   }
+   input:checked + .slider {
+   background-color: #646464;
+   }
+   input:focus + .slider {
+   box-shadow: 0 0 1px #5f5f5f;
+   }
+   input:checked + .slider:before {
+   -webkit-transform: translateX(26px);
+   -ms-transform: translateX(26px);
+   transform: translateX(26px);
+   }
+   /* Rounded sliders */
+   .slider.round {
+   border-radius: 34px;
+   }
+   .slider.round:before {
+   border-radius: 50%;
+   }
+   .slide_long_container {
+   width: 100%; /* Width of the outside container */
+   }
+   /* The slider itself */
+   .slider_long {
+   -webkit-appearance: none;  /* Override default CSS styles */
+   appearance: none;
+   width: 100%; /* Full-width */
+   height: 25px; /* Specified height */
+   background: #d3d3d3; /* Grey background */
+   outline: none; /* Remove outline */
+   opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+   -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+   transition: opacity .2s;
+   border-radius: 4px;
+   }
+   /* Mouse-over effects */
+   .slider_long:hover {
+   opacity: 1; /* Fully shown on mouse-over */
+   }
+   /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+   .slider_long::-webkit-slider-thumb {
+   -webkit-appearance: none; /* Override default look */
+   appearance: none;
+   width: 25px; /* Set a specific slider handle width */
+   height: 25px; /* Slider handle height */
+   background: #5f5f5f; /* Green background */
+   cursor: pointer; /* Cursor on hover */
+   border-radius: 4px;
+   }
+   .slider_long::-moz-range-thumb {
+   width: 25px; /* Set a specific slider handle width */
+   height: 25px; /* Slider handle height */
+   background: #4CAF50; /* Green background */
+   cursor: pointer; /* Cursor on hover */
+   }
+
+</style>
+<div class="container-fluid">
+   <div class = row>
+      <div class="col-sm-12">
+         <h1 style="text-align: center">{{ title }}</h1>
+      </div>
+   </div>
+    <div class="row">
+         <div class="col-sm-12">
+            <h2>Basic Settings</h2>
+         </div>
+    </div>
+      <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
+      <div class="row">
+         <div class="col-lg-6" style="text-align: center">
+            <input type="color" class="colorSchemeInput" style="border: none;width: 256px;height: 128px;">
+         </div>
+         <div class="col-lg-6" style="text-align:center">
+            <h3>Color Selector</h3>
+            <br />
+            <button type="button" class="btn btn-success setColor">Set Color</button>
+         </div>
+      </div>
+   <div class="row">
+      <div class="col-sm-6" style="text-align: center">
+         <label class="switch">
+         <input type="checkbox">
+         <span class="slider round"></span>
+         </label>
+      </div>
+      <div class="col-sm-6" style="text-align: center">
+         <h3>Option 1</h3>
+      </div>
+   </div>
+       <div class="row">
+      <div class="col-sm-6" style="text-align: center">
+         <label class="switch">
+         <input type="checkbox">
+         <span class="slider round"></span>
+         </label>
+      </div>
+      <div class="col-sm-6" style="text-align: center">
+         <h3>Option 2</h3>
+      </div>
+   </div>
+       <div class="row">
+      <div class="col-sm-6" style="text-align: center">
+         <label class="switch">
+         <input type="checkbox">
+         <span class="slider round"></span>
+         </label>
+      </div>
+      <div class="col-sm-6" style="text-align: center">
+         <h3>Option 3</h3>
+      </div>
+   </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <h2>Advanced Recommendation Settings</h2>
+        </div>
+    </div>
+    <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
+   <div class = row>
+      <div class="col-sm-12">
+         <h4 style="text-align: left">Acousticness: <span id="acousticness"></span></h4>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="slidecontainer">
+            <input type="range" min="1" max="100" value="50" class="slider_long" id="acousticness_slider">
+         </div>
+      </div>
+   </div>
+   <div class = row>
+      <div class="col-sm-12">
+         <h4 style="text-align: left">Instrumentalness: <span id="instrumentalness"></span></h4>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="slidecontainer">
+            <input type="range" min="1" max="100" value="50" class="slider_long" id="instrumentalness_slider">
+         </div>
+      </div>
+   </div>
+   <div class = row>
+      <div class="col-sm-12">
+         <h4 style="text-align: left">Danceability: <span id="danceability"></span></h4>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="slidecontainer">
+            <input type="range" min="1" max="100" value="50" class="slider_long" id="danceability_slider">
+         </div>
+      </div>
+   </div>
+   <div class = row>
+      <div class="col-sm-12">
+         <h4 style="text-align: left">Valence: <span id="valence"></span></h4>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="slidecontainer">
+            <input type="range" min="1" max="100" value="50" class="slider_long" id="valence_slider">
+         </div>
+      </div>
+   </div>
+   <div class = row>
+      <div class="col-sm-12">
+         <h4 style="text-align: left">Energy: <span id="energy"></span></h4>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-sm-12">
+         <div class="slidecontainer">
+            <input type="range" min="1" max="100" value="50" class="slider_long" id="energy_slider">
+         </div>
+      </div>
+   </div>
+</div>
+<script>
+   var acousticness_slider = document.getElementById("acousticness_slider");
+   var acousticness = document.getElementById("acousticness");
+   acousticness.innerHTML = acousticness_slider.value; // Display the default slider value
+
+   // Update the current slider value (each time you drag the slider handle)
+   acousticness_slider.oninput = function() {
+     acousticness.innerHTML = this.value;
+   }
+
+   var instrumentalness_slider = document.getElementById("instrumentalness_slider");
+   var instrumentalness = document.getElementById("instrumentalness");
+   instrumentalness.innerHTML = instrumentalness_slider.value; // Display the default slider value
+
+   // Update the current slider value (each time you drag the slider handle)
+   instrumentalness_slider.oninput = function() {
+     instrumentalness.innerHTML = this.value;
+   }
+
+   var danceability_slider = document.getElementById("danceability_slider");
+   var danceability = document.getElementById("danceability");
+   danceability.innerHTML = danceability_slider.value; // Display the default slider value
+
+   // Update the current slider value (each time you drag the slider handle)
+   danceability_slider.oninput = function() {
+     danceability.innerHTML = this.value;
+   }
+
+   var valence_slider = document.getElementById("valence_slider");
+   var valence = document.getElementById("valence");
+   valence.innerHTML = valence_slider.value; // Display the default slider value
+
+   // Update the current slider value (each time you drag the slider handle)
+   valence_slider.oninput = function() {
+     valence.innerHTML = this.value;
+   }
+
+   var energy_slider = document.getElementById("energy_slider");
+   var energy = document.getElementById("energy");
+   energy.innerHTML = acousticness_slider.value; // Display the default slider value
+
+   // Update the current slider value (each time you drag the slider handle)
+   energy_slider.oninput = function() {
+     energy.innerHTML = this.value;
+   }
+
+</script>
 {% endblock content %}

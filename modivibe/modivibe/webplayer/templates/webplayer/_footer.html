@@ -1,23 +1,23 @@
 <fieldset class="playbar">
     <span class="playbarLeft">
-        <img class="Album" id="trackImage" src="" alt="Track Album Cover" width="64" height="64" data-uri="">
+        <img class="Album" id="trackImage" src="" alt="Album Cover" width="64" height="64" data-uri="">
         <div class="trackInfoContainer">
             <p class="Song" id="trackName" data-uri="">Track Name</p>
             <span id="trackArtistContainer">Track Artist(s)</span>
         </div>
 
-<!--        <button id="helperButtonControl">click me</button> -->
+<!--        <button id="helperButtonControl">click me</button>-->
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
             <button id="shuffleTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Shuffle">shuffle</button>
             <button id="previousTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Previous Track">skip_previous</button>
-            <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_circle</button>
+            <button id="playbackControl" class="material-icons md-36 md-light md-inactive" aria-label="Play">play_arrow</button>
             <button id="nextTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Next Track">skip_next</button>
             <button id="repeatTrackControl" class="material-icons md-36 md-light md-inactive" aria-label="Loop Track">loop<span id="repeatDot">album</span></button>
         </div>
         <div id="progressBarContainer">
-            <span id="progressTimeLabel" style="font-size: 12px">00:00</span>
+            <span id="progressTimeLabel" style="font-size: 12px"></span>
             <input
               type="range"
               id="progressBarControl"
@@ -29,10 +29,10 @@
         </div>
     </span>
     <span class="playbarRight">
-        <button id="queueControl" class="material-icons md-36 md-light md-inactive" aria-label="Queue">queue</button>
+        <button class="ConnectionStatus material-icons md-24 md-light md-inactive">wifi_off</button>
         <div class="volumeController">
             <div class="mdc-slider mdc-slider--discrete">
-                <span id="volumeIcon" class="material-icons md-light md-36">volume_down</span>
+                <span id="volumeIcon" class="material-icons md-light md-36">volume_up</span>
                 <input class="mdc-slider__input" type="range" value="100" min="0" max="100" step="1" name="volume" aria-label="Volume Slider">
                 <div class="mdc-slider__track">
                 <div class="mdc-slider__track--inactive"></div>
@@ -49,6 +49,12 @@
 </fieldset>
 
 <script>
+    const UPDATE_PROGRESS_MS_INTERVAL_AMT = 1000;
+
+    const progressTimeLabel = document.getElementById('progressTimeLabel');
+    const progressBarControl = document.getElementById('progressBarControl');
+    const durationTimeLabel = document.getElementById('durationTimeLabel');
+
     let deviceID;
     let deviceState;
     let repeatStatus;
@@ -57,6 +63,10 @@
     let initializeStates = true;
     let repeatTimeout = false;
     let shuffleTimeout = false;
+    let progressMsHelper;
+    let updateProgressMsHelperIntervalID;
+    let updateProgressBarLblSldrIntervalID;
+    let volumeLvlBeforeClickToMute = 100;
 
     // SpotifySDK initializers and events
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -67,15 +77,27 @@
         });
 
         // Error handling
-        player.addListener('initialization_error', ({message}) => { console.error(message); });
-        player.addListener('authentication_error', ({message}) => { console.error(message); });
+        player.addListener('initialization_error', ({message}) => { $('.ConnectionStatus').text('wifi_off'); console.error(message);  });
+        player.addListener('authentication_error', ({message}) => { $('.ConnectionStatus').text('wifi_off'); console.error(message); });
         player.addListener('account_error', ({message}) => { console.error(message); });
         player.addListener('playback_error', ({message}) => { console.error(message); });
 
         // Playback status updates
         player.addListener('player_state_changed', state => {
             console.log(state);
+
+            if (state === null) $('.ConnectionStatus').text('wifi_off');
+            else $('.ConnectionStatus').text('wifi');
             deviceState = state;
+
+            // Progress bar updates
+            // ryan: This listener gets called by the track controllers so updating the progress bar stuff
+            //          here works "decently", but can probably be moved somewhere better in the future.
+            //       The reason why it's all here is the reliance on the deviceState object.
+            durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
+            progressBarControl.max = deviceState.duration / 1000; // total duration of the current track
+            progressMsHelper = deviceState.position; // current position of the current track
+            updateProgressBarLblSldr(); // for the initial webplayer loading
 
             // Update Track Name in Player
             let trackURI = deviceState['track_window']['current_track']['uri'];
@@ -83,18 +105,12 @@
             $('#trackName').text(deviceState['track_window']['current_track']['name']);
 
             // Update Track Artists in Player
-            let artists = "";
-            let artistsList = deviceState['track_window']['current_track']['artists'];
-            for(let i = 0; i < artistsList.length; i++){
-                let artistURI = artistsList[i]['uri'];
-                artists += `<a class="Artist" href="artist/${artistURI}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
-                if (i != artistsList.length - 1) artists += ", ";
-            }
-            $('#trackArtistContainer').html(artists)
+            let artists = getArtistAsLinks(deviceState['track_window']['current_track']['artists']);
+            $('#trackArtistContainer').html(artists);
 
             // Update Track Image in Player
             let albumURI = deviceState['track_window']['current_track']['album']['uri'];
-            $('#trackImage').attr('data-uri', albumURI)
+            $('#trackImage').attr('data-uri', albumURI);
             $('#trackImage').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
 
             // Update Play/Pause button and toggle variable
@@ -116,15 +132,65 @@
             if (isShuffled) $('#shuffleTrackControl').removeClass('md-inactive');
             else $('#shuffleTrackControl').addClass('md-inactive');
 
-            if(initializeStates) {
+            // Update Queue - Last Song 2
+            if(deviceState['track_window']['previous_tracks'][0])
+            {
+                $('#QueueLast2 .Song').text(deviceState['track_window']['previous_tracks'][0]['name']);
+                $('#QueueLast2 .Album').attr('data-uri', deviceState['track_window']['previous_tracks'][0]['album']['uri']);
+                $('#QueueLast2 .Album').prop('src', deviceState['track_window']['previous_tracks'][0]['album']['images'][1]['url']);
+                $('#QueueLast2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['previous_tracks'][0]['artists']));
+                $('#QueueLast2').show();
+            } else {
+                $('#QueueLast2').hide();
+            }
 
+            // Update Queue - Last Song 1
+            if(deviceState['track_window']['previous_tracks'][1]) {
+                $('#QueueLast1 .Song').text(deviceState['track_window']['previous_tracks'][1]['name']);
+                $('#QueueLast1 .Album').attr('data-uri', deviceState['track_window']['previous_tracks'][1]['album']['uri']);
+                $('#QueueLast1 .Album').prop('src', deviceState['track_window']['previous_tracks'][1]['album']['images'][1]['url']);
+                $('#QueueLast1 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['previous_tracks'][1]['artists']));
+                $('#QueueLast1').show();
+            } else {
+                $('#QueueLast1').hide();
+            }
+
+            // Update Queue - Current Song
+            $('#QueueCurrent .Song').text(deviceState['track_window']['current_track']['name']);
+            $('#QueueCurrent .Album').attr('data-uri', albumURI);
+            $('#QueueCurrent .Album').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
+            $('#QueueCurrent .ArtistContainer').html(artists);
+
+            // Update Queue - Next Song 1
+            if (deviceState['track_window']['next_tracks'][0]) {
+                $('#QueueNext1 .Song').text(deviceState['track_window']['next_tracks'][0]['name']);
+                $('#QueueNext1 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][0]['album']['uri']);
+                $('#QueueNext1 .Album').prop('src', deviceState['track_window']['next_tracks'][0]['album']['images'][1]['url']);
+                $('#QueueNext1 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][0]['artists']));
+                $('#QueueNext1').show();
+            } else {
+                $('#QueueNext1').hide();
+            }
+
+            // Update Queue - Next Song 2
+            if (deviceState['track_window']['next_tracks'][1]) {
+                $('#QueueNext2 .Song').text(deviceState['track_window']['next_tracks'][1]['name']);
+                $('#QueueNext2 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][1]['album']['uri']);
+                $('#QueueNext2 .Album').prop('src', deviceState['track_window']['next_tracks'][1]['album']['images'][1]['url']);
+                $('#QueueNext2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][1]['artists']));
+                $('#QueueNext2').show();
+            } else {
+                $('#QueueNext2').hide();
+            }
+
+            if(initializeStates) {
                 // This will only run once!
                 initializeStates = false;
 
                 // Track controls are now available
                 $('#playbackControl').removeClass('md-inactive');
                 $('#previousTrackControl').removeClass('md-inactive');
-                $('#nextTrackControl').removeClass('md-inactive')
+                $('#nextTrackControl').removeClass('md-inactive');
             }
         });
 
@@ -134,11 +200,13 @@
             deviceID = device_id;
             // Trigger playback transfer to Modivibe
             transferPlayback();
+            $('.ConnectionStatus').text('wifi');
         });
 
         // Not Ready
         player.addListener('not_ready', ({device_id}) => {
             console.log('Device ID has gone offline', device_id);
+            $('.ConnectionStatus').text('wifi_off');
         });
 
         // Connect to the player!
@@ -147,11 +215,13 @@
 
     // Button event bindings
     $('#playbackControl').on('click', togglePlayback);
+    $('#volumeIcon').on('click', muteVolume);
     $('.mdc-slider__input').on('change', setVolume);
     $('#previousTrackControl').on('click', previousTrack);
     $('#nextTrackControl').on('click', nextTrack);
     $('#shuffleTrackControl').on('click', toggleShuffle);
     $('#repeatTrackControl').on('click', toggleRepeat);
+    $('.ConnectionStatus').on('click', transferPlayback);
 
     // $('#helperButtonControl').on('click', helperButton);
     // $('#progressBarControl').on('change', updateProgressBarSliderThumb);
@@ -169,10 +239,6 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log('Successfully transferred playback');
-
-                    // This sometimes throws a deviceState undefined error and I have no idea why. Will fix later
-                    //  (think it's a timing issue)
-                    document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
                 } else {
                     console.log('Failed to resume playback');
                 }
@@ -181,12 +247,8 @@
     }
 
     function togglePlayback(event){
-
-
         let playbackRequest = (isPlaying) ? 'pause' : 'play';
         console.log(`Requesting playback: ${playbackRequest}`);
-        // ryan: Want to do this label update elsewhere - putting it here for now. I was having trouble with transferPlayback()
-        document.getElementById("durationTimeLabel").textContent = millisToMinutesAndSeconds(deviceState.duration);
 
         $.ajax({
             type: "POST",
@@ -199,11 +261,82 @@
             success: function(response) {
                 if (response == 'True') {
                     console.log(`Success: ${playbackRequest}`);
+
+                    // ryan: Update intervals are tied together but I'm keeping the functions separate for now
+                    if (playbackRequest == 'pause') {
+                        // The song is paused so stop the progress bar timers
+                        clearInterval(updateProgressMsHelperIntervalID);
+                        clearInterval(updateProgressBarLblSldrIntervalID);
+                    } else {
+                        // The song is playing so start the progress bar timers
+                        updateProgressMsHelperIntervalID = setInterval(updateProgressMsHelper, UPDATE_PROGRESS_MS_INTERVAL_AMT);
+                        updateProgressBarLblSldrIntervalID = setInterval(updateProgressBarLblSldr, UPDATE_PROGRESS_MS_INTERVAL_AMT);
+                    }
                 } else {
                     console.log(`Failed: ${playbackRequest}`);
                 }
             }
         });
+    }
+
+    function muteVolume(event) {
+       console.log('Attempting to mute or unmute volume');
+
+       // If already muted, don't overwrite the previously-saved current volume level
+       if ($('.mdc-slider__input').val() != 0) {
+           // Save the current volume level in case the user re-clicks the volume icon to revert the mute
+           volumeLvlBeforeClickToMute = $('.mdc-slider__input').val();
+       }
+
+       let isCurrentlyMuted = ($('.mdc-slider__input').val() == 0) ? true : false;
+
+       // If the volume is currently muted, revert to the previous volume level from when the icon was last clicked
+       //  Otherwise mute the volume
+       if (isCurrentlyMuted) {
+          $.ajax({
+                type: "POST",
+                url: "{% url 'setVolume' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    volume: volumeLvlBeforeClickToMute
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully unmuted volume');
+
+                        $('.mdc-slider__input').val(volumeLvlBeforeClickToMute);
+
+                        if ($('.mdc-slider__input').val() <= 0) { $('#volumeIcon').text('volume_mute'); }
+                        else if ($('.mdc-slider__input').val() <= 49) { $('#volumeIcon').text('volume_down'); }
+                        else if ($('.mdc-slider__input').val() <= 100) { $('#volumeIcon').text('volume_up'); }
+                    } else {
+                        console.log('Failed to unmute volume');
+                    }
+                }
+            });
+       } else {
+          $.ajax({
+                type: "POST",
+                url: "{% url 'setVolume' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    device_id: deviceID,
+                    volume: 0
+                },
+                success: function(response) {
+                    if (response == 'True') {
+                        console.log('Successfully muted volume');
+
+                        $('.mdc-slider__input').val(0);
+
+                        $('#volumeIcon').text('volume_mute');
+                    } else {
+                        console.log('Failed to mute volume');
+                    }
+                }
+            });
+       }
     }
 
     function setVolume(event) {
@@ -339,32 +472,59 @@
         });
     }
 
-    // function helperButton() {
-    //  console.log('Attempting to get current track info');
+    // Helper function for parsing artists from SpotifySDK into links
+    function getArtistAsLinks(artistsList) {
+        let artists = "";
+        for(let i = 0; i < artistsList.length; i++){
+            let artistURI = artistsList[i]['uri'];
+            let artistID = artistURI.split(':')[2];
+            artists += `<a class="Artist ItemLink" href="artist/${artistID}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
+            if (i != artistsList.length - 1) artists += ", ";
+        }
+        return artists;
+    }
+
+    // Helper function for the progress bar slider and time label
+    function updateProgressMsHelper() {
+        progressMsHelper += UPDATE_PROGRESS_MS_INTERVAL_AMT;
+    }
+
+    function updateProgressBarLblSldr() {
+        progressTimeLabel.textContent = millisToMinutesAndSeconds(progressMsHelper);
+        progressBarControl.value = progressMsHelper / 1000; // moves the slider as the value changes
+    }
+
+    // ryan: to-do
+    // function progressBarSliderThumbChanged() {
+    //     console.log('progressBarSliderThumbChanged()');
+    //
+    //     console.log('progressBar.value', progressBar.value);
+    //     console.log("seconds: ", progressBar.value / 1000);
+    //
+    //     progressBar.value = (progressMsHelper / 1000);
+    //     console.log('progressBar.value after', progressBar.value);
+    // }
+
+    // ryan: temp to use while playing with the API
+    // function helperButton(event) {
+    //    console.log('Attempting to mute volume');
     //    $.ajax({
-    //         type: "GET",
-    //         url: "{% url 'helperButton' %}",
+    //         type: "POST",
+    //         url: "{% url 'setVolume' %}",
     //         data: {
     //             csrfmiddlewaretoken: '{{ csrf_token }}',
     //             device_id: deviceID,
+    //             volume: 0
     //         },
     //         success: function(response) {
-    //             if (response != 'False') {
-    //                 console.log('Successfully retrieved current track info');
-    //                 console.log(response);
+    //             if (response == 'True') {
+    //                 console.log('Successfully muted volume');
+    //                 if ($('.mdc-slider__input').val() <= 0) { $('#volumeIcon').text('volume_mute'); }
     //             } else {
-    //                 console.log('Failed to retrieve current track info');
+    //                 console.log('Failed to set volume');
     //             }
     //         }
     //     });
-    //
-    //     // console.log(deviceState);
-    // }
-
-    // To do
-    // function updateProgressBarSliderThumb () {
-    //     progressBar = document.getElementById("progressBarControl");
-    //
     // }
 
 </script>

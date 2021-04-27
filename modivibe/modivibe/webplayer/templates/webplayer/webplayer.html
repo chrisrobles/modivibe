@@ -12,16 +12,39 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
         <script src="https://sdk.scdn.co/spotify-player.js"></script>
         <script src="{% static 'webplayer/util.js' %}" async></script>
+        <link rel="icon" href="{% static 'Artboard_1_0.5x.png'%}">
         {% if title %} <title>Modivibe - {{ title }}</title>
         {% else %} <title>Modivibe</title>
         {% endif %}
     </head>
     <body>
+    <style>
+        /* width */
+        ::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+          background: #888;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+
+    </style>
         <div class="min-vh-100 p-0 d-flex flex-column overflow-hidden">
             <div class="container-fluid no-gutters d-flex flex-column flex-fill">
                 <div class="row flex-shrink-0">
                     <div class="col-12">
-                        <div class="header">{% include 'webplayer/_header.html' %}</div>
+                        <div class="header colorScheme">{% include 'webplayer/_header.html' %}</div>
                     </div>
                 </div>
                 <div class="row flex-fill">
@@ -36,7 +59,7 @@
                 </div>
                 <div class="row flex-shrink-1">
                     <div class="col-12">
-                        <div class="footer" style="bottom: 0; position: fixed; width: 100%; box-sizing: border-box !important; height: auto">{% include 'webplayer/_footer.html' %}</div>
+                        <div class="footer colorScheme" style="bottom: 0; position: fixed; width: 100%; box-sizing: border-box !important; height: auto">{% include 'webplayer/_footer.html' %}</div>
                     </div>
                 </div>
             </div>

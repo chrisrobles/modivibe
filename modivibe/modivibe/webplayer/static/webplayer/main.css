@@ -138,12 +138,7 @@ body {
     margin: 0 10px;
     display: flex;
     align-content: center;
-    flex: 1;
-}
-
-.playbarLeft p {
-    padding: 0;
-    margin: 0;
+    width: 300px;
 }
 
 .playbarLeft .trackInfoContainer {
@@ -152,21 +147,26 @@ body {
     flex-direction: column;
     justify-content: center;
     padding: 10px;
+    overflow: hidden;
 }
 
 .playbar #trackImage {
     background-color: black;
     border: 1px solid black;
-    width: fit-content;
-    height: fit-content;
+    width: 64px !important;
+    height: 64px !important;
 }
 
 .playbarLeft #trackName {
+    padding: 0;
+    margin: 0;
     font-weight: bold;
+    white-space: nowrap;
 }
 
 .playbarLeft #trackArtistContainer {
     font-weight: normal;
+    white-space: nowrap;
 }
 
 .playbarMiddle {
@@ -202,7 +202,7 @@ body {
     justify-content: flex-end;
     align-content: center;
     flex-flow: wrap;
-    flex: 1;
+    width: 300px;
 }
 
 .playbarRight button {
@@ -356,4 +356,8 @@ a:hover, a:active, a:focus {
 img {
     max-width: 100%;
     height: auto;
+}
+
+.ContentImage {
+
 }
