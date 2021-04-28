@@ -537,7 +537,6 @@ def artistRelated(request, artist_id):
                       context={"header": header, "content": content, "contentType": "related",
                                "loadContent": True, "ajax": False})
 
-
 def settings(request):
     if not validUser():
         return redirect('splash')
@@ -547,3 +546,14 @@ def settings(request):
         return JsonResponse({"page": page}, status=200)
     else:
         return render(request, 'webplayer/settings.html', context={"ajax": False})
+
+def progressBarSldrMoved(request):
+    deviceID = request.POST['device_id']
+    songPositionMs = int(request.POST['position_ms'])
+
+    try:
+        sp.seek_track(songPositionMs, deviceID)
+        response = True
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
