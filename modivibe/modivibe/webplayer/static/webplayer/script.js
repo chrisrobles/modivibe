@@ -80,6 +80,7 @@ $(document).ready(function() {
                     success: function(response) {
                         console.log("Search success.");
                         $(".content").first().html(response.searchResults);
+                        $("button.PlayRequest").remove();
                     }
                 });
             }

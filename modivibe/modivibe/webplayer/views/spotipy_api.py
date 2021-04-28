@@ -301,7 +301,7 @@ def playlist(request, playlist_id):
 
         return JsonResponse({'page': page}, status=200)
 
-    return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this
+    return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this <------- need html page
 
 def mySavedAlbums(request):
     #check if user is authenticated
@@ -537,12 +537,13 @@ def artistRelated(request, artist_id):
                       context={"header": header, "content": content, "contentType": "related",
                                "loadContent": True, "ajax": False})
 
-# Never insert search_value directly!!! (users would be able to insert html)
+# Never return search_value back to ajax directly!!! (users would be able to insert html)
+# Render cleans input
 def search(request, search_value):
     if not validUser():
         return redirect('splash')
 
-    sr = sp.search(search_value, type="track,album,artist,playlist", limit=6)
+    sr = sp.search(search_value, type="track,album,artist,playlist", limit=8)
 
     # tracks
     tracks = []
@@ -557,12 +558,21 @@ def search(request, search_value):
             'songAlbumId': tr['album']['id'],
             'songURI': tr['uri'],
             'artistId': tr['album']['artists'][0]['id'],
-            'songArtist': tr['album']['artists'][0]['name']
+            'songArtist': tr['album']['artists'][0]['name'],
+            'songAlbumURI': tr['album']['uri']
         })
 
         sn+=1
 
-    trackRes = createSongList(tracks, "playlist", None)
+    uriPlaceholder = "URI:PLACE:HOLDER"
+    trackRes = createSongList(tracks, "playlist", uriPlaceholder)
+
+    # replace individual track uris
+    # replace play request uri first
+    trackRes = trackRes.replace(uriPlaceholder, 'button machine broke pls delete in js', 1)
+
+    for track in tracks:
+        trackRes = trackRes.replace(uriPlaceholder, track['songAlbumURI'], 2)
 
     # artists
     artists = []
@@ -609,6 +619,7 @@ def search(request, search_value):
                                                         "artists": artistRes,
                                                         "albums": albumRes,
                                                         "playlists": playlistRes,
+                                                        "searchValue": search_value,
                                                         "ajax": True})},
             status=200
         )
@@ -618,6 +629,7 @@ def search(request, search_value):
                                                         "artists": artistRes,
                                                         "albums": albumRes,
                                                         "playlists": playlistRes,
+                                                        "searchValue": search_value,
                                                         "ajax": False }
         )
 

@@ -1,7 +1,30 @@
 {% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
 {% block content %}
-{{tracks|safe}}
-{{artists|safe}}
-{{albums|safe}}
-{{playlists|safe}}
+
+<style>
+.searchRow {
+    padding-bottom: 15px;
+}
+</style>
+
+<div class="row searchRow">
+    <div class="searchHeader container-fluid">
+        <h1>Search results for: {{ searchValue }}</h1>
+    </div>
+</div>
+<div class="row searchRow">
+    <div class="container-fluid">
+        <h1>Songs</h1>
+        {{tracks|safe}}
+    </div>
+</div>
+<div class="row searchRow">
+        {{artists}}
+</div>
+<div class="row searchRow">
+        {{albums}}
+</div>
+<div class="row searchRow">
+        {{playlists}}
+</div>
 {% endblock content %}
