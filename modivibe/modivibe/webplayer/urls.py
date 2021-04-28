@@ -19,6 +19,8 @@ urlpatterns = [
     path('setShuffle', views.setShuffle, name='setShuffle'),
     path('setRepeat', views.setRepeat, name='setRepeat'),
     path('helperButton', views.helperButton, name='helperButton'),
+    path('toggleFollow', views.toggleFollow, name='toggleFollow'),
+    path('isFollowing', views.isFollowing, name='isFollowing'),
     path('progressBarSldrMoved', views.progressBarSldrMoved, name='progressBarSldrMoved'),
 
     # user collections and music collections (albums, artists, playlists, podcasts)

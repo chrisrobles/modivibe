@@ -73,6 +73,7 @@
         </div>
     </body>
 <script>
+
     $(document).on('click', '.PlayRequest', function(e) {
         let contextURI, offsetURI;
         if ($(this).data('parent-uri')) {
@@ -102,6 +103,30 @@
                    }
                }
             }
+        });
+    });
+
+    $(document).on('click', '.FollowRequest', function (e) {
+        let contextURI = $(this).attr('data-uri');
+        let followStatus = $(this).attr('data-following') === 'true' ? 'false' : 'true';
+        console.log(`Attempting to toggle follow for artist ${contextURI}`);
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'toggleFollow' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                artist: contextURI,
+                follow: followStatus
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log(`Successfully toggled follow for artist`);
+                    updateFollowStatus();
+                }
+                else {
+                    console.log(`Failed to toggle follow for artist`);
+                }
+            },
         });
     });
 
@@ -207,5 +232,35 @@
         $playNumber.text($playNumber.data('number'));
         $playNumber.removeClass('material-icons md-24 md-light');
     });
+
+    function updateFollowStatus() {
+        let followButtons = $('.FollowRequest');
+        let affectedURIs = [];
+        $(followButtons).each(function(){
+            let contextURI = $(this).attr('data-uri');
+            if (affectedURIs.includes(contextURI)) return;
+            affectedURIs.push(contextURI);
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'isFollowing' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    artist: contextURI
+                },
+                success: function(response) {
+                    if (response != 'False') {
+                        console.log('Successfully collected follow status, now updating associated buttons');
+                        response = JSON.parse(response);
+                        let affectedFollowButtons = $(`.FollowRequest[data-uri="${response['artist']}"]`);
+                        $(affectedFollowButtons).attr('data-following', response['following']);
+                        let followText = $(affectedFollowButtons).attr('data-following') === 'true' ? 'person_remove_alt_1' : 'person_add_alt';
+                        $(affectedFollowButtons).text(followText);
+                    } else {
+                        console.log('Failed to collect follow status');
+                    }
+                },
+            });
+        });
+    }
 </script>
 </html>
