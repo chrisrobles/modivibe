@@ -65,15 +65,28 @@ $(document).ready(function() {
         color[2] += 60;
         $('.content').css('background-color', "rgb(" + color.join(",") + ")")
     });
-//    $(document).on("click","#myAlbums",function(e) {
-//        e.preventDefault();
-//
-//        $.ajax({
-//            url: $(this).attr("href"),
-//            type: "Get",
-//            success: function (response) {
-//                $(".content").first().html(response.myAlbums);
-//            }
-//        });
-//    });
+
+    $(document).on("keydown", "#searchInput", function(e) {
+        if(e.keyCode == 13) {
+            e.preventDefault();
+            let input = $(this).val();
+            $(this).attr("value", input);
+
+            // if input
+            if(input) {
+                $.ajax({
+                    url: "/search/"+input,
+                    type: "GET",
+                    success: function(response) {
+                        console.log("Search success.");
+                        $(".content").first().html(response.searchResults);
+                        $("button.PlayRequest").remove();
+                    }
+                });
+            }
+            else {
+                console.log("Empty search value.");
+            }
+        }
+    });
 });

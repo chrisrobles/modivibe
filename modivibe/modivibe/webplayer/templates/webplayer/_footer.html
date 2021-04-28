@@ -95,7 +95,7 @@
             //          here works "decently", but can probably be moved somewhere better in the future.
             //       The reason why it's all here is the reliance on the deviceState object.
             durationTimeLabel.textContent = millisToMinutesAndSeconds(deviceState.duration);
-            progressBarControl.max = deviceState.duration / 1000; // total duration of the current track
+            progressBarControl.max = Math.trunc(deviceState.duration / 1000); // total duration of the current track
             progressMsHelper = deviceState.position; // current position of the current track
             updateProgressBarLblSldr(); // for the initial webplayer loading
 
@@ -224,7 +224,7 @@
     $('.ConnectionStatus').on('click', transferPlayback);
 
     // $('#helperButtonControl').on('click', helperButton);
-    // $('#progressBarControl').on('change', updateProgressBarSliderThumb);
+    $('#progressBarControl').on('change', progressBarSldrMoved);
 
     // Button event functions
     function transferPlayback() {
@@ -393,6 +393,9 @@
             },
             success: function(response) {
                 if (response == 'True') {
+                    progressMsHelper = 0;
+                    updateProgressBarLblSldr();
+
                     console.log('Successfully played previous track');
                 } else {
                     console.log('Failed to play previous track');
@@ -412,6 +415,9 @@
             },
             success: function(response) {
                 if (response == 'True') {
+                    progressMsHelper = 0;
+                    updateProgressBarLblSldr();
+
                     console.log('Successfully played next track');
                 } else {
                     console.log('Failed to play next track');
@@ -494,16 +500,27 @@
         progressBarControl.value = progressMsHelper / 1000; // moves the slider as the value changes
     }
 
-    // ryan: to-do
-    // function progressBarSliderThumbChanged() {
-    //     console.log('progressBarSliderThumbChanged()');
-    //
-    //     console.log('progressBar.value', progressBar.value);
-    //     console.log("seconds: ", progressBar.value / 1000);
-    //
-    //     progressBar.value = (progressMsHelper / 1000);
-    //     console.log('progressBar.value after', progressBar.value);
-    // }
+    // Listener for when the progress bar slider gets moved/dragged to a new position for seeking in the current track
+    function progressBarSldrMoved() {
+        console.log('Attempting to seek to new track position: ', progressBarControl.value, 's');
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'progressBarSldrMoved' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                device_id: deviceID,
+                position_ms: progressBarControl.value * 1000,
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log('Successfully seeked to new track position: ', progressBarControl.value, 's');
+                } else {
+                    console.log('Failed to seek to new track position: ', progressBarControl.value, 's');
+                }
+            }
+        });
+    }
 
     // ryan: temp to use while playing with the API
     // function helperButton(event) {

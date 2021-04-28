@@ -33,10 +33,16 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
         </div>
         <section class="ContentItems">
         <div class="row">
+        {% if not info %}
+            <div class="container-fluid">
+                No {{ type|add:"s" }}.
+            </div>
+        {% endif %}
+
         {% for item in info %}
-            <div style="padding-bottom: 20px;" class="col-4">
-                <div class="ContentItem {{ type|title }}" data-uri="spotify:{{ type }}:{{ item.contentId }}">
-                    <img class="ContentImage" src="{{ item.contentImg }}">
+            <div style="padding-bottom: 20px;" class="col-3">
+                <div class="ContentItem {{ type|title }}" data-uri="spotify:{{ type }}:{{ item.contentId }}" style="display: flex; flex-direction: column">
+                    <img class="ContentImage" src="{{ item.contentImg }}" style="">
                     <a class="ItemLink" style="text-align:center;" href="/{{ type }}/{{ item.contentId }}">
                         <h3>{{ item.contentName }}</h3>
                     </a>
@@ -57,7 +63,7 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
             </div>
 
 
-            {% if forloop.counter|divisibleby:3 %}
+            {% if forloop.counter|divisibleby:4 %}
         </div>
         <div class="row">
             {% endif %}

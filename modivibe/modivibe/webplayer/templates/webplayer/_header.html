@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
- MODIVIBE
+{% load static %}
+<a style="text-decoration: none;" href="{% url 'webplayer' %}"><img src="{% static 'Artboard_1_0.5x.png'%}" style ="height:50px; border-radius: 10px; border-color: pink"></a>
 <style>
 
 * {box-sizing: border-box;}
@@ -68,7 +68,7 @@ body {
     padding: 14px;
   }
   .topnav input[type=text] {
-    border: 1px solid #ccc;
+      border: 1px solid #ccc;
   }
 }
 </style>
@@ -76,16 +76,19 @@ body {
 <fieldset class = "TopBar">
     <span class = "TopBarLeft">
         <div class="DirectionalButtons">
-           <button onClick="window.location.reload();" class="material-icons md-18 md-dark" aria-label="back">arrow_back_ios</button>
-           <button onClick="window.location.reload();" class="material-icons md-18 md-dark" aria-label="forward">arrow_forward_ios</button>
+           <button onClick="window.location.reload();" class="material-icons myButton" aria-label="back" style="background:none; border:none; outline: none; cursor:pointer; color: white">arrow_back_ios</button>
+           <button onClick="window.location.reload();" class="material-icons myButton" aria-label="forward" style="background:none; border:none; outline: none; cursor:pointer; color: white">arrow_forward_ios</button>
         </div>
     </span>
-    <span class = "TopBarRight">
-        <form autocomplete="off" action="/action_page.php">
+    <span class="TopBarRight">
+        <div class="SearchBar">
+            <form autocomplete="off" method="get">
             <div class="autocomplete" style="width:300px; text-align: right">
-                <input id="myInput" type="text" name="mySong" placeholder="Artists, Songs, Playlists.." style="border: 2px solid #808080; border-radius: 8px; ">
+                <input id="searchInput" type="text" name="mySearch" placeholder="Search Spotify"
+                style="border: 2px solid #808080; border-radius: 8px; " maxlength="80" value>
             </div>
-        </form>
+            </form>
+        </div>
     </span>
 </fieldset>
 <script>

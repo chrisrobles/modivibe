@@ -50,7 +50,7 @@ def createSongList(info, type, context_uri):
 
     for song in info:
         htmlStr += \
-            f'''    <div class="Song row" data-uri="{song['songURI']} data-parent-uri='{context_uri}">
+            f'''    <div class="Song row" data-uri="{song['songURI']}" data-parent-uri="{context_uri}">
                         <div class="col-1">
                             <span class="SongNumber PlayRequest" data-number="{song['songNum']}" data-uri="{song['songURI']}" data-parent-uri="{context_uri}">{song['songNum']}</span>
                         </div>

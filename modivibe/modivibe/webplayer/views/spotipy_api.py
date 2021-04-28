@@ -344,7 +344,7 @@ def playlist(request, playlist_id):
 
         return JsonResponse({'page': page}, status=200)
 
-    return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this
+    return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this <------- need html page
 
 def mySavedAlbums(request):
     #check if user is authenticated
@@ -580,6 +580,101 @@ def artistRelated(request, artist_id):
                       context={"header": header, "content": content, "contentType": "related",
                                "loadContent": True, "ajax": False})
 
+# Never return search_value back to ajax directly!!! (users would be able to insert html)
+# Render cleans input
+def search(request, search_value):
+    if not validUser():
+        return redirect('splash')
+
+    sr = sp.search(search_value, type="track,album,artist,playlist", limit=8)
+
+    # tracks
+    tracks = []
+    sn = 1
+    for tr in sr['tracks']['items']:
+        tracks.append({
+            'songNum': sn,
+            'songName': tr['name'],
+            'songId': tr['id'],
+            'songLength': tr['duration_ms'],
+            'songAlbum': tr['album']['name'],
+            'songAlbumId': tr['album']['id'],
+            'songURI': tr['uri'],
+            'artistId': tr['album']['artists'][0]['id'],
+            'songArtist': tr['album']['artists'][0]['name'],
+            'songAlbumURI': tr['album']['uri']
+        })
+
+        sn+=1
+
+    uriPlaceholder = "URI:PLACE:HOLDER"
+    trackRes = createSongList(tracks, "playlist", uriPlaceholder)
+
+    # replace individual track uris
+    # replace play request uri first
+    trackRes = trackRes.replace(uriPlaceholder, 'button machine broke pls delete in js', 1)
+
+    for track in tracks:
+        trackRes = trackRes.replace(uriPlaceholder, track['songAlbumURI'], 2)
+
+    # artists
+    artists = []
+    for ar in sr['artists']['items']:
+        artists.append({
+            'contentImg': ar['images'][0]['url'] if ar['images'] else 'default',
+            'contentName': ar['name'],
+            'contentId': ar['id']
+        })
+
+    artistRes = render_to_string('webplayer/collectionItems.html', context={"info": artists, "type": "artist", "ajax": True})
+
+    # albums
+    albums = []
+    for al in sr['albums']['items']:
+        albums.append({
+            'contentImg': al['images'][0]['url'] if al['images'] else 'default',
+            'contentName': al['name'],
+            'contentId': al['id'],
+            'artist': al['artists'][0]['name'],
+            'artistId': al['artists'][0]['id'],
+            'albumDate': al['release_date'][0:4]
+        })
+
+    albumRes = render_to_string('webplayer/collectionItems.html',
+                               context={"info": albums, "type": "album", "ajax": True})
+
+    # playlists
+    playlists = []
+    for pl in sr['playlists']['items']:
+        playlists.append({
+            'contentImg': pl['images'][0]['url'] if pl['images'] else 'default',
+            'contentName': pl['name'],
+            'contentId': pl['id']
+        })
+
+    playlistRes = render_to_string('webplayer/collectionItems.html',
+                                context={"info": playlists, "type": "playlist", "ajax": True})
+
+    if isAjaxRequest(request):
+        return JsonResponse(
+            {"searchResults": render_to_string('webplayer/search.html',
+                                               context={"tracks": trackRes,
+                                                        "artists": artistRes,
+                                                        "albums": albumRes,
+                                                        "playlists": playlistRes,
+                                                        "searchValue": search_value,
+                                                        "ajax": True})},
+            status=200
+        )
+    else:
+        return render(
+            request, 'webplayer/search.html', context={ "tracks": trackRes,
+                                                        "artists": artistRes,
+                                                        "albums": albumRes,
+                                                        "playlists": playlistRes,
+                                                        "searchValue": search_value,
+                                                        "ajax": False }
+        )
 
 def settings(request):
     if not validUser():
@@ -590,3 +685,14 @@ def settings(request):
         return JsonResponse({"page": page}, status=200)
     else:
         return render(request, 'webplayer/settings.html', context={"ajax": False})
+
+def progressBarSldrMoved(request):
+    deviceID = request.POST['device_id']
+    songPositionMs = int(request.POST['position_ms'])
+
+    try:
+        sp.seek_track(songPositionMs, deviceID)
+        response = True
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)

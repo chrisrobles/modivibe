@@ -21,6 +21,7 @@ urlpatterns = [
     path('helperButton', views.helperButton, name='helperButton'),
     path('toggleFollow', views.toggleFollow, name='toggleFollow'),
     path('isFollowing', views.isFollowing, name='isFollowing'),
+    path('progressBarSldrMoved', views.progressBarSldrMoved, name='progressBarSldrMoved'),
 
     # user collections and music collections (albums, artists, playlists, podcasts)
     # url should follow:    my/{collection_type}s
@@ -36,4 +37,7 @@ urlpatterns = [
     path('artist/<str:artist_id>/topSongs', views.artistTopSongs, name='artistTopSongs'),
     path('artist/<str:artist_id>/albums', views.artistAlbums, name='artistAlbums'),
     path('artist/<str:artist_id>/related', views.artistRelated, name='artistRelated'),
+
+    # search bar
+    path('search/<str:search_value>', views.search, name='search'),
 ]
