@@ -1,5 +1,5 @@
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth, CacheFileHandler
+from spotipy.oauth2 import SpotifyOAuth, CacheHandler
 from modivibe.settings import env
 
 # DON'T CHANGE ANY OF THE VARIABLES IN HERE pls
@@ -28,9 +28,37 @@ scope = [
     'user-read-private'
 ]
 
+class ModivibeCache(CacheHandler):
+    def __init__(self):
+        self.session = None
+
+    def set_session(self, session):
+        self.session = session
+
+    def get_session(self):
+        return self.session
+
+    def get_cached_token(self):
+        token = None
+        if self.session['modivibe_access']:
+            token = self.session['modivibe_access']
+        return token
+
+    def save_token_to_cache(self, token_info):
+        self.session.clear()
+
+        if token_info:
+            self.session['modivibe_access'] = token_info
+
+    def delete_token(self):
+        self.session.clear()
+
+cache_handler = ModivibeCache()
+
 auth_manager = SpotifyOAuth(client_id=env('CLIENT_ID'),
                             client_secret=env('CLIENT_SECRET'),
                             redirect_uri=env('REDIRECT_URI'),
+                            cache_handler= cache_handler,
                             scope=' '.join(scope))
 
 sp = spotipy.Spotify(auth_manager=auth_manager)

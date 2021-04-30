@@ -1,4 +1,4 @@
-{% extends 'webplayer/webplayer.html'%}
+{% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
 {% block content %}
     <h1>{{ title }}</h1>
 {% endblock content %}
