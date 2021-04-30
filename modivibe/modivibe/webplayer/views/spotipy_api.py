@@ -7,6 +7,7 @@ from spotipy.oauth2 import SpotifyOauthError
 from django.template.loader import render_to_string
 import pprint
 from webplayer.views.create_html import *
+import json
 
 def validUser():
     try:
@@ -685,6 +686,50 @@ def settings(request):
         return JsonResponse({"page": page}, status=200)
     else:
         return render(request, 'webplayer/settings.html', context={"ajax": False})
+
+
+def recommendations(request):
+    if not validUser():
+        return redirect('splash')
+
+    if isAjaxRequest(request):
+        page = render_to_string('webplayer/recommendations.html', context={"ajax": True})
+        return JsonResponse({"page": page}, status=200)
+    else:
+        return render(request, 'webplayer/recommendations.html', context={"ajax": False})
+
+
+def getRecommendations(request):
+    features = request.POST.get('features', None)
+    if not features:
+        return HttpResponse(False)
+    features = json.loads(features)
+
+    genres = sp.recommendation_genre_seeds()
+    #return HttpResponse(False)
+
+    try:
+        generatedRecommendations = sp.recommendations(
+            seed_genres=None,
+            seed_tracks=None,
+            seed_artists=['spotify:artist:0Riv2KnFcLZA3JSVryRg4y'],
+            limit=20,
+            target_acousticness=features.get('acousticness', None),
+            target_danceability=features.get('danceability', None),
+            target_energy=features.get('energy', None),
+            target_instrumentalness=features.get('instrumentalness', None),
+            target_key=features.get('key', None),
+            target_liveness=features.get('liveness', None),
+            target_loudness=features.get('loudness', None),
+            target_speechiness=features.get('speechiness', None),
+            target_tempo=features.get('tempo', None),
+            target_valence=features.get('valence', None)
+        )
+        print(generatedRecommendations)
+        return JsonResponse(generatedRecommendations, status=200)
+    except SpotifyException:
+        return HttpResponse(False)
+
 
 def progressBarSldrMoved(request):
     deviceID = request.POST['device_id']

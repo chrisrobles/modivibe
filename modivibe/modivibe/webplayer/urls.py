@@ -40,4 +40,8 @@ urlpatterns = [
 
     # search bar
     path('search/<str:search_value>', views.search, name='search'),
+
+    # recommendations
+    path('recommendations', views.recommendations, name='recommendations'),
+    path('getRecommendations', views.getRecommendations, name='getRecommendations'),
 ]
