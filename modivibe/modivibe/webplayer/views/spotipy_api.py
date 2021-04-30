@@ -1,7 +1,7 @@
 # All views here will be dedicated to API calls
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
-from ..SpotifyApiObjs import sp, auth_manager
+from ..SpotifyApiObjs import sp, auth_manager, cache_handler
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
 from django.template.loader import render_to_string
@@ -9,7 +9,9 @@ import pprint
 from webplayer.views.create_html import *
 import json
 
-def validUser():
+def validUser(request):
+    cache_handler.set_session(request.session) # leave in or take out? better to update or not?
+
     try:
         auth_manager.validate_token(auth_manager.cache_handler.get_cached_token())
     except:
@@ -32,7 +34,8 @@ def redirectToHome(request):
     # validate the code given
     try:
         # Check_cache may have to be changed later depending on how we handle caching
-        api_token = auth_manager.get_access_token(request.GET['code'], check_cache=False)
+        cache_handler.set_session(request.session)
+        auth_manager.get_access_token(request.GET['code'], check_cache=False, as_dict=False)
     except SpotifyOauthError:
         # if a code is not valid, a SpotifyOauthError is thrown
         return redirect('splash') # redirect to splash
@@ -260,8 +263,8 @@ def helperButton(request):
 def myPlaylists(request):
     # check a user is authenticated
     # also refreshes token if expired
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     startAt = 0
     lim = 50 # 50 is max for api request
@@ -292,14 +295,14 @@ def myPlaylists(request):
 
     if isAjaxRequest(request):
         collection = render_to_string('webplayer/collectionItems.html', context={"info" : info, "type": "playlist", "ajax": True})
-        return JsonResponse({'collection': collection}, status=200)
+        return JsonResponse({'collection': collection, 'status': 200 })
     else:
         return render(request, 'webplayer/collectionItems.html', context={"info" : info, "type": "playlist", "ajax": False})
 
 def playlist(request, playlist_id):
 
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     if isAjaxRequest(request):
         startAt = 0
@@ -318,8 +321,8 @@ def playlist(request, playlist_id):
                 "songName":     s['track']['name'],
                 "songId":       s['track']['id'],
                 "songURI":      s['track']['uri'],
-                "songArtist":   s['track']['artists'][0]['name'],
-                "artistId":     s['track']['artists'][0]['id'],
+                "songArtist":   s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+                "artistId":     s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
                 "songLength":   s['track']['duration_ms']
             })
 
@@ -334,8 +337,8 @@ def playlist(request, playlist_id):
                     "songName":     s['track']['name'],
                     "songId":       s['track']['id'],
                     "songURI":      s['track']['uri'],
-                    "songArtist":   s['track']['artists'][0]['name'],
-                    "artistId":     s['track']['artists'][0]['id'],
+                    "songArtist":   s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+                    "artistId":     s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
                     "songLength":   s['track']['duration_ms']
                 })
 
@@ -343,15 +346,15 @@ def playlist(request, playlist_id):
 
         page = createSongList(info, 'playlist', 'spotify:playlist:'+playlist_id)
 
-        return JsonResponse({'page': page}, status=200)
+        return JsonResponse({'page': page, 'status': 200 })
 
-    return HttpResponse("<h1>{}</h1>".format(playlist_id)) # fix this <------- need html page
+    return redirect('webplayer') # fix this <------- need html page
 
 def mySavedAlbums(request):
     #check if user is authenticated
 
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     startAt = 0
     lim = 50 #max that the api allows
@@ -388,14 +391,14 @@ def mySavedAlbums(request):
 
     if isAjaxRequest(request):
         collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "album", "ajax": True})
-        return JsonResponse({'collection': collection}, status=200)
+        return JsonResponse({'collection': collection, 'status': 200 })
     else:
         return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "album", "ajax": False})
 
 def myArtists(request):
 
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     lim = 50
     artistInfo = sp.current_user_followed_artists(limit=lim)
@@ -421,14 +424,14 @@ def myArtists(request):
 
     if isAjaxRequest(request):
         collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": True})
-        return JsonResponse({'collection': collection}, status=200)
+        return JsonResponse({'collection': collection, 'status': 200 })
     else:
         return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": False})
 
 def myPodcasts(request):
 
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     startAt = 0
     lim = 50
@@ -459,13 +462,13 @@ def myPodcasts(request):
 
     if isAjaxRequest(request):
         collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "podcast", "ajax": True})
-        return JsonResponse({'collection': collection}, status=200)
+        return JsonResponse({'collection': collection, 'status': 200 })
     else:
         return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "podcast", "ajax": False})
 
 def artist(request, artist_id):
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     # create header info, turn this into a function
     header = getArtistHeaderInfo(sp, artist_id)
@@ -474,12 +477,15 @@ def artist(request, artist_id):
     if isAjaxRequest(request):
         page = render_to_string('webplayer/artistPage.html',
                         context={"header": header, "ajax": True, "loadContent": False})
-        return JsonResponse({"page": page}, status=200)
+        return JsonResponse({"page": page, 'status': 200 })
     else:
         return render(request, 'webplayer/artistPage.html',
                         context={"header": header, "ajax": False, "loadContent": False})
 
 def artistTopSongs(request, artist_id):
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
+
     info = []
     top = sp.artist_top_tracks(artist_id)
     sn = 1
@@ -501,7 +507,7 @@ def artistTopSongs(request, artist_id):
     content = createSongList(info, 'artist', 'spotify:artist:'+artist_id)
 
     if isAjaxRequest(request):
-        return JsonResponse({"content": content}, status=200)
+        return JsonResponse({"content": content, 'status': 200 })
     else:
         # if not ajax, have to get header info and insert content string into template
         header = getArtistHeaderInfo(sp, artist_id)
@@ -510,8 +516,8 @@ def artistTopSongs(request, artist_id):
                                  "loadContent": True, "ajax": False})
 
 def artistAlbums(request, artist_id):
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     info = []
     lim = 50
@@ -548,7 +554,7 @@ def artistAlbums(request, artist_id):
 
     # if ajax, just insert the collection of items into the page
     if isAjaxRequest(request):
-        return JsonResponse({"content": content}, status=200)
+        return JsonResponse({"content": content, 'status': 200 })
     else:
         # if not ajax, have to get header info and insert content string into template
         header = getArtistHeaderInfo(sp, artist_id)
@@ -557,8 +563,8 @@ def artistAlbums(request, artist_id):
                                "loadContent": True, "ajax": False})
 
 def artistRelated(request, artist_id):
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     # gets 20 related artists
     related = sp.artist_related_artists(artist_id)
@@ -574,7 +580,7 @@ def artistRelated(request, artist_id):
     content = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": True})
 
     if isAjaxRequest(request):
-        return JsonResponse({"content": content}, status=200)
+        return JsonResponse({"content": content, 'status': 200 })
     else:
         header = getArtistHeaderInfo(sp, artist_id)
         return render(request, 'webplayer/artistPage.html',
@@ -584,8 +590,8 @@ def artistRelated(request, artist_id):
 # Never return search_value back to ajax directly!!! (users would be able to insert html)
 # Render cleans input
 def search(request, search_value):
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     sr = sp.search(search_value, type="track,album,artist,playlist", limit=8)
 
@@ -664,8 +670,8 @@ def search(request, search_value):
                                                         "albums": albumRes,
                                                         "playlists": playlistRes,
                                                         "searchValue": search_value,
-                                                        "ajax": True})},
-            status=200
+                                                        "ajax": True}),
+            'status': 200 }
         )
     else:
         return render(
@@ -678,12 +684,12 @@ def search(request, search_value):
         )
 
 def settings(request):
-    if not validUser():
-        return redirect('splash')
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
     if isAjaxRequest(request):
         page = render_to_string('webplayer/settings.html', context={"ajax": True})
-        return JsonResponse({"page": page}, status=200)
+        return JsonResponse({"page": page, 'status': 200 })
     else:
         return render(request, 'webplayer/settings.html', context={"ajax": False})
 
