@@ -7,12 +7,12 @@
         <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
         <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css'%}">
         <script src="{% static 'lib/bootstrap/js/bootstrap.min.js'%}"></script>
-        <script src="{% static 'webplayer/script.js' %}" async></script>
+        <script src="{% static 'webplayer/script.js' %}"></script>
         <link rel="stylesheet" type="text/css" href="{% static 'webplayer/main.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'webplayer/queue.css' %}">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
         <script src="https://sdk.scdn.co/spotify-player.js"></script>
-        <script src="{% static 'webplayer/util.js' %}" async></script>
+        <script src="{% static 'webplayer/util.js' %}"></script>
         <link rel="icon" href="{% static 'Artboard_1_0.5x.png'%}">
         {% if title %} <title>Modivibe - {{ title }}</title>
         {% else %} <title>Modivibe</title>
@@ -91,7 +91,7 @@
             type: 'POST',
             url: "{% url 'setPlayback' %}",
             data: {
-               csrfmiddlewaretoken: '{{ csrf_token }}',
+               csrfmiddlewaretoken: csrftoken,
                device_id: deviceID,
                status: 'play',
                context_uri: contextURI,
@@ -116,7 +116,7 @@
             type: 'POST',
             url: "{% url 'toggleFollow' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 artist: contextURI,
                 follow: followStatus
             },
@@ -246,7 +246,7 @@
                 type: 'POST',
                 url: "{% url 'isFollowing' %}",
                 data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    csrfmiddlewaretoken: csrftoken,
                     artist: contextURI
                 },
                 success: function(response) {
