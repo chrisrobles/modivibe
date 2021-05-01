@@ -111,20 +111,20 @@
                <div class="row font-weight-bold">{{ referenceInfo.type|upper }}</div>
                {% if referenceInfo.type == 'artist' %}
                   <div class="row">Name: </div>
-                  <div class="row" id="artistName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
+                  <div class="row" id="referenceArtistName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
                {% elif referenceInfo.type == 'album' %}
                   <div class="row">Name: </div>
-                  <div class="row" id="albumName">{{ referenceInfo.name }}</div>
+                  <div class="row" id="referenceAlbumName">{{ referenceInfo.name }}</div>
                   <div class="row">Artist: </div>
-                  <div class="row" id="albumArtistName" data-uri="{{ referenceInfo.artistURI }}" data-name="{{ referenceInfo.artistName }}">{{ referenceInfo.artistName }}</div>
+                  <div class="row" id="referenceAlbumArtistName" data-uri="{{ referenceInfo.artistURI }}" data-name="{{ referenceInfo.artistName }}">{{ referenceInfo.artistName }}</div>
                {% elif referenceInfo.type == 'playlist' %}
                   <div class="row">Name: </div>
-                  <div class="row" id="playlistName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
+                  <div class="row" id="referencePlaylistName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
                {% elif referenceInfo.type == 'track' %}
                   <div class="row">Name: </div>
-                  <div class="row" id="trackName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
+                  <div class="row" id="referenceTrackName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
                   <div class="row">Artist: </div>
-                  <div class="row" id="trackArtistName" data-uri="{{ referenceInfo.artistURI }}" data-name="{{ referenceInfo.artistName }}">{{ referenceInfo.artistName }}</div>
+                  <div class="row" id="referenceTrackArtistName" data-uri="{{ referenceInfo.artistURI }}" data-name="{{ referenceInfo.artistName }}">{{ referenceInfo.artistName }}</div>
                {% endif %}
             </div>
          </div>
@@ -276,7 +276,7 @@
 </div>
 <script>
 
-   $('#artistName, #albumArtistName, #trackArtistName').each(function() {
+   $('#referenceArtistName, #referenceAlbumArtistName, #referenceTrackArtistName').each(function() {
       let artists = [
          {
             uri: $(this).attr('data-uri'),
@@ -286,43 +286,52 @@
       $(this).html(getArtistAsLinks(artists));
    });
 
-
+   $('#acousticness').text($('#acousticness_slider').val());
    $('#acousticness_slider').on('input', function() {
       $('#acousticness').text(this.value);
    });
 
+   $('#danceability').text($('#danceability_slider').val());
    $('#danceability_slider').on('input', function() {
       $('#danceability').text(this.value);
    });
 
+   $('#energy').text($('#energy_slider').val());
    $('#energy_slider').on('input', function() {
       $('#energy').text(this.value);
    });
 
+   $('#instrumentalness').text($('#instrumentalness_slider').val());
    $('#instrumentalness_slider').on('input', function() {
       $('#instrumentalness').text(this.value);
    });
 
+   $('#key').text($('#key_slider').val());
    $('#key_slider').on('input', function() {
       $('#key').text(this.value);
    });
 
+   $('#liveness').text($('#liveness_slider').val());
    $('#liveness_slider').on('input', function() {
       $('#liveness').text(this.value);
    });
 
+   $('#loudness').text($('#loudness_slider').val());
    $('#loudness_slider').on('input', function() {
       $('#loudness').text(this.value);
    });
 
+   $('#speechiness').text($('#speechiness_slider').val());
    $('#speechiness_slider').on('input', function() {
       $('#speechiness').text(this.value);
    });
 
+   $('#tempo').text($('#tempo_slider').val());
    $('#tempo_slider').on('input', function() {
       $('#tempo').text(this.value);
    });
 
+   $('#valence').text($('#valence_slider').val());
    $('#valence_slider').on('input', function() {
       $('#valence').text(this.value);
    });
