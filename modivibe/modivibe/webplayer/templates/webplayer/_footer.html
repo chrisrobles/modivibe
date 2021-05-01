@@ -136,6 +136,7 @@
             if(deviceState['track_window']['previous_tracks'][0])
             {
                 $('#QueueLast2 .Song').text(deviceState['track_window']['previous_tracks'][0]['name']);
+                $('#QueueLast2 .Song').attr('data-uri', deviceState['track_window']['previous_tracks'][0]['uri']);
                 $('#QueueLast2 .Album').attr('data-uri', deviceState['track_window']['previous_tracks'][0]['album']['uri']);
                 $('#QueueLast2 .Album').prop('src', deviceState['track_window']['previous_tracks'][0]['album']['images'][1]['url']);
                 $('#QueueLast2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['previous_tracks'][0]['artists']));
@@ -147,6 +148,7 @@
             // Update Queue - Last Song 1
             if(deviceState['track_window']['previous_tracks'][1]) {
                 $('#QueueLast1 .Song').text(deviceState['track_window']['previous_tracks'][1]['name']);
+                $('#QueueLast1 .Song').attr('data-uri', deviceState['track_window']['previous_tracks'][1]['uri']);
                 $('#QueueLast1 .Album').attr('data-uri', deviceState['track_window']['previous_tracks'][1]['album']['uri']);
                 $('#QueueLast1 .Album').prop('src', deviceState['track_window']['previous_tracks'][1]['album']['images'][1]['url']);
                 $('#QueueLast1 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['previous_tracks'][1]['artists']));
@@ -157,6 +159,7 @@
 
             // Update Queue - Current Song
             $('#QueueCurrent .Song').text(deviceState['track_window']['current_track']['name']);
+            $('#QueueCurrent .Song').attr('data-uri', deviceState['track_window']['current_track']['uri']);
             $('#QueueCurrent .Album').attr('data-uri', albumURI);
             $('#QueueCurrent .Album').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
             $('#QueueCurrent .ArtistContainer').html(artists);
@@ -164,6 +167,7 @@
             // Update Queue - Next Song 1
             if (deviceState['track_window']['next_tracks'][0]) {
                 $('#QueueNext1 .Song').text(deviceState['track_window']['next_tracks'][0]['name']);
+                $('#QueueNext1 .Song').attr('data-uri', deviceState['track_window']['next_tracks'][0]['uri']);
                 $('#QueueNext1 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][0]['album']['uri']);
                 $('#QueueNext1 .Album').prop('src', deviceState['track_window']['next_tracks'][0]['album']['images'][1]['url']);
                 $('#QueueNext1 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][0]['artists']));
@@ -175,6 +179,7 @@
             // Update Queue - Next Song 2
             if (deviceState['track_window']['next_tracks'][1]) {
                 $('#QueueNext2 .Song').text(deviceState['track_window']['next_tracks'][1]['name']);
+                $('#QueueNext2 .Song').attr('data-uri', deviceState['track_window']['next_tracks'][1]['uri']);
                 $('#QueueNext2 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][1]['album']['uri']);
                 $('#QueueNext2 .Album').prop('src', deviceState['track_window']['next_tracks'][1]['album']['images'][1]['url']);
                 $('#QueueNext2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][1]['artists']));

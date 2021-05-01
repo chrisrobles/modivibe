@@ -79,7 +79,22 @@ def getContextURIInfo(referenceURI):
             'tracks': tracks
         }
     elif referenceType == 'track':
-        referenceData = None # TODO
+        trackInfo = sp.track(referenceURI)
+        albumInfo = sp.album_tracks(trackInfo['album']['uri'])
+        tracks = [referenceURI]
+        randomTracks = sample(albumInfo['items'], 3)
+        for track in randomTracks:
+            trackURI = track['uri']
+            tracks.append(trackURI)
+        referenceData = {
+            'type': referenceType,
+            'name': trackInfo['name'],
+            'image': trackInfo['album']['images'][0]['url'] if trackInfo['album']['images'] else 'default',
+            'uri': trackInfo['uri'],
+            'artistURI': trackInfo['artists'][0]['uri'],
+            'artistName': trackInfo['artists'][0]['name'],
+            'tracks': tracks
+        }
     return referenceData
 
 # After logging in, we're redirected to this redirect uri
@@ -340,7 +355,9 @@ def getRecommendations(request):
         tracks = reference['tracks'][:5]
         # Total Seeds: (5) tracks from playlist
     elif reference['type'] == 'track':
-        print('track')
+        artists = [reference['artistURI']]
+        tracks = reference['tracks'][:4]
+        # Total Seeds: (1) artists + (1-4) track & tracks from album
     else:
         return HttpResponse(False)
     print('Seeds:', genres, tracks, artists)
