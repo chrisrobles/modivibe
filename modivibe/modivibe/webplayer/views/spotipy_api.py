@@ -5,7 +5,7 @@ from ..SpotifyApiObjs import sp, auth_manager, cache_handler
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
 from .create_html import *
-from random import choice
+from random import choice, sample
 import json
 import pprint
 
@@ -61,6 +61,22 @@ def getContextURIInfo(referenceURI):
             'genres': genres[:7],
             'artistURI': albumInfo['artists'][0]['uri'],
             'artistName': artistInfo['name']
+        }
+    elif referenceType == 'playlist':
+        playlistInfo = sp.playlist(referenceURI)
+        tracks = []
+        randomTracks = sample(playlistInfo['tracks']['items'], 15)
+        for track in randomTracks:
+            trackURI = track['track']['uri']
+            if trackURI.split(':')[1] == 'local':
+                continue
+            tracks.append(trackURI)
+        referenceData = {
+            'type': referenceType,
+            'name': playlistInfo['name'],
+            'image': playlistInfo['images'][0]['url'] if playlistInfo['images'] else 'default',
+            'uri': playlistInfo['uri'],
+            'tracks': tracks
         }
     elif referenceType == 'track':
         referenceData = None # TODO
@@ -311,19 +327,18 @@ def getRecommendations(request):
     genres, tracks, artists = [], [], []
     if reference['type'] == 'artist':
         artists = [reference['uri']]
-        for genre in reference['genres']:
-            genres.append(genre)
-        genres = genres[:4]
+        genres = reference['genres'][:4]
         # Total Seeds: (1) artist + (1-4) genres
     elif reference['type'] == 'album':
         artists = [reference['artistURI']]
-        for genre in reference['genres']:
-            genres.append(genre)
-        genres = genres[:3]
+        genres = reference['genres'][:3]
         albumTracks = sp.album_tracks(reference['uri'])
         randomTrack = choice(albumTracks['items'])
         tracks.append(randomTrack['uri'])
         # Total Seeds: (1) artist + (1-3) genres + (1) track from album
+    elif reference['type'] == 'playlist':
+        tracks = reference['tracks'][:5]
+        # Total Seeds: (5) tracks from playlist
     elif reference['type'] == 'track':
         print('track')
     else:

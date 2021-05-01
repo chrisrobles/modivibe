@@ -117,6 +117,9 @@
                   <div class="row" id="albumName">{{ referenceInfo.name }}</div>
                   <div class="row">Artist: </div>
                   <div class="row" id="albumArtistName" data-uri="{{ referenceInfo.artistURI }}" data-name="{{ referenceInfo.artistName }}">{{ referenceInfo.artistName }}</div>
+               {% elif referenceInfo.type == 'playlist' %}
+                  <div class="row">Name: </div>
+                  <div class="row" id="playlistName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
                {% endif %}
             </div>
          </div>
