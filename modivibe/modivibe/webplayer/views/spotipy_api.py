@@ -5,6 +5,7 @@ from ..SpotifyApiObjs import sp, auth_manager, cache_handler
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
 from .create_html import *
+from random import choice
 import json
 import pprint
 
@@ -45,7 +46,22 @@ def getContextURIInfo(referenceURI):
             'genres': artistInfo['genres'][:7],
         }
     elif referenceType == 'album':
-        referenceData = None # TODO
+        albumInfo = sp.album(referenceURI)
+        artistURI = albumInfo['artists'][0]['uri']
+        artistInfo = sp.artist(artistURI)
+        if len(albumInfo['genres']) > 0:
+            genres = albumInfo['genres']
+        else:
+            genres = artistInfo['genres']
+        referenceData = {
+            'type': referenceType,
+            'name': albumInfo['name'],
+            'image': albumInfo['images'][0]['url'] if albumInfo['images'] else 'default',
+            'uri': albumInfo['uri'],
+            'genres': genres[:7],
+            'artistURI': albumInfo['artists'][0]['uri'],
+            'artistName': artistInfo['name']
+        }
     elif referenceType == 'track':
         referenceData = None # TODO
     return referenceData
@@ -300,7 +316,14 @@ def getRecommendations(request):
         genres = genres[:4]
         # Total Seeds: (1) artist + (1-4) genres
     elif reference['type'] == 'album':
-        print('album')
+        artists = [reference['artistURI']]
+        for genre in reference['genres']:
+            genres.append(genre)
+        genres = genres[:3]
+        albumTracks = sp.album_tracks(reference['uri'])
+        randomTrack = choice(albumTracks['items'])
+        tracks.append(randomTrack['uri'])
+        # Total Seeds: (1) artist + (1-3) genres + (1) track from album
     elif reference['type'] == 'track':
         print('track')
     else:
@@ -329,7 +352,7 @@ def getRecommendations(request):
             target_tempo=features.get('tempo', None),
             target_valence=features.get('valence', None)
         )
-        print(generatedRecommendations)
+        print('Recommendations:', generatedRecommendations)
         return JsonResponse(generatedRecommendations, status=200)
     except SpotifyException:
         return HttpResponse(False)

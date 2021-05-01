@@ -109,9 +109,15 @@
             </div>
             <div class="col-6">
                <div class="row font-weight-bold">{{ referenceInfo.type|upper }}</div>
-               <div class="row">
-                  Name: {{ referenceInfo.name }}
-               </div>
+               {% if referenceInfo.type == 'artist' %}
+                  <div class="row">Name: </div>
+                  <div class="row" id="artistName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
+               {% elif referenceInfo.type == 'album' %}
+                  <div class="row">Name: </div>
+                  <div class="row" id="albumName">{{ referenceInfo.name }}</div>
+                  <div class="row">Artist: </div>
+                  <div class="row" id="albumArtistName" data-uri="{{ referenceInfo.artistURI }}" data-name="{{ referenceInfo.artistName }}">{{ referenceInfo.artistName }}</div>
+               {% endif %}
             </div>
          </div>
          <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
@@ -261,6 +267,18 @@
    </div>
 </div>
 <script>
+
+   $('#artistName, #albumArtistName').each(function() {
+      let artists = [
+         {
+            uri: $(this).attr('data-uri'),
+            name: $(this).attr('data-name')
+         }
+      ]
+      $(this).html(getArtistAsLinks(artists));
+   });
+
+
    $('#acousticness_slider').on('input', function() {
       $('#acousticness').text(this.value);
    });
