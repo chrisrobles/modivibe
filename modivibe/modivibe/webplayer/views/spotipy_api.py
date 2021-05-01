@@ -31,6 +31,25 @@ def getUserAccessCode():
 def isAjaxRequest(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
+
+def getContextURIInfo(referenceURI):
+    referenceData = None
+    referenceType = referenceURI.split(':')[1]
+    if referenceType == 'artist':
+        artistInfo = sp.artist(referenceURI)
+        referenceData = {
+            'type': referenceType,
+            'name': artistInfo['name'],
+            'image': artistInfo['images'][0]['url'] if artistInfo['images'] else 'default',
+            'uri': artistInfo['uri'],
+            'genres': artistInfo['genres'][:7],
+        }
+    elif referenceType == 'album':
+        referenceData = None # TODO
+    elif referenceType == 'track':
+        referenceData = None # TODO
+    return referenceData
+
 # After logging in, we're redirected to this redirect uri
 # Verifies that a valid code is given and redirects user to proper page
 # Does not require an html page
@@ -268,19 +287,36 @@ def helperButton(request):
 
 
 def getRecommendations(request):
+    reference = request.POST.get('reference', None)
+    if not reference:
+        return HttpResponse(False)
+    reference = json.loads(reference)
+
+    genres, tracks, artists = [], [], []
+    if reference['type'] == 'artist':
+        artists = [reference['uri']]
+        for genre in reference['genres']:
+            genres.append(genre)
+        genres = genres[:4]
+        # Total Seeds: (1) artist + (1-4) genres
+    elif reference['type'] == 'album':
+        print('album')
+    elif reference['type'] == 'track':
+        print('track')
+    else:
+        return HttpResponse(False)
+    print('Seeds:', genres, tracks, artists)
+
     features = request.POST.get('features', None)
     if not features:
         return HttpResponse(False)
     features = json.loads(features)
 
-    genres = sp.recommendation_genre_seeds()
-    #return HttpResponse(False)
-
     try:
         generatedRecommendations = sp.recommendations(
-            seed_genres=None,
-            seed_tracks=None,
-            seed_artists=['spotify:artist:0Riv2KnFcLZA3JSVryRg4y'],
+            seed_genres=genres,
+            seed_tracks=tracks,
+            seed_artists=artists,
             limit=20,
             target_acousticness=features.get('acousticness', None),
             target_danceability=features.get('danceability', None),

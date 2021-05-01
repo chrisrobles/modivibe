@@ -130,6 +130,29 @@
         });
     });
 
+    $(document).on('click', '.RecommendationRequest', function(e) {
+        e.preventDefault();
+        let contextURI = $(this).attr('data-uri');
+        console.log(`Attempting to pass information for recommendations based of: ${contextURI}`);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'recommendations' %}",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                context_uri: contextURI
+            },
+            success: function(response) {
+                if(response.status == 200) {
+                    $(".content").first().html(response.page);
+                    $("html, .content").animate({ scrollTop: 0 }, "fast");
+                }
+                else {
+                    window.location="/";
+                }
+            }
+        });
+    });
+
     $(document).on('contextmenu', function(e) {
         if (e.ctrlKey) return; // Temporary method for overcoming the mouse-menu
         e.preventDefault(); // Prevent browser right-click menu
@@ -148,6 +171,7 @@
                 <li><button class="PlayRequest" data-uri="${dataURI}">Play Artist</button></li>
                 <li><button>Follow Artist</button></li>
                 <li><button>Go to Artist</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
         }
         else if ($(clickTarget).hasClass('Playlist') || $(clickTarget).parents('.Playlist').length) {

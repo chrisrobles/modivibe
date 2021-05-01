@@ -105,17 +105,16 @@
          <hr class="col-xs-12" style="border: 1px solid #bfbfbf; margin-top: 0;">
          <div id="recommendationReference" class="row">
             <div class="col-6">
-               <img src="" alt="Album"></img>
+               <img src="{{referenceInfo.image}}" alt="Album"></img>
             </div>
             <div class="col-6">
+               <div class="row font-weight-bold">{{ referenceInfo.type|upper }}</div>
                <div class="row">
-                  TYPE: idk
-               </div>
-               <div class="row">
-                  NAME: idk
+                  Name: {{ referenceInfo.name }}
                </div>
             </div>
          </div>
+         <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
          <button id="recommend" class='col-12' style="color: darkgrey; border: 1px solid white;">GENERATE RECOMMENDATIONS</button>
          <ul id="generatedRecommendations" class="QueueContainer" style="width: 100%;">
 
@@ -262,88 +261,58 @@
    </div>
 </div>
 <script>
-   let acousticness_slider = document.getElementById("acousticness_slider");
-   let acousticness = document.getElementById("acousticness");
-   acousticness.innerHTML = acousticness_slider.value; // Display the default slider value
-   acousticness_slider.oninput = function() {
-     acousticness.innerHTML = this.value;
-   }
+   $('#acousticness_slider').on('input', function() {
+      $('#acousticness').text(this.value);
+   });
 
-   let danceability_slider = document.getElementById("danceability_slider");
-   let danceability = document.getElementById("danceability");
-   danceability.innerHTML = danceability_slider.value; // Display the default slider value
-   danceability_slider.oninput = function() {
-     danceability.innerHTML = this.value;
-   }
+   $('#danceability_slider').on('input', function() {
+      $('#danceability').text(this.value);
+   });
 
-   let energy_slider = document.getElementById("energy_slider");
-   let energy = document.getElementById("energy");
-   energy.innerHTML = acousticness_slider.value; // Display the default slider value
-   energy_slider.oninput = function() {
-     energy.innerHTML = this.value;
-   }
+   $('#energy_slider').on('input', function() {
+      $('#energy').text(this.value);
+   });
 
-   let instrumentalness_slider = document.getElementById("instrumentalness_slider");
-   let instrumentalness = document.getElementById("instrumentalness");
-   instrumentalness.innerHTML = instrumentalness_slider.value; // Display the default slider value
-   instrumentalness_slider.oninput = function() {
-     instrumentalness.innerHTML = this.value;
-   }
+   $('#instrumentalness_slider').on('input', function() {
+      $('#instrumentalness').text(this.value);
+   });
 
-   let key_slider = document.getElementById("key_slider");
-   let key = document.getElementById("key");
-   key.innerHTML = key_slider.value; // Display the default slider value
-   key_slider.oninput = function() {
-     key.innerHTML = this.value;
-   }
+   $('#key_slider').on('input', function() {
+      $('#key').text(this.value);
+   });
 
-   let liveness_slider = document.getElementById("liveness_slider");
-   let liveness = document.getElementById("liveness");
-   liveness.innerHTML = liveness_slider.value; // Display the default slider value
-   liveness_slider.oninput = function() {
-     liveness.innerHTML = this.value;
-   }
+   $('#liveness_slider').on('input', function() {
+      $('#liveness').text(this.value);
+   });
 
-   let loudness_slider = document.getElementById("loudness_slider");
-   let loudness = document.getElementById("loudness");
-   loudness.innerHTML = loudness_slider.value; // Display the default slider value
-   loudness_slider.oninput = function() {
-     loudness.innerHTML = this.value;
-   }
+   $('#loudness_slider').on('input', function() {
+      $('#loudness').text(this.value);
+   });
 
-   let speechiness_slider = document.getElementById("speechiness_slider");
-   let speechiness = document.getElementById("speechiness");
-   speechiness.innerHTML = speechiness_slider.value; // Display the default slider value
-   speechiness_slider.oninput = function() {
-     speechiness.innerHTML = this.value;
-   }
+   $('#speechiness_slider').on('input', function() {
+      $('#speechiness').text(this.value);
+   });
 
-   let tempo_slider = document.getElementById("tempo_slider");
-   let tempo = document.getElementById("tempo");
-   tempo.innerHTML = tempo_slider.value; // Display the default slider value
-   tempo_slider.oninput = function() {
-     tempo.innerHTML = this.value;
-   }
+   $('#tempo_slider').on('input', function() {
+      $('#tempo').text(this.value);
+   });
 
-   let valence_slider = document.getElementById("valence_slider");
-   let valence = document.getElementById("valence");
-   valence.innerHTML = valence_slider.value; // Display the default slider value
-   valence_slider.oninput = function() {
-     valence.innerHTML = this.value;
-   }
+   $('#valence_slider').on('input', function() {
+      $('#valence').text(this.value);
+   });
 
    $('#recommend').on('click', function() {
       let songFeatures = {
-         'acousticness': acousticness_slider.value,
-         'danceability': danceability_slider.value,
-         'energy': energy_slider.value,
-         'instrumentalness': instrumentalness_slider.value,
-         'key': key_slider.value,
-         'liveness': liveness_slider.value,
-         'loudness': loudness_slider.value,
-         'speechiness': speechiness_slider.value,
-         'tempo': tempo_slider.value,
-         'valence': valence_slider.value
+         'acousticness': $('#acousticness_slider').val(),
+         'danceability': $('#danceability_slider').val(),
+         'energy': $('#energy_slider').val(),
+         'instrumentalness': $('#instrumentalness_slider').val(),
+         'key': $('#key_slider').val(),
+         'liveness': $('#liveness_slider').val(),
+         'loudness': $('#loudness_slider').val(),
+         'speechiness': $('#speechiness_slider').val(),
+         'tempo': $('#tempo_slider').val(),
+         'valence': $('#valence_slider').val()
       }
       console.log(songFeatures);
       $.ajax({
@@ -351,6 +320,7 @@
          url: "{% url 'getRecommendations' %}",
          data: {
             csrfmiddlewaretoken: csrftoken,
+            reference: `{{ referenceString|safe }}`,
             features: JSON.stringify(songFeatures)
          },
          success: function(response) {
@@ -367,6 +337,9 @@
                   let trackArtists = getArtistAsLinks(currentTrack['artists']);
                   $('#generatedRecommendations').append(`
                      <li class="QueueItem" data-uri="${trackURI}" parent-uri="${albumURI}">
+                        <span class="PlayRequest material-icons md-light md-24" data-uri="${trackURI}" data-parent-uri="${albumURI}" style="align-self: center; margin-right: 10px;">
+                            play_arrow
+                        </span>
                         <img class="Album" src="${albumArt}" alt="Album" data-uri="${albumURI}">
                         <div class="TrackInfoContainer">
                             <p class="Song" data-uri="${trackURI}">${trackName}</p>
@@ -377,7 +350,7 @@
                }
 
             } else {
-               console.log('Failed to collect follow status');
+               console.log('Failed to generate recommendations');
             }
          },
       });

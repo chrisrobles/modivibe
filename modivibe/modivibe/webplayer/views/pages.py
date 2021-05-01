@@ -5,8 +5,9 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from ..SpotifyApiObjs import sp, auth_manager
 from spotipy.oauth2 import SpotifyOauthError
-from .spotipy_api import validUser, isAjaxRequest, getUserAccessCode
+from .spotipy_api import validUser, isAjaxRequest, getUserAccessCode, getContextURIInfo
 from .create_html import *
+from json import dumps
 
 
 # Login flow: splash, click loginurl -> redirectToHome -> splash or home
@@ -46,9 +47,16 @@ def recommendations(request):
     if not userAccessCode:
         return redirect('splash')
 
+    referenceURI = request.POST.get('context_uri', None)
+    referenceInfo = getContextURIInfo(referenceURI) if referenceURI else None
+    referenceString = dumps(referenceInfo)
+    print('Loading:', referenceString)
+
     context = {
         'userAccessCode': userAccessCode,
-        'ajax': isAjaxRequest(request)
+        'ajax': isAjaxRequest(request),
+        'referenceInfo': referenceInfo,
+        'referenceString': referenceString
     }
 
     if context['ajax'] is True:
