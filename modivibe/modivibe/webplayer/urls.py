@@ -6,7 +6,7 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.splash, name='splash'),
     path('webplayer', views.home, name='webplayer'),
-    path('webplayer/settings', views.settings, name='webplayer/settings'),
+    path('settings', views.settings, name='settings'),
 
     # SPOTIPY API
     path('redirectToHome', views.redirectToHome, name='redirectToHome'),
