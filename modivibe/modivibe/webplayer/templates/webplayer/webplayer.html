@@ -209,6 +209,10 @@
             `);
         }
         else if ($(clickTarget).hasClass('Song') || $(clickTarget).parents('.Song').length) {
+            if (dataURI === null) {
+                let parentDataURI = $(clickTarget).parents('.Song')[0];
+                dataURI = parentDataURI ? $(parentDataURI).data('uri') : null;
+            }
             $('.mouse-menu ul').html(`
                 <li><button>Add to Queue</button></li>
                 <li><button>Add to Playlist</button></li>
