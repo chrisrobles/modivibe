@@ -65,7 +65,10 @@ def getContextURIInfo(referenceURI):
     elif referenceType == 'playlist':
         playlistInfo = sp.playlist(referenceURI)
         tracks = []
-        randomTracks = sample(playlistInfo['tracks']['items'], 15)
+        if len(playlistInfo['tracks']['items']) > 15:
+            randomTracks = sample(playlistInfo['tracks']['items'], 15)
+        else:
+            randomTracks = playlistInfo['tracks']['items']
         for track in randomTracks:
             trackURI = track['track']['uri']
             if trackURI.split(':')[1] == 'local':
@@ -82,7 +85,10 @@ def getContextURIInfo(referenceURI):
         trackInfo = sp.track(referenceURI)
         albumInfo = sp.album_tracks(trackInfo['album']['uri'])
         tracks = [referenceURI]
-        randomTracks = sample(albumInfo['items'], 3)
+        if len(albumInfo['items']) > 3:
+            randomTracks = sample(albumInfo['items'], 3)
+        else:
+            randomTracks = albumInfo['items']
         for track in randomTracks:
             trackURI = track['uri']
             tracks.append(trackURI)
