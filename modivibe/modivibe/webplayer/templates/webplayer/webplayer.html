@@ -145,6 +145,9 @@
                 if(response.status == 200) {
                     $(".content").first().html(response.page);
                     $("html, .content").animate({ scrollTop: 0 }, "fast");
+                    if ($('.mouse-menu').is(':visible')) {
+                       $('.mouse-menu').hide();
+                    }
                 }
                 else {
                     window.location="/";
