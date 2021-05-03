@@ -6,7 +6,7 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.splash, name='splash'),
     path('webplayer', views.home, name='webplayer'),
-    path('webplayer/settings', views.settings, name='webplayer/settings'),
+    path('settings', views.settings, name='settings'),
 
     # SPOTIPY API
     path('redirectToHome', views.redirectToHome, name='redirectToHome'),
@@ -40,4 +40,8 @@ urlpatterns = [
 
     # search bar
     path('search/<str:search_value>', views.search, name='search'),
+
+    # recommendations
+    path('recommendations', views.recommendations, name='recommendations'),
+    path('getRecommendations', views.getRecommendations, name='getRecommendations'),
 ]

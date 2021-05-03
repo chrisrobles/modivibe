@@ -1,12 +1,14 @@
 # All views here will be dedicated to API calls
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from ..SpotifyApiObjs import sp, auth_manager, cache_handler
 from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
-from django.template.loader import render_to_string
+from .create_html import *
+from random import choice, sample
+import json
 import pprint
-from webplayer.views.create_html import *
+
 
 def validUser(request):
     cache_handler.set_session(request.session) # leave in or take out? better to update or not?
@@ -18,8 +20,104 @@ def validUser(request):
         return False
     return True
 
+
+def getUserAccessCode():
+    try:
+        code = auth_manager.get_access_token().get('access_token')
+        return code
+    except:
+        return None
+
+
 def isAjaxRequest(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+
+def getContextURIInfo(referenceURI):
+    referenceData = None
+    referenceType = referenceURI.split(':')[1]
+    if referenceType == 'artist':
+        artistInfo = sp.artist(referenceURI)
+        referenceData = {
+            'type': referenceType,
+            'name': artistInfo['name'],
+            'image': artistInfo['images'][0]['url'] if artistInfo['images'] else 'default',
+            'uri': artistInfo['uri'],
+            'genres': artistInfo['genres'][:7],
+        }
+    elif referenceType == 'album':
+        albumInfo = sp.album(referenceURI)
+        artistURI = albumInfo['artists'][0]['uri']
+        artistInfo = sp.artist(artistURI)
+        if len(albumInfo['genres']) > 0:
+            genres = albumInfo['genres']
+        else:
+            genres = artistInfo['genres']
+        referenceData = {
+            'type': referenceType,
+            'name': albumInfo['name'],
+            'image': albumInfo['images'][0]['url'] if albumInfo['images'] else 'default',
+            'uri': albumInfo['uri'],
+            'genres': genres[:7],
+            'artistURI': albumInfo['artists'][0]['uri'],
+            'artistName': artistInfo['name']
+        }
+    elif referenceType == 'playlist':
+        playlistInfo = sp.playlist(referenceURI)
+        tracks = []
+        if len(playlistInfo['tracks']['items']) > 15:
+            randomTracks = sample(playlistInfo['tracks']['items'], 15)
+        else:
+            randomTracks = playlistInfo['tracks']['items']
+        for track in randomTracks:
+            trackURI = track['track']['uri']
+            if trackURI.split(':')[1] == 'local':
+                continue
+            tracks.append(trackURI)
+        referenceData = {
+            'type': referenceType,
+            'name': playlistInfo['name'],
+            'image': playlistInfo['images'][0]['url'] if playlistInfo['images'] else 'default',
+            'uri': playlistInfo['uri'],
+            'tracks': tracks
+        }
+    elif referenceType == 'track':
+        trackInfo = sp.track(referenceURI)
+        albumInfo = sp.album_tracks(trackInfo['album']['uri'])
+        tracks = [referenceURI]
+        if len(albumInfo['items']) > 3:
+            randomTracks = sample(albumInfo['items'], 3)
+        else:
+            randomTracks = albumInfo['items']
+        for track in randomTracks:
+            trackURI = track['uri']
+            tracks.append(trackURI)
+
+        trackFeatures = sp.audio_features(referenceURI)
+        features = {
+            'acousticness': trackFeatures[0]['acousticness'],
+            'danceability': trackFeatures[0]['danceability'],
+            'energy': trackFeatures[0]['energy'],
+            'instrumentalness': trackFeatures[0]['instrumentalness'],
+            'key': trackFeatures[0]['key'],
+            'liveness': trackFeatures[0]['liveness'],
+            'loudness': trackFeatures[0]['loudness'],
+            'speechiness': trackFeatures[0]['speechiness'],
+            'tempo': trackFeatures[0]['tempo'],
+            'valence': trackFeatures[0]['valence']
+        }
+
+        referenceData = {
+            'type': referenceType,
+            'name': trackInfo['name'],
+            'image': trackInfo['album']['images'][0]['url'] if trackInfo['album']['images'] else 'default',
+            'uri': trackInfo['uri'],
+            'artistURI': trackInfo['artists'][0]['uri'],
+            'artistName': trackInfo['artists'][0]['name'],
+            'tracks': tracks,
+            'trackFeatures': features
+        }
+    return referenceData
 
 # After logging in, we're redirected to this redirect uri
 # Verifies that a valid code is given and redirects user to proper page
@@ -257,440 +355,62 @@ def helperButton(request):
     return HttpResponse(response)
 
 
-# Display all of the current user's playlists
-# my/playlists
-def myPlaylists(request):
-    # check a user is authenticated
-    # also refreshes token if expired
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
+def getRecommendations(request):
+    reference = request.POST.get('reference', None)
+    if not reference:
+        return HttpResponse(False)
+    reference = json.loads(reference)
 
-    startAt = 0
-    lim = 50 # 50 is max for api request
-
-    plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
-    numPLs = plInfo['total']    # total number of playlists the user has
-
-    info = []
-
-    for p in plInfo['items']:
-        info.append({
-        'contentImg':  p['images'][0]['url'] if p['images'] else 'default',
-        'contentName': p['name'],
-        'contentId' :  p['id']
-        })
-
-        # if there are still more playlists to get
-    while lim + startAt < numPLs:
-        startAt += lim
-        plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
-
-        for p in plInfo['items']:
-            info.append({
-                'contentImg': p['images'][0]['url'] if p['images'] else 'default',
-                'contentName': p['name'],
-                'contentId': p['id']
-            })
-
-    if isAjaxRequest(request):
-        collection = render_to_string('webplayer/collectionItems.html', context={"info" : info, "type": "playlist", "ajax": True})
-        return JsonResponse({'collection': collection, 'status': 200 })
+    genres, tracks, artists = [], [], []
+    if reference['type'] == 'artist':
+        artists = [reference['uri']]
+        genres = reference['genres'][:4]
+        # Total Seeds: (1) artist + (1-4) genres
+    elif reference['type'] == 'album':
+        artists = [reference['artistURI']]
+        genres = reference['genres'][:3]
+        albumTracks = sp.album_tracks(reference['uri'])
+        randomTrack = choice(albumTracks['items'])
+        tracks.append(randomTrack['uri'])
+        # Total Seeds: (1) artist + (1-3) genres + (1) track from album
+    elif reference['type'] == 'playlist':
+        tracks = reference['tracks'][:5]
+        # Total Seeds: (5) tracks from playlist
+    elif reference['type'] == 'track':
+        artists = [reference['artistURI']]
+        tracks = reference['tracks'][:4]
+        # Total Seeds: (1) artists + (1-4) track & tracks from album
     else:
-        return render(request, 'webplayer/collectionItems.html', context={"info" : info, "type": "playlist", "ajax": False})
-
-def playlist(request, playlist_id):
-
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    if isAjaxRequest(request):
-        startAt = 0
-        lim = 100
-        pNo = 1
-
-        slInfo = sp.playlist_items(playlist_id=playlist_id, limit=lim, offset=startAt)
-        numSongs = slInfo['total'] # total number of songs in a playlist
-
-        info = []
-
-
-        for s in slInfo['items']:
-            info.append({
-                "songNum":       pNo,
-                "songName":     s['track']['name'],
-                "songId":       s['track']['id'],
-                "songURI":      s['track']['uri'],
-                "songArtist":   s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
-                "artistId":     s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
-                "songLength":   s['track']['duration_ms']
-            })
-
-            pNo += 1
-
-        while lim + startAt < numSongs:
-            startAt += lim
-            slInfo = sp.playlist_items(playlist_id=playlist_id, limit=lim, offset=startAt)
-            for s in slInfo['items']:
-                info.append({
-                    "songNum":      pNo,
-                    "songName":     s['track']['name'],
-                    "songId":       s['track']['id'],
-                    "songURI":      s['track']['uri'],
-                    "songArtist":   s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
-                    "artistId":     s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
-                    "songLength":   s['track']['duration_ms']
-                })
-
-                pNo += 1
-
-        page = createSongList(info, 'playlist', 'spotify:playlist:'+playlist_id)
-
-        return JsonResponse({'page': page, 'status': 200 })
-
-    return redirect('webplayer') # fix this <------- need html page
-
-def mySavedAlbums(request):
-    #check if user is authenticated
-
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    startAt = 0
-    lim = 50 #max that the api allows
-
-    albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
-    numAlbums = albumInfo['total'] #total # of albums the user has saved
-
-    info = []
-
-    for a in albumInfo['items']:
-        info.append({
-            'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
-            'contentName': a['album']['name'],
-            'contentId': a['album']['id'],
-            'artist': a['album']['artists'][0]['name'],
-            'artistId': a['album']['artists'][0]['id'],
-            'albumDate': a['album']['release_date'][0:4]
-        })
-
-    while lim + startAt < numAlbums:
-        startAt += lim
-        albumInfo = sp.current_user_saved_albums(limit=lim, offset=startAt)
-
-        for a in albumInfo['items']:
-            info.append({
-            'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
-            'contentName': a['album']['name'],
-            'contentId': a['album']['id'],
-            'artist': a['album']['artists'][0]['name'],
-            'artistId': a['album']['artists'][0]['id'],
-            'albumDate': a['album']['release_date'][0:4]
-        })
-            
-
-    if isAjaxRequest(request):
-        collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "album", "ajax": True})
-        return JsonResponse({'collection': collection, 'status': 200 })
-    else:
-        return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "album", "ajax": False})
-
-def myArtists(request):
-
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    lim = 50
-    artistInfo = sp.current_user_followed_artists(limit=lim)
-    info = []
-
-    for a in artistInfo['artists']['items']:
-        info.append({
-            'contentImg':  a['images'][0]['url'] if a['images'] else 'default',
-            'contentName': a['name'],
-            'contentId' :  a['id']
-        })
-
-    while artistInfo['artists']['next']:
-        lastArtistReceived = artistInfo['artists']['cursors']['after']
-        artistInfo = sp.current_user_followed_artists(limit=lim, after=lastArtistReceived)
-
-        for a in artistInfo['artists']['items']:
-            info.append({
-                'contentImg':   a['images'][0]['url'] if a['images'] else 'default',
-                'contentName':  a['name'],
-                'contentId':    a['id']
-            })
-
-    if isAjaxRequest(request):
-        collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": True})
-        return JsonResponse({'collection': collection, 'status': 200 })
-    else:
-        return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": False})
-
-def myPodcasts(request):
-
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    startAt = 0
-    lim = 50
-
-    podcastInfo = sp.current_user_saved_shows(limit=lim, offset=startAt)
-    total = podcastInfo['total']
-    info = []
-
-    for p in podcastInfo['items']:
-        info.append({
-            'contentImg':   p['show']['images'][0]['url'] if p['show']['images'] else 'default',
-            'contentName':  p['show']['name'],
-            'contentId':    p['show']['id'],
-            'publisher':    p['show']['publisher']
-        })
-
-    while lim + startAt < total:
-        startAt += lim
-        podcastInfo = sp.current_user_saved_shows(limit=lim, offset=startAt)
-
-        for p in podcastInfo['items']:
-            info.append({
-                'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else 'default',
-                'contentName': p['show']['name'],
-                'contentId': p['show']['id'],
-                'publisher': p['show']['publisher']
-            })
-
-    if isAjaxRequest(request):
-        collection = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "podcast", "ajax": True})
-        return JsonResponse({'collection': collection, 'status': 200 })
-    else:
-        return render(request, 'webplayer/collectionItems.html', context={"info": info, "type": "podcast", "ajax": False})
-
-def artist(request, artist_id):
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    # create header info, turn this into a function
-    header = getArtistHeaderInfo(sp, artist_id)
-
-    # artist page is just their picture and information by default, tabs will be used to show anything
-    if isAjaxRequest(request):
-        page = render_to_string('webplayer/artistPage.html',
-                        context={"header": header, "ajax": True, "loadContent": False})
-        return JsonResponse({"page": page, 'status': 200 })
-    else:
-        return render(request, 'webplayer/artistPage.html',
-                        context={"header": header, "ajax": False, "loadContent": False})
-
-def artistTopSongs(request, artist_id):
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    info = []
-    top = sp.artist_top_tracks(artist_id)
-    sn = 1
-    for song in top['tracks']:
-        info.append({
-            'songNum': sn,
-            'songName': song['name'],
-            'songId': song['id'],
-            'songLength': song['duration_ms'],
-            'songAlbum': song['album']['name'],
-            'songAlbumId': song['album']['id'],
-            'songURI': song['uri'],
-            'artistId': song['album']['artists'][0]['id'],
-            'songArtist': song['album']['artists'][0]['name']
-        })
-
-        sn += 1
-
-    content = createSongList(info, 'artist', 'spotify:artist:'+artist_id)
-
-    if isAjaxRequest(request):
-        return JsonResponse({"content": content, 'status': 200 })
-    else:
-        # if not ajax, have to get header info and insert content string into template
-        header = getArtistHeaderInfo(sp, artist_id)
-        return render(request, 'webplayer/artistPage.html',
-                        context={"header": header, "content": content, "contentType": "topSongs",
-                                 "loadContent": True, "ajax": False})
-
-def artistAlbums(request, artist_id):
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    info = []
-    lim = 50
-    startAt = 0
-    albums = sp.artist_albums(artist_id, album_type='album,single', limit=lim, offset=startAt)
-    numAlbums = albums['total']
-
-    for a in albums['items']:
-        info.append({
-            'contentImg': a['images'][0]['url'] if a['images'] else 'default',
-            'contentName': a['name'],
-            'contentId': a['id'],
-            'artist': a['artists'][0]['name'],
-            'artistId': a['artists'][0]['id'],
-            'albumDate': a['release_date'][0:4]
-        })
-
-    while lim + startAt < numAlbums:
-        startAt += lim
-        albums = sp.artist_albums(artist_id, album_type='album,single', limit=lim, offset=startAt)
-        
-        for a in albums['items']:
-            info.append({
-            'contentImg': a['images'][0]['url'] if a['images'] else 'default',
-            'contentName': a['name'],
-            'contentId': a['id'],
-            'artist': a['artists'][0]['name'],
-            'artistId': a['artists'][0]['id'],
-            'albumDate': a['release_date'][0:4]
-        })
-
-    content = render_to_string('webplayer/collectionItems.html',
-                               context={"info": info, "type": "album", "ajax": True})
-
-    # if ajax, just insert the collection of items into the page
-    if isAjaxRequest(request):
-        return JsonResponse({"content": content, 'status': 200 })
-    else:
-        # if not ajax, have to get header info and insert content string into template
-        header = getArtistHeaderInfo(sp, artist_id)
-        return render(request, 'webplayer/artistPage.html',
-                      context={"header": header, "content": content, "contentType": "albums",
-                               "loadContent": True, "ajax": False})
-
-def artistRelated(request, artist_id):
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    # gets 20 related artists
-    related = sp.artist_related_artists(artist_id)
-    info = []
-
-    for artist in related['artists']:
-        info.append({
-            'contentImg': artist['images'][0]['url'] if artist['images'] else 'default',
-            'contentName': artist['name'],
-            'contentId': artist['id']
-        })
-
-    content = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": True})
-
-    if isAjaxRequest(request):
-        return JsonResponse({"content": content, 'status': 200 })
-    else:
-        header = getArtistHeaderInfo(sp, artist_id)
-        return render(request, 'webplayer/artistPage.html',
-                      context={"header": header, "content": content, "contentType": "related",
-                               "loadContent": True, "ajax": False})
-
-# Never return search_value back to ajax directly!!! (users would be able to insert html)
-# Render cleans input
-def search(request, search_value):
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    sr = sp.search(search_value, type="track,album,artist,playlist", limit=8)
-
-    # tracks
-    tracks = []
-    sn = 1
-    for tr in sr['tracks']['items']:
-        tracks.append({
-            'songNum': sn,
-            'songName': tr['name'],
-            'songId': tr['id'],
-            'songLength': tr['duration_ms'],
-            'songAlbum': tr['album']['name'],
-            'songAlbumId': tr['album']['id'],
-            'songURI': tr['uri'],
-            'artistId': tr['album']['artists'][0]['id'],
-            'songArtist': tr['album']['artists'][0]['name'],
-            'songAlbumURI': tr['album']['uri']
-        })
-
-        sn+=1
-
-    uriPlaceholder = "URI:PLACE:HOLDER"
-    trackRes = createSongList(tracks, "playlist", uriPlaceholder)
-
-    # replace individual track uris
-    # replace play request uri first
-    trackRes = trackRes.replace(uriPlaceholder, 'button machine broke pls delete in js', 1)
-
-    for track in tracks:
-        trackRes = trackRes.replace(uriPlaceholder, track['songAlbumURI'], 2)
-
-    # artists
-    artists = []
-    for ar in sr['artists']['items']:
-        artists.append({
-            'contentImg': ar['images'][0]['url'] if ar['images'] else 'default',
-            'contentName': ar['name'],
-            'contentId': ar['id']
-        })
-
-    artistRes = render_to_string('webplayer/collectionItems.html', context={"info": artists, "type": "artist", "ajax": True})
-
-    # albums
-    albums = []
-    for al in sr['albums']['items']:
-        albums.append({
-            'contentImg': al['images'][0]['url'] if al['images'] else 'default',
-            'contentName': al['name'],
-            'contentId': al['id'],
-            'artist': al['artists'][0]['name'],
-            'artistId': al['artists'][0]['id'],
-            'albumDate': al['release_date'][0:4]
-        })
-
-    albumRes = render_to_string('webplayer/collectionItems.html',
-                               context={"info": albums, "type": "album", "ajax": True})
-
-    # playlists
-    playlists = []
-    for pl in sr['playlists']['items']:
-        playlists.append({
-            'contentImg': pl['images'][0]['url'] if pl['images'] else 'default',
-            'contentName': pl['name'],
-            'contentId': pl['id']
-        })
-
-    playlistRes = render_to_string('webplayer/collectionItems.html',
-                                context={"info": playlists, "type": "playlist", "ajax": True})
-
-    if isAjaxRequest(request):
-        return JsonResponse(
-            {"searchResults": render_to_string('webplayer/search.html',
-                                               context={"tracks": trackRes,
-                                                        "artists": artistRes,
-                                                        "albums": albumRes,
-                                                        "playlists": playlistRes,
-                                                        "searchValue": search_value,
-                                                        "ajax": True}),
-            'status': 200 }
+        return HttpResponse(False)
+    print('Seeds:', genres, tracks, artists)
+
+    features = request.POST.get('features', None)
+    if not features:
+        return HttpResponse(False)
+    features = json.loads(features)
+
+    try:
+        generatedRecommendations = sp.recommendations(
+            seed_genres=genres,
+            seed_tracks=tracks,
+            seed_artists=artists,
+            limit=20,
+            target_acousticness=features.get('acousticness', None),
+            target_danceability=features.get('danceability', None),
+            target_energy=features.get('energy', None),
+            target_instrumentalness=features.get('instrumentalness', None),
+            target_key=features.get('key', None),
+            target_liveness=features.get('liveness', None),
+            target_loudness=features.get('loudness', None),
+            target_speechiness=features.get('speechiness', None),
+            target_tempo=features.get('tempo', None),
+            target_valence=features.get('valence', None)
         )
-    else:
-        return render(
-            request, 'webplayer/search.html', context={ "tracks": trackRes,
-                                                        "artists": artistRes,
-                                                        "albums": albumRes,
-                                                        "playlists": playlistRes,
-                                                        "searchValue": search_value,
-                                                        "ajax": False }
-        )
+        print('Recommendations:', generatedRecommendations)
+        return JsonResponse(generatedRecommendations, status=200)
+    except SpotifyException:
+        return HttpResponse(False)
 
-def settings(request):
-    if not validUser(request):
-        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
-
-    if isAjaxRequest(request):
-        page = render_to_string('webplayer/settings.html', context={"ajax": True})
-        return JsonResponse({"page": page, 'status': 200 })
-    else:
-        return render(request, 'webplayer/settings.html', context={"ajax": False})
 
 def progressBarSldrMoved(request):
     deviceID = request.POST['device_id']
