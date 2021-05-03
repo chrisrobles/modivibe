@@ -92,6 +92,21 @@ def getContextURIInfo(referenceURI):
         for track in randomTracks:
             trackURI = track['uri']
             tracks.append(trackURI)
+
+        trackFeatures = sp.audio_features(referenceURI)
+        features = {
+            'acousticness': trackFeatures[0]['acousticness'],
+            'danceability': trackFeatures[0]['danceability'],
+            'energy': trackFeatures[0]['energy'],
+            'instrumentalness': trackFeatures[0]['instrumentalness'],
+            'key': trackFeatures[0]['key'],
+            'liveness': trackFeatures[0]['liveness'],
+            'loudness': trackFeatures[0]['loudness'],
+            'speechiness': trackFeatures[0]['speechiness'],
+            'tempo': trackFeatures[0]['tempo'],
+            'valence': trackFeatures[0]['valence']
+        }
+
         referenceData = {
             'type': referenceType,
             'name': trackInfo['name'],
@@ -99,7 +114,8 @@ def getContextURIInfo(referenceURI):
             'uri': trackInfo['uri'],
             'artistURI': trackInfo['artists'][0]['uri'],
             'artistName': trackInfo['artists'][0]['name'],
-            'tracks': tracks
+            'tracks': tracks,
+            'trackFeatures': features
         }
     return referenceData
 
