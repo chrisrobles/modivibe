@@ -343,18 +343,6 @@ def isFollowing(request):
     return HttpResponse(response)
 
 
-# Helper while developing the progress bar
-def helperButton(request):
-    response = False
-    deviceID = request.POST['device_id']
-    try:
-        sp.current_playback(device_id=deviceID)
-        response = True
-    except SpotifyException:
-        response = False
-    return HttpResponse(response)
-
-
 def getRecommendations(request):
     reference = request.POST.get('reference', None)
     if not reference:
@@ -418,6 +406,21 @@ def progressBarSldrMoved(request):
 
     try:
         sp.seek_track(songPositionMs, deviceID)
+        response = True
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
+# Helper for developing stuffs
+def devHelper(request):
+    # deviceID = request.POST['device_id']
+
+    # returns a JSON object with some user data
+    #   look in the pycharm server terminal for the print out
+    try:
+        returnedData = sp.current_user_playlists()
+        print(json.dumps(returnedData, indent=4))
+
         response = True
     except SpotifyException:
         response = False
