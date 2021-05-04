@@ -31,7 +31,7 @@ urlpatterns = [
     path('my/albums', views.mySavedAlbums, name='myAlbums'),
     path('my/artists', views.myArtists, name='myArtists'),
     path('my/podcasts', views.myPodcasts, name='myPodcasts'),
-    path('my/likedSongs', views.likedSongs, name='likedSongs'),
+    path('my/likedSongs', views.myLikedSongs, name='likedSongs'),
 
     # displays an item's page
     # url should follow:    {collection_type}/<str:type_id>
