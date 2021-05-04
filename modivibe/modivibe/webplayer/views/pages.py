@@ -142,8 +142,6 @@ def myPlaylists(request):
 
 
 def playlist(request, playlist_id):
-    print('***** views.playlist() fired *****')
-
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
@@ -158,8 +156,6 @@ def playlist(request, playlist_id):
 
         slInfo = sp.playlist_items(playlist_id=playlist_id, limit=lim, offset=startAt)
         numSongs = slInfo['total']  # total number of songs in a playlist
-
-        # print(dumps(slInfo, indent=4))
 
         info = []
 
@@ -200,9 +196,6 @@ def playlist(request, playlist_id):
     return redirect('webplayer')  # fix this <------- need html page
 
 def likedSongs(request):
-    print('****** views.likedSongs() fired ******')
-    # print(isAjaxRequest(request))
-
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
@@ -211,24 +204,25 @@ def likedSongs(request):
         return redirect('splash')
 
     startAt = 0
-    # might want to play with this limit .... a limit of 100 was giving an error - max of 50 apparently
-    lim = 25
+    # limit of 50 or the API call will fail
+    lim = 50
     songNum = 1
 
     likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
     numOfSongs = likedSongsInfo['total']  # total number of liked songs
 
-    info = []
+    likedSongsTrimmedInfo = []
 
     for s in likedSongsInfo['items']:
-        info.append({
+        likedSongsTrimmedInfo.append({
             "songNum": songNum,
             "songName": s['track']['name'],
             "songId": s['track']['id'],
             "songURI": s['track']['uri'],
             "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
             "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
-            "songLength": s['track']['duration_ms']
+            "songLength": s['track']['duration_ms'],
+            'songAlbumURI': s['track']['album']['uri'],
         })
 
         songNum += 1
@@ -238,25 +232,32 @@ def likedSongs(request):
 
         likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
         for s in likedSongsInfo['items']:
-            info.append({
+            likedSongsTrimmedInfo.append({
                 "songNum": songNum,
                 "songName": s['track']['name'],
                 "songId": s['track']['id'],
                 "songURI": s['track']['uri'],
                 "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
                 "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
-                "songLength": s['track']['duration_ms']
+                "songLength": s['track']['duration_ms'],
+                'songAlbumURI': s['track']['album']['uri'],
             })
 
             songNum += 1
 
     # TODO: Make the songList an actual HTML page then utilize context & render_to_string
-    page = createSongList(info, 'liked songs', 'likedSongs')
-    # page = createSongList(info, 'liked songs', 'spotify:likedSongs')
+    uriPlaceholder = "URI:PLACE:HOLDER"
+    page = createSongList(likedSongsTrimmedInfo, 'liked songs', uriPlaceholder)
+
+    # fix this replace with the correct URI string for the liked strings page to allow the PLAY ALL button to work
+    #   note: not really sure if that is possible with what we're given by spotipy/spotify
+    page = page.replace(uriPlaceholder, 'fix me luls', 1)
+
+    # needed for each song to be playable from the list
+    for song in likedSongsTrimmedInfo:
+        page = page.replace(uriPlaceholder, song['songAlbumURI'], 2)
 
     return JsonResponse({'page': page, 'status': 200})
-
-    # return redirect('webplayer')  # fix this <------- need html page
 
 
 def mySavedAlbums(request):
