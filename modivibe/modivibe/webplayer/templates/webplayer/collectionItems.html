@@ -41,7 +41,7 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
 
             <!--  Liked Songs banner -->
             {% if type == "playlist" %}
-            <a href="{% url 'likedSongs' %}">
+            <a href="{% url 'likedSongs' %}" class="ItemLink">
                 <button id="likedSongsButton">
                     <span>Liked Songs</span>
                 </button>
