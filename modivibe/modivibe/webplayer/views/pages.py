@@ -27,7 +27,7 @@ def home(request):
     if not userAccessCode:
         return redirect('splash')
 
-    recentlyPlayedList = sp.current_user_recently_played(limit=5)
+    recentlyPlayedList = sp.current_user_recently_played(limit=32)
     import pprint
     # pp = pprint.PrettyPrinter(indent=4)
     # pp.pprint(recentlyPlayedList)
@@ -45,7 +45,8 @@ def home(request):
     collectionContext ={
         'type': 'album',
         'ajax': True,
-        'info': RecentlyPlayed
+        'info': RecentlyPlayed,
+        'skipHeader': True
     }
 
     RecentlyPlayedContent = render_to_string("webplayer/collectionItems.html", context=collectionContext)

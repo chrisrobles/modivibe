@@ -21,6 +21,8 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
                     4. podcast
 
     3. ajax:    True if page will be updated through an ajax request, false if not
+
+    4. skipHeader : True if we dont want the header tag
 -->
 
 {% block content %}
@@ -28,7 +30,9 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
     <section class="CollectionContent">
         <div class="row">
             <div class="col-12">
+                {%if not skipHeader%}
                 <h1 class="ContentHeader">{{ type|capfirst|add:"s" }}</h1>
+            {%endif%}
             </div>
         </div>
         <section class="ContentItems">
