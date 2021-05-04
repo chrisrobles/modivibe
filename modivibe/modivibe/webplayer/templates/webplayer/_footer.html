@@ -220,6 +220,7 @@
 
     // Button event bindings
     $('#playbackControl').on('click', togglePlayback);
+    $('#playbackControl').on('click', togglePlayback);
     $('#volumeIcon').on('click', muteVolume);
     $('.mdc-slider__input').on('change', setVolume);
     $('#previousTrackControl').on('click', previousTrack);
@@ -254,7 +255,6 @@
     function togglePlayback(event){
         let playbackRequest = (isPlaying) ? 'pause' : 'play';
         console.log(`Requesting playback: ${playbackRequest}`);
-
         $.ajax({
             type: "POST",
             url: "{% url 'setPlayback' %}",
@@ -264,6 +264,7 @@
                 status: playbackRequest
             },
             success: function(response) {
+                paused_value_visualizer = playbackRequest == 'pause' ? 0 : 1; //in visualizer.js
                 if (response == 'True') {
                     console.log(`Success: ${playbackRequest}`);
 
