@@ -348,6 +348,7 @@ a:hover, a:active, a:focus {
       padding-left: 0 !important;
     }*/
 }
+
 .flex-fill {
     flex: 1;
 }
@@ -364,4 +365,24 @@ img {
 #likedSongsButton {
     width: 20em;
     height: 10em;
+
+    margin-top: 0px;
+    padding-top: 0px;
+
+}
+
+#likedSongsButtonLabel1 {
+    font-size: 32px;
+
+    padding-right: 40%;
+    position: relative;
+    top: 45px;
+}
+
+#likedSongsButtonLabel2 {
+    font-size: 16px;
+
+    padding-right: 55%;
+    position: relative;
+    top: 40px;
 }

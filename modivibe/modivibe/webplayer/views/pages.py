@@ -104,6 +104,10 @@ def myPlaylists(request):
     plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
     numPLs = plInfo['total']  # total number of playlists the user has
 
+    # for showing the number of liked songs on the button
+    likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+    numOfLikedSongs = likedSongsInfo['total']  # total number of liked songs
+
     info = []
 
     for p in plInfo['items']:
@@ -130,14 +134,13 @@ def myPlaylists(request):
         'ajax': isAjaxRequest(request),
         'info': info,
         'type': 'playlist',
+        'numOfLikedSongs': numOfLikedSongs,
     }
 
     if context['ajax'] is True:
         collection = render_to_string('webplayer/collectionItems.html', context=context)
-        print('***** views.myPlaylists() fired , is an ajax request *****')
         return JsonResponse({'collection': collection, 'status': 200})
     else:
-        print('***** views.myPlaylists() fired , is NOT an ajax request *****')
         return render(request, 'webplayer/collectionItems.html', context=context)
 
 
