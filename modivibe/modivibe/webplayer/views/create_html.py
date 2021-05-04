@@ -50,7 +50,7 @@ def createSongList(info, type, context_uri):
 
     for song in info:
         htmlStr += \
-            f'''    <div class="Song row" data-uri="{song['songURI']} data-parent-uri='{context_uri}">
+            f'''    <div class="Song row" data-uri="{song['songURI']}" data-parent-uri="{context_uri}">
                         <div class="col-1">
                             <span class="SongNumber PlayRequest" data-number="{song['songNum']}" data-uri="{song['songURI']}" data-parent-uri="{context_uri}">{song['songNum']}</span>
                         </div>
@@ -91,11 +91,13 @@ def convertToMinSec(length):
 # gets information needed to create a header for an artist
 def getArtistHeaderInfo(sp, artist_id):
     ar = sp.artist(artist_id)
+    isUserFollowing = sp.current_user_following_artists(ids=[ar['uri']])[0]
     return {
         'artistName': ar['name'],
         'artistImg': ar['images'][0]['url'] if ar['images'] else 'default',
         'artistFollowers': ar['followers']['total'],
         'artistId': ar['id'],
-        'artistGenres': ar['genres'][:7]
+        'artistGenres': ar['genres'][:7],
+        'followingArtist': isUserFollowing
     }
 

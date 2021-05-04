@@ -9,7 +9,14 @@ $(document).ready(function() {
             url: $(this).attr("href"),
             type: "GET",
             success: function(response) {
+                if(response.status == 200) {
                   $(".content").first().html(response.collection);
+                  $("html, .content").animate({ scrollTop: 0 }, "fast");
+
+                }
+                else {
+                    window.location="/"; // redirect
+                }
             }
         });
 
@@ -17,13 +24,21 @@ $(document).ready(function() {
 
     $(document).on("click", ".ItemLink", function(e) {
         e.preventDefault();
+
        // window.history.pushState({}, "", $(this).attr("href"));
 
         $.ajax({
             url: $(this).attr("href"),
             type: "GET",
             success: function(response) {
-                $(".content").first().html(response.page);
+                if(response.status == 200) {
+                    $(".content").first().html(response.page);
+                    $("html, .content").animate({ scrollTop: 0 }, "fast");
+
+                }
+                else {
+                    window.location="/";
+                }
             }
         });
     });
@@ -40,11 +55,17 @@ $(document).ready(function() {
                 'fromArtistPage': true
             },
             success: function(response) {
-                $(".ArtistItemButton").removeAttr("style");
-                $(".ArtistItemButton"+dataType).attr("style", "background-color: rgba(255, 255, 255, 0.25);");
-                $(".ArtistItemsContent").first().html(response.content);
-                $(".CollectionContent .row .col-12 .ContentHeader").remove();
-                $(".CollectionContent .row:first").attr("style", "margin: 15px 0px 15px 0px"); // for spacing between tabs and content
+                if(response.status == 200) {
+                    $(".ArtistItemButton").removeAttr("style");
+                    $(".ArtistItemButton"+dataType).attr("style", "background-color: rgba(255, 255, 255, 0.25);");
+                    $(".ArtistItemsContent").first().html(response.content);
+                    $(".CollectionContent .row .col-12 .ContentHeader").remove();
+                    $(".CollectionContent .row:first").attr("style", "margin: 15px 0px 15px 0px"); // for spacing between tabs and content
+                    $("html, .content").animate({ scrollTop: 0 }, "fast");
+                }
+                else {
+                    window.location="/";
+                }
             }
         });
     });
@@ -65,15 +86,34 @@ $(document).ready(function() {
         color[2] += 60;
         $('.content').css('background-color', "rgb(" + color.join(",") + ")")
     });
-//    $(document).on("click","#myAlbums",function(e) {
-//        e.preventDefault();
-//
-//        $.ajax({
-//            url: $(this).attr("href"),
-//            type: "Get",
-//            success: function (response) {
-//                $(".content").first().html(response.myAlbums);
-//            }
-//        });
-//    });
+
+    $(document).on("keydown", "#searchInput", function(e) {
+        if(e.keyCode == 13) {
+            e.preventDefault();
+            let input = $(this).val();
+            $(this).attr("value", input);
+
+            // if input
+            if(input) {
+                $.ajax({
+                    url: "/search/"+input,
+                    type: "GET",
+                    success: function(response) {
+                        if(response.status == 200) {
+                            console.log("Search success.");
+                            $(".content").first().html(response.searchResults);
+                            $("button.PlayRequest").remove();
+                            $("html, .content").animate({ scrollTop: 0 }, "fast");
+                        }
+                        else {
+                            window.location="/";
+                        }
+                    }
+                });
+            }
+            else {
+                console.log("Empty search value.");
+            }
+        }
+    });
 });

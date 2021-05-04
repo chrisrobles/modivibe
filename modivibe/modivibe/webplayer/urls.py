@@ -6,7 +6,7 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.splash, name='splash'),
     path('webplayer', views.home, name='webplayer'),
-    path('webplayer/settings', views.settings, name='webplayer/settings'),
+    path('settings', views.settings, name='settings'),
 
     # SPOTIPY API
     path('redirectToHome', views.redirectToHome, name='redirectToHome'),
@@ -19,6 +19,9 @@ urlpatterns = [
     path('setShuffle', views.setShuffle, name='setShuffle'),
     path('setRepeat', views.setRepeat, name='setRepeat'),
     path('helperButton', views.helperButton, name='helperButton'),
+    path('toggleFollow', views.toggleFollow, name='toggleFollow'),
+    path('isFollowing', views.isFollowing, name='isFollowing'),
+    path('progressBarSldrMoved', views.progressBarSldrMoved, name='progressBarSldrMoved'),
     path('recentlyPlayedList', views.getRecentPlayed, name='getRecentPlayed'),
 
     # user collections and music collections (albums, artists, playlists, podcasts)
@@ -35,4 +38,11 @@ urlpatterns = [
     path('artist/<str:artist_id>/topSongs', views.artistTopSongs, name='artistTopSongs'),
     path('artist/<str:artist_id>/albums', views.artistAlbums, name='artistAlbums'),
     path('artist/<str:artist_id>/related', views.artistRelated, name='artistRelated'),
+
+    # search bar
+    path('search/<str:search_value>', views.search, name='search'),
+
+    # recommendations
+    path('recommendations', views.recommendations, name='recommendations'),
+    path('getRecommendations', views.getRecommendations, name='getRecommendations'),
 ]

@@ -38,3 +38,9 @@
 .ArtistItemsContent {
     width: 100%;
 }
+
+.ArtistFollowButton, .ArtistFollowButton:focus {
+    background: none;
+    border: none;
+    outline: none;
+}

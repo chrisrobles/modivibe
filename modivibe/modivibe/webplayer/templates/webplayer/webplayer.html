@@ -7,15 +7,14 @@
         <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
         <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css'%}">
         <script src="{% static 'lib/bootstrap/js/bootstrap.min.js'%}"></script>
-        <script src="{% static 'webplayer/script.js' %}" async></script>
+        <script src="{% static 'webplayer/script.js' %}"></script>
         <link rel="stylesheet" type="text/css" href="{% static 'webplayer/main.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'webplayer/queue.css' %}">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
         <script src="https://sdk.scdn.co/spotify-player.js"></script>
-        <script src="{% static 'webplayer/util.js' %}" async></script>
+        <script src="{% static 'webplayer/util.js' %}"></script>
         <link rel="icon" href="{% static 'Artboard_1_0.5x.png'%}">
-        {% if title %} <title>Modivibe - {{ title }}</title>
-        {% else %} <title>Modivibe</title>
-        {% endif %}
+        <title>Modivibe</title>
     </head>
     <body>
     <style>
@@ -73,6 +72,8 @@
         </div>
     </body>
 <script>
+    const csrftoken = getCookie('csrftoken');
+
     $(document).on('click', '.PlayRequest', function(e) {
         let contextURI, offsetURI;
         if ($(this).data('parent-uri')) {
@@ -88,7 +89,7 @@
             type: 'POST',
             url: "{% url 'setPlayback' %}",
             data: {
-               csrfmiddlewaretoken: '{{ csrf_token }}',
+               csrfmiddlewaretoken: csrftoken,
                device_id: deviceID,
                status: 'play',
                context_uri: contextURI,
@@ -101,6 +102,56 @@
                        $('.mouse-menu').hide();
                    }
                }
+            }
+        });
+    });
+
+    $(document).on('click', '.FollowRequest', function (e) {
+        let contextURI = $(this).attr('data-uri');
+        let followStatus = $(this).attr('data-following') === 'true' ? 'false' : 'true';
+        console.log(`Attempting to toggle follow for artist ${contextURI}`);
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'toggleFollow' %}",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                artist: contextURI,
+                follow: followStatus
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log(`Successfully toggled follow for artist`);
+                    updateFollowStatus();
+                }
+                else {
+                    console.log(`Failed to toggle follow for artist`);
+                }
+            },
+        });
+    });
+
+    $(document).on('click', '.RecommendationRequest', function(e) {
+        e.preventDefault();
+        let contextURI = $(this).attr('data-uri');
+        console.log(`Attempting to pass information for recommendations based of: ${contextURI}`);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'recommendations' %}",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                context_uri: contextURI
+            },
+            success: function(response) {
+                if(response.status == 200) {
+                    $(".content").first().html(response.page);
+                    $("html, .content").animate({ scrollTop: 0 }, "fast");
+                    if ($('.mouse-menu').is(':visible')) {
+                       $('.mouse-menu').hide();
+                    }
+                }
+                else {
+                    window.location="/";
+                }
             }
         });
     });
@@ -123,6 +174,7 @@
                 <li><button class="PlayRequest" data-uri="${dataURI}">Play Artist</button></li>
                 <li><button>Follow Artist</button></li>
                 <li><button>Go to Artist</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
         }
         else if ($(clickTarget).hasClass('Playlist') || $(clickTarget).parents('.Playlist').length) {
@@ -134,6 +186,7 @@
                 <li><button class="PlayRequest" data-uri="${dataURI}">Play Playlist</button></li>
                 <li><button>Add to Queue</button></li>
                 <li><button>Go to Playlist</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
         }
         else if ($(clickTarget).hasClass('Album') || $(clickTarget).parents('.Album').length) {
@@ -145,6 +198,7 @@
                 <li><button class="PlayRequest" data-uri="${dataURI}">Play Album</button></li>
                 <li><button>Add to Queue</button></li>
                 <li><button>Go to Album</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
         }
         else if ($(clickTarget).hasClass('Podcast') || $(clickTarget).parents('.Podcast').length) {
@@ -158,12 +212,17 @@
             `);
         }
         else if ($(clickTarget).hasClass('Song') || $(clickTarget).parents('.Song').length) {
+            if (dataURI === null) {
+                let parentDataURI = $(clickTarget).parents('.Song')[0];
+                dataURI = parentDataURI ? $(parentDataURI).data('uri') : null;
+            }
             $('.mouse-menu ul').html(`
                 <li><button>Add to Queue</button></li>
                 <li><button>Add to Playlist</button></li>
                 <li><button>Add to Liked Songs</button></li>
                 <li><button>Go to Artist</button></li>
                 <li><button>Go to Album</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
         } else {
             return;
@@ -207,5 +266,35 @@
         $playNumber.text($playNumber.data('number'));
         $playNumber.removeClass('material-icons md-24 md-light');
     });
+
+    function updateFollowStatus() {
+        let followButtons = $('.FollowRequest');
+        let affectedURIs = [];
+        $(followButtons).each(function(){
+            let contextURI = $(this).attr('data-uri');
+            if (affectedURIs.includes(contextURI)) return;
+            affectedURIs.push(contextURI);
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'isFollowing' %}",
+                data: {
+                    csrfmiddlewaretoken: csrftoken,
+                    artist: contextURI
+                },
+                success: function(response) {
+                    if (response != 'False') {
+                        console.log('Successfully collected follow status, now updating associated buttons');
+                        response = JSON.parse(response);
+                        let affectedFollowButtons = $(`.FollowRequest[data-uri="${response['artist']}"]`);
+                        $(affectedFollowButtons).attr('data-following', response['following']);
+                        let followText = $(affectedFollowButtons).attr('data-following') === 'true' ? 'person_remove_alt_1' : 'person_add_alt';
+                        $(affectedFollowButtons).text(followText);
+                    } else {
+                        console.log('Failed to collect follow status');
+                    }
+                },
+            });
+        });
+    }
 </script>
 </html>

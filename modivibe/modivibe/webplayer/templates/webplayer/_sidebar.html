@@ -94,106 +94,12 @@
       transform: scale(1,1);
     }
 
-    .Queue {
-        padding: 10px;
-    }
-
-    .Queue button {
-        background: none;
-        border: none;
-    }
-
-    .Queue button:focus {
-        outline: none;
-    }
-
-    .Queue .QueueTitleContainer {
-        display: flex;
-        border-bottom: 1px solid white;
-    }
-
-    .Queue .QueueTitle {
-        flex: 1;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    .Queue .QueueSettings, .Queue .QueueToggle {
-        align-self: center;
-    }
-
-    .Queue .QueueContainer {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        width: 200px;
-    }
-
-    .Queue .QueueItem {
-        background-color: #1c1c1c;
-        margin: 5px 0;
-        display: flex;
-        align-content: space-between;
-    }
-
-    .Queue .QueueItem:hover {
-        background: #101010;
-    }
-
-    .Queue .TrackInfoContainer {
-        overflow: hidden;
-        align-self: center;
-    }
-
-    .Queue .Song {
-        font-weight: bold;
-        margin: 0;
-        overflow: hidden;
-        white-space: nowrap;
-    }
-
-    .Queue .ArtistContainer {
-        margin: 0;
-        overflow: hidden;
-        white-space: nowrap;
-        font-size: small;
-    }
-
-    .Queue .Album {
-        margin-right: 10px;
-        max-width: 48px;
-        max-height: 48px;
-        width: fit-content;
-        height: fit-content;
-    }
-
-    .Queue #QueueCurrent {
-        padding-left: 0;
-    }
-
-    .Queue #QueueCurrent .Album {
-        max-width: 64px;
-        max-height: 64px;
-    }
-
-    .Queue .QueuePointer {
-        align-self: center;
-    }
-
-    .Queue .TopShadow {
-        position: absolute;
-        width: inherit;
-        height: 75px;
-        background: linear-gradient(to top, transparent, black);
-        pointer-events: none;
-    }
-
 </style>
 
 <nav id="mySidenav" class="sidenav">
    <ul style="list-style-type: none; padding: 0; margin: 0;">
       <li>
-          <a style="text-decoration: none;" href="{% url 'webplayer' %}">
+          <a class="SideBarUserCollection" style="text-decoration: none;" href="{% url 'webplayer' %}">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">home</span> Home</span>
             </div>
@@ -235,7 +141,7 @@
 <!--          </a>-->
 <!--      </li>-->
        <li>
-          <a class="ItemLink" style="text-decoration: none;" href="{% url 'webplayer/settings' %}">
+          <a class="ItemLink" style="text-decoration: none;" href="{% url 'settings' %}">
             <div class="btn btn-three">
                 <span><span class="material-icons" style="vertical-align: -4px;">settings</span> Settings</span>
             </div>
