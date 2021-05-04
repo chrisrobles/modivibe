@@ -152,12 +152,16 @@ def playlist(request, playlist_id):
         return redirect('splash')
 
     if isAjaxRequest(request):
+        print('views.playlist() - isAjaxRequest(request) = TRUE')
+
         startAt = 0
         lim = 100
         pNo = 1
 
         slInfo = sp.playlist_items(playlist_id=playlist_id, limit=lim, offset=startAt)
         numSongs = slInfo['total']  # total number of songs in a playlist
+
+        print(dumps(slInfo, indent=4))
 
         info = []
 
@@ -199,6 +203,7 @@ def playlist(request, playlist_id):
 
 def likedSongs(request):
     print('****** views.likedSongs() fired ******')
+    print(isAjaxRequest(request))
 
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -207,9 +212,122 @@ def likedSongs(request):
     if not userAccessCode:
         return redirect('splash')
 
+    # if isAjaxRequest(request):
+    #     print('views.likedSongs() - isAjaxRequest(request) = TRUE')
+    #
+    #     # startAt = 0
+    #     # lim = 100
+    #     songNum = 1
+    #
+    #     # no params setting yet - uses defaults
+    #     likedSongsInfo = sp.current_user_saved_tracks()
+    #     numSongs = likedSongsInfo['total']  # total number of liked songs
+    #
+    #     # print(dumps(likedSongsInfo, indent=4))
+    #     print(numSongs)
+    #
+    #     info = []
+    #
+    #     for s in likedSongsInfo['items']:
+    #         info.append({
+    #             "songNum": songNum,
+    #             "songName": s['track']['name'],
+    #             "songId": s['track']['id'],
+    #             "songURI": s['track']['uri'],
+    #             "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+    #             "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
+    #             "songLength": s['track']['duration_ms']
+    #         })
+    #
+    #         songNum += 1
+    #
+    #     # commented out lim and startAt for now
+    #
+    #     # while lim + startAt < numSongs:
+    #     #     startAt += lim
+    #     #
+    #     #     likedSongsInfo = sp.current_user_saved_tracks() # no params setting yet - uses defaults
+    #     #     for s in likedSongsInfo['items']:
+    #     #         info.append({
+    #     #             "songNum": songNum,
+    #     #             "songName": s['track']['name'],
+    #     #             "songId": s['track']['id'],
+    #     #             "songURI": s['track']['uri'],
+    #     #             "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+    #     #             "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
+    #     #             "songLength": s['track']['duration_ms']
+    #     #         })
+    #     #
+    #     #         songNum += 1
+    #
+    #     # TODO: Make the songList an actual HTML page then utilize context & render_to_string
+    #     # page = createSongList(info, 'playlist', 'spotify:playlist:' + playlist_id)
+    #
+    #     print(dumps(info, indent=4))
+    #
+    #
+    #     # change "page" to the json object when done
+    #     return JsonResponse({'page': "page", 'status': 200})
 
+    # skipping the ajax stuff for now
+    # print('views.likedSongs() - isAjaxRequest(request) = TRUE')
 
-    return JsonResponse({"content": "none", 'status': 200})
+    # startAt = 0
+    # lim = 100
+
+    startAt = 0
+    # might want to play with this limit .... a limit of 100 was giving an error
+    lim = 25
+    songNum = 1
+
+    likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+    numOfSongs = likedSongsInfo['total']  # total number of liked songs
+
+    # print(dumps(likedSongsInfo, indent=4))
+    print('numOfSongs: ', numOfSongs)
+
+    info = []
+
+    for s in likedSongsInfo['items']:
+        info.append({
+            "songNum": songNum,
+            "songName": s['track']['name'],
+            "songId": s['track']['id'],
+            "songURI": s['track']['uri'],
+            "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+            "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
+            "songLength": s['track']['duration_ms']
+        })
+
+        songNum += 1
+
+    # commented out lim and startAt for now
+    while lim + startAt < numOfSongs:
+        startAt += lim
+
+        likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+        for s in likedSongsInfo['items']:
+            info.append({
+                "songNum": songNum,
+                "songName": s['track']['name'],
+                "songId": s['track']['id'],
+                "songURI": s['track']['uri'],
+                "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+                "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
+                "songLength": s['track']['duration_ms']
+            })
+
+            songNum += 1
+
+    # TODO: Make the songList an actual HTML page then utilize context & render_to_string
+    # page = createSongList(info, 'liked songs', 'spotify:playlist:' + playlist_id)
+
+    print(dumps(info, indent=4))
+
+    # change "page" to the json object when done
+    return JsonResponse({'page': "page", 'status': 200})
+
+    # return redirect('webplayer')  # fix this <------- need html page
 
 
 def mySavedAlbums(request):
