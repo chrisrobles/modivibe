@@ -8,6 +8,7 @@ $(document).ready(function() {
         $.ajax({
             url: path,
             type: "GET",
+            cache: false,
             success: function(response) {
                 if(response.status == 200) {
                   window.history.pushState({}, "", path);
@@ -30,6 +31,7 @@ $(document).ready(function() {
         $.ajax({
             url: path,
             type: "GET",
+            cache: false,
             success: function(response) {
                 if(response.status == 200) {
                     window.history.pushState({}, "", path);
@@ -54,6 +56,7 @@ $(document).ready(function() {
             data: {
                 'fromArtistPage': true
             },
+            cache: false,
             success: function(response) {
                 if(response.status == 200) {
                     $(".ArtistItemButton").removeAttr("style");
@@ -99,6 +102,7 @@ $(document).ready(function() {
                 $.ajax({
                     url: path,
                     type: "GET",
+                    cache: false,
                     success: function(response) {
                         if(response.status == 200) {
                             console.log("Search success.");
@@ -120,12 +124,12 @@ $(document).ready(function() {
     });
 
     $(window).on("popstate", function(e) {
-        console.log(window.location);
         let path = window.location.pathname;
 
         $.ajax({
             url: path,
             type: "GET",
+            cache: false,
             success: function(response) {
                 if(response.status == 200) {
                     $(".content").first().html(Object.values(response)[0]); // content should be first element of json response
