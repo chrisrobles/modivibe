@@ -27,9 +27,33 @@ def home(request):
     if not userAccessCode:
         return redirect('splash')
 
+    recentlyPlayedList = sp.current_user_recently_played(limit=5)
+    import pprint
+    # pp = pprint.PrettyPrinter(indent=4)
+    # pp.pprint(recentlyPlayedList)
+    RecentlyPlayed = []
+    for a in recentlyPlayedList['items']:
+        RecentlyPlayed.append({
+          'contentImg': a['track']['album']['images'][1]['url'] if a['track']['album']['images'] else 'default',
+          'contentName': a['track']['album']['name'],
+          'contentId': a['track']['album']['id'],
+          'artist': a['track']['album']['artists'][0]['name'],
+          'artistId': a['track']['album']['artists'][0]['id'],
+          'albumDate': a['track']['album']['release_date'][0:4],
+        })
+
+    collectionContext ={
+        'type': 'album',
+        'ajax': True,
+        'info': RecentlyPlayed
+    }
+
+    RecentlyPlayedContent = render_to_string("webplayer/collectionItems.html", context=collectionContext)
+
     context = {
         'userAccessCode': userAccessCode,
-        'ajax': isAjaxRequest(request)
+        'ajax': isAjaxRequest(request),
+        'RecentlyPlayed': RecentlyPlayedContent
     }
 
     if context['ajax'] is True:
