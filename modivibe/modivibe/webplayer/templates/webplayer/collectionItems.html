@@ -39,6 +39,15 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
             </div>
         {% endif %}
 
+            <!--  Liked Songs banner -->
+            {% if type == "playlist" %}
+            <a href="{% url 'likedSongs' %}">
+                <button id="likedSongsButton">
+                    <span>Liked Songs</span>
+                </button>
+            </a>
+            {% endif %}
+
         {% for item in info %}
             <div style="padding-bottom: 20px;" class="col-3">
                 <div class="ContentItem {{ type|title }}" data-uri="spotify:{{ type }}:{{ item.contentId }}" style="display: flex; flex-direction: column">

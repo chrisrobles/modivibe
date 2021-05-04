@@ -134,12 +134,16 @@ def myPlaylists(request):
 
     if context['ajax'] is True:
         collection = render_to_string('webplayer/collectionItems.html', context=context)
+        print('***** views.myPlaylists() fired , is an ajax request *****')
         return JsonResponse({'collection': collection, 'status': 200})
     else:
+        print('***** views.myPlaylists() fired , is NOT an ajax request *****')
         return render(request, 'webplayer/collectionItems.html', context=context)
 
 
 def playlist(request, playlist_id):
+    print('***** views.playlist() fired *****')
+
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
 
@@ -192,6 +196,20 @@ def playlist(request, playlist_id):
         return JsonResponse({'page': page, 'status': 200})
 
     return redirect('webplayer')  # fix this <------- need html page
+
+def likedSongs(request):
+    print('****** views.likedSongs() fired ******')
+
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
+
+    userAccessCode = getUserAccessCode()
+    if not userAccessCode:
+        return redirect('splash')
+
+
+
+    return JsonResponse({"content": "none", 'status': 200})
 
 
 def mySavedAlbums(request):
