@@ -101,8 +101,6 @@ $(document).ready(function() {
     });
 
     $(document).on("keydown", "#searchInput", function(e) {
-        current_player = "";
-        open_and_close_visualizer();
         if(e.keyCode == 13) {
             e.preventDefault();
             let input = $(this).val();
@@ -111,6 +109,10 @@ $(document).ready(function() {
             // if input
             if(input) {
                 let path = "/search/" + input;
+                let endpoint = path.split('/');
+                let site = $(endpoint).last();
+                current_player = site[0];
+                open_and_close_visualizer();
                 $.ajax({
                     url: path,
                     type: "GET",
