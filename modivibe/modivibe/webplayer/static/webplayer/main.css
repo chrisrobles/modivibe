@@ -363,26 +363,29 @@ img {
 }
 
 #likedSongsButton {
-    width: 20em;
-    height: 10em;
+    /*width: 20em;*/
+    /*height: 10em;*/
+
+    position: absolute;
+    width: 90%;
+    height: 50%;
 
     margin-top: 0px;
     padding-top: 0px;
-
 }
 
 #likedSongsButtonLabel1 {
-    font-size: 32px;
-
+    font-size: 2em;
     padding-right: 40%;
+
     position: relative;
     top: 45px;
 }
 
 #likedSongsButtonLabel2 {
-    font-size: 16px;
-
+    font-size: 1em;
     padding-right: 55%;
+
     position: relative;
     top: 40px;
 }
