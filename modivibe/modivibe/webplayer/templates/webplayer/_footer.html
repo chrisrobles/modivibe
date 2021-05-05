@@ -1,6 +1,7 @@
+{% load static %}
 <fieldset class="playbar">
     <span class="playbarLeft">
-        <img class="Album" id="trackImage" src="" alt="Album Cover" width="64" height="64" data-uri="">
+        <img class="Album" id="trackImage" src="{% static 'default_img.png' %}" alt="Album Cover" width="64" height="64" data-uri="">
         <div class="trackInfoContainer">
             <p class="Song" id="trackName" data-uri="">Track Name</p>
             <span id="trackArtistContainer">Track Artist(s)</span>
