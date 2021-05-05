@@ -1,12 +1,32 @@
-@keyframes slide {
-    0% {right: 0px;}
-    100% {right: 250px;}
+@keyframes slideL {
+    0% {right: 0%; opacity: 0%;}
+    100% {right: 40%; opacity: 100%;}
+}
 
+@keyframes slideR {
+     0% {left: 0%; opacity: 0%;}
+    100% {left: 50%; opacity: 100%;}
+
+}
+
+
+.slideLeft{
+    position: absolute;
+    animation-name: slideL;
+    animation-duration: 4s;
+    right: 40%;
+}
+
+.slideRight{
+    position: absolute;
+    animation-name: slideR;
+    animation-duration: 4s;
+    left: 50%;
 }
 
 body{
     height: 100%;
-    background: linear-gradient( #1c1c1c 33%, darkgrey ) fixed no-repeat;
+    background: linear-gradient( lightgrey 33%, darkgrey ) fixed no-repeat;
     font-family: Roboto, sans-serif;
 }
 
@@ -70,10 +90,7 @@ h1{
     margin: 0 !important;
 }
 
-.slideLeft{
-    animation-name: slide;
-    animation-duration: 10s;
-}
+
 .btn {
     background: white;
 }
