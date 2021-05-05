@@ -108,7 +108,7 @@ def myPlaylists(request):
 
     for p in plInfo['items']:
         info.append({
-            'contentImg': p['images'][0]['url'] if p['images'] else 'default',
+            'contentImg': p['images'][0]['url'] if p['images'] else None,
             'contentName': p['name'],
             'contentId': p['id']
         })
@@ -120,7 +120,7 @@ def myPlaylists(request):
 
         for p in plInfo['items']:
             info.append({
-                'contentImg': p['images'][0]['url'] if p['images'] else 'default',
+                'contentImg': p['images'][0]['url'] if p['images'] else None,
                 'contentName': p['name'],
                 'contentId': p['id']
             })
@@ -213,7 +213,7 @@ def mySavedAlbums(request):
 
     for a in albumInfo['items']:
         info.append({
-            'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+            'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else None,
             'contentName': a['album']['name'],
             'contentId': a['album']['id'],
             'artist': a['album']['artists'][0]['name'],
@@ -227,7 +227,7 @@ def mySavedAlbums(request):
 
         for a in albumInfo['items']:
             info.append({
-                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else None,
                 'contentName': a['album']['name'],
                 'contentId': a['album']['id'],
                 'artist': a['album']['artists'][0]['name'],
@@ -263,7 +263,7 @@ def myArtists(request):
 
     for a in artistInfo['artists']['items']:
         info.append({
-            'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+            'contentImg': a['images'][0]['url'] if a['images'] else None,
             'contentName': a['name'],
             'contentId': a['id']
         })
@@ -274,7 +274,7 @@ def myArtists(request):
 
         for a in artistInfo['artists']['items']:
             info.append({
-                'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+                'contentImg': a['images'][0]['url'] if a['images'] else None,
                 'contentName': a['name'],
                 'contentId': a['id']
             })
@@ -310,7 +310,7 @@ def myPodcasts(request):
 
     for p in podcastInfo['items']:
         info.append({
-            'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else 'default',
+            'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else None,
             'contentName': p['show']['name'],
             'contentId': p['show']['id'],
             'publisher': p['show']['publisher']
@@ -322,7 +322,7 @@ def myPodcasts(request):
 
         for p in podcastInfo['items']:
             info.append({
-                'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else 'default',
+                'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else None,
                 'contentName': p['show']['name'],
                 'contentId': p['show']['id'],
                 'publisher': p['show']['publisher']
@@ -423,7 +423,7 @@ def artistAlbums(request, artist_id):
 
     for a in albums['items']:
         info.append({
-            'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+            'contentImg': a['images'][0]['url'] if a['images'] else None,
             'contentName': a['name'],
             'contentId': a['id'],
             'artist': a['artists'][0]['name'],
@@ -437,7 +437,7 @@ def artistAlbums(request, artist_id):
 
         for a in albums['items']:
             info.append({
-                'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+                'contentImg': a['images'][0]['url'] if a['images'] else None,
                 'contentName': a['name'],
                 'contentId': a['id'],
                 'artist': a['artists'][0]['name'],
@@ -474,7 +474,7 @@ def artistRelated(request, artist_id):
 
     for artist in related['artists']:
         info.append({
-            'contentImg': artist['images'][0]['url'] if artist['images'] else 'default',
+            'contentImg': artist['images'][0]['url'] if artist['images'] else None,
             'contentName': artist['name'],
             'contentId': artist['id']
         })
@@ -536,7 +536,7 @@ def search(request, search_value):
     artists = []
     for ar in sr['artists']['items']:
         artists.append({
-            'contentImg': ar['images'][0]['url'] if ar['images'] else 'default',
+            'contentImg': ar['images'][0]['url'] if ar['images'] else None,
             'contentName': ar['name'],
             'contentId': ar['id']
         })
@@ -548,7 +548,7 @@ def search(request, search_value):
     albums = []
     for al in sr['albums']['items']:
         albums.append({
-            'contentImg': al['images'][0]['url'] if al['images'] else 'default',
+            'contentImg': al['images'][0]['url'] if al['images'] else None,
             'contentName': al['name'],
             'contentId': al['id'],
             'artist': al['artists'][0]['name'],
@@ -563,7 +563,7 @@ def search(request, search_value):
     playlists = []
     for pl in sr['playlists']['items']:
         playlists.append({
-            'contentImg': pl['images'][0]['url'] if pl['images'] else 'default',
+            'contentImg': pl['images'][0]['url'] if pl['images'] else None,
             'contentName': pl['name'],
             'contentId': pl['id']
         })

@@ -20,7 +20,7 @@
                 </button>
             </div>
             <div class="ArtistHeaderCenter col-4">
-                <img class="ArtistHeaderImage" src="{{header.artistImg}}">
+                <img class="ArtistHeaderImage" src={% if not header.artistImg %} "{% static 'default_img.png' %}" {% else %} "{{header.artistImg}}" {% endif %}>
                 <div><h1>{{ header.artistName }}</h1></div>
             </div>
             <div class="ArtistHeaderRight col-4">

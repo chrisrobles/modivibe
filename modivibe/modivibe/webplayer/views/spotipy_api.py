@@ -41,7 +41,7 @@ def getContextURIInfo(referenceURI):
         referenceData = {
             'type': referenceType,
             'name': artistInfo['name'],
-            'image': artistInfo['images'][0]['url'] if artistInfo['images'] else 'default',
+            'image': artistInfo['images'][0]['url'] if artistInfo['images'] else None,
             'uri': artistInfo['uri'],
             'genres': artistInfo['genres'][:7],
         }
@@ -56,7 +56,7 @@ def getContextURIInfo(referenceURI):
         referenceData = {
             'type': referenceType,
             'name': albumInfo['name'],
-            'image': albumInfo['images'][0]['url'] if albumInfo['images'] else 'default',
+            'image': albumInfo['images'][0]['url'] if albumInfo['images'] else None,
             'uri': albumInfo['uri'],
             'genres': genres[:7],
             'artistURI': albumInfo['artists'][0]['uri'],
@@ -77,7 +77,7 @@ def getContextURIInfo(referenceURI):
         referenceData = {
             'type': referenceType,
             'name': playlistInfo['name'],
-            'image': playlistInfo['images'][0]['url'] if playlistInfo['images'] else 'default',
+            'image': playlistInfo['images'][0]['url'] if playlistInfo['images'] else None,
             'uri': playlistInfo['uri'],
             'tracks': tracks
         }
@@ -110,7 +110,7 @@ def getContextURIInfo(referenceURI):
         referenceData = {
             'type': referenceType,
             'name': trackInfo['name'],
-            'image': trackInfo['album']['images'][0]['url'] if trackInfo['album']['images'] else 'default',
+            'image': trackInfo['album']['images'][0]['url'] if trackInfo['album']['images'] else None,
             'uri': trackInfo['uri'],
             'artistURI': trackInfo['artists'][0]['uri'],
             'artistName': trackInfo['artists'][0]['name'],
@@ -327,6 +327,31 @@ def toggleFollow(request):
     return HttpResponse(response)
 
 
+# Sets the like status for a specific track
+# Excepts:
+#   track [STRING] (the track uri)
+#   like [STRING] ('true' || 'false')
+def toggleLike(request):
+    response = False
+    trackURI = request.POST.get('track', None)
+    like = request.POST.get('like', None)
+    trackURI = trackURI.split(':')[2]
+    trackList = [trackURI]
+
+    try:
+        if like is None:
+            response = False
+        elif like == 'true':
+            sp.current_user_saved_tracks_add(tracks=trackList)
+            response = True
+        elif like == 'false':
+            sp.current_user_saved_tracks_delete(tracks=trackList)
+            response = True
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
+
 # Checks if the user is following a specific artist.
 # If so, return the artist URI and follow status for asynchronous calls
 # Excepts:
@@ -334,13 +359,28 @@ def toggleFollow(request):
 def isFollowing(request):
     artistURI = request.POST.get('artist', None)
     artistList = [artistURI]
-
     try:
         boolFollowList = sp.current_user_following_artists(ids=artistList)
         response = JsonResponse({"artist": artistURI, "following": boolFollowList[0]}, status=200)
     except SpotifyException:
         response = False
     return HttpResponse(response)
+
+
+# Checks if the user likes a specific track
+# If so, return the track URI and like status for asynchronous calls
+# Excepts:
+#   track [STRING] (the track uri)
+def isLiked(request):
+    trackURI = request.POST.get('track', None)
+    trackList = [trackURI]
+    try:
+        boolFollowList = sp.current_user_saved_tracks_contains(tracks=trackList)
+        response = JsonResponse({"track": trackURI, "liked": boolFollowList[0]}, status=200)
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
 
 
 # Helper while developing the progress bar
@@ -422,3 +462,11 @@ def progressBarSldrMoved(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
+
+def logout(request):
+    if not validUser(request):
+        return redirect('splash')
+
+    cache_handler.delete_session()
+
+    return redirect('splash')

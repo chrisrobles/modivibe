@@ -58,7 +58,7 @@ def createSongList(info, type, context_uri):
                             <span class="SongName">{song['songName']}</span>
                         </div>
                         <div class="col-5">
-                            <span class="SongArtist Artist"><a class='ItemLink' href="artist/{song['artistId']}" data-uri="spotify:artist:{song['artistId']}">{song['songArtist']}</a></span>
+                            <span class="SongArtist Artist"><a class='ItemLink' href="/artist/{song['artistId']}" data-uri="spotify:artist:{song['artistId']}">{song['songArtist']}</a></span>
                         </div>
                         <div class="col-1">
                             <span class="SongLength">{convertToMinSec(song['songLength'])}</span>
@@ -94,7 +94,7 @@ def getArtistHeaderInfo(sp, artist_id):
     isUserFollowing = sp.current_user_following_artists(ids=[ar['uri']])[0]
     return {
         'artistName': ar['name'],
-        'artistImg': ar['images'][0]['url'] if ar['images'] else 'default',
+        'artistImg': ar['images'][0]['url'] if ar['images'] else None,
         'artistFollowers': ar['followers']['total'],
         'artistId': ar['id'],
         'artistGenres': ar['genres'][:7],

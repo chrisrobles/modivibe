@@ -1,6 +1,7 @@
+{% load static %}
 <fieldset class="playbar">
     <span class="playbarLeft">
-        <img class="Album" id="trackImage" src="" alt="Album Cover" width="64" height="64" data-uri="">
+        <img class="Album" id="trackImage" src="{% static 'default_img.png' %}" alt="Album Cover" width="64" height="64" data-uri="">
         <div class="trackInfoContainer">
             <p class="Song" id="trackName" data-uri="">Track Name</p>
             <span id="trackArtistContainer">Track Artist(s)</span>
@@ -490,7 +491,7 @@
         for(let i = 0; i < artistsList.length; i++){
             let artistURI = artistsList[i]['uri'];
             let artistID = artistURI.split(':')[2];
-            artists += `<a class="Artist ItemLink" href="artist/${artistID}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
+            artists += `<a class="Artist ItemLink" href="/artist/${artistID}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
             if (i != artistsList.length - 1) artists += ", ";
         }
         return artists;
