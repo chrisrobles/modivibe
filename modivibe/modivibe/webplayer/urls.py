@@ -46,4 +46,7 @@ urlpatterns = [
     # recommendations
     path('recommendations', views.recommendations, name='recommendations'),
     path('getRecommendations', views.getRecommendations, name='getRecommendations'),
+
+    # logout
+    path('logout', views.logout, name='logout')
 ]
