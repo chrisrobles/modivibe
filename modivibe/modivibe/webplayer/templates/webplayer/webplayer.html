@@ -14,9 +14,11 @@
         <script src="https://sdk.scdn.co/spotify-player.js"></script>
         <script src="{% static 'webplayer/util.js' %}"></script>
         <link rel="icon" href="{% static 'Artboard_1_0.5x.png'%}">
+        <script src="https://cdn.jsdelivr.net/npm/p5@1.3.1/lib/p5.js"></script>
+        <script src="{% static 'webplayer/visualizer.js' %}"></script>
         <title>Modivibe</title>
     </head>
-    <body>
+    <body onload="on_load_visualizer()">
     <style>
         /* width */
         ::-webkit-scrollbar {
@@ -39,6 +41,7 @@
         }
 
     </style>
+    <div id='container'></div>
         <div class="min-vh-100 p-0 d-flex flex-column overflow-hidden">
             <div class="container-fluid no-gutters d-flex flex-column flex-fill">
                 <div class="row flex-shrink-0">
@@ -51,11 +54,16 @@
                         <div class="sidebar">
                             {% include 'webplayer/_sidebar.html' %}
                         </div>
-                        <div class="content" style="overflow-x: hidden; overflow-y: auto;height: calc(100vh - 157px);">
+                        <div class="content" style="overflow-x: hidden; overflow-y: auto;height: calc(100vh - 175px);">
                             {% block content %}{% endblock content %}
+
                         </div>
                     </div>
                 </div>
+                <div id="sketch_one"></div>
+                        <script>
+
+                        </script>
                 <div class="row flex-shrink-1">
                     <div class="col-12">
                         <div class="footer colorScheme" style="bottom: 0; position: fixed; width: 100%; box-sizing: border-box !important; height: auto">{% include 'webplayer/_footer.html' %}</div>
@@ -73,7 +81,6 @@
     </body>
 <script>
     const csrftoken = getCookie('csrftoken');
-
     $(document).on('click', '.PlayRequest', function(e) {
         let contextURI, offsetURI;
         if ($(this).data('parent-uri')) {
@@ -153,6 +160,8 @@
     });
 
     $(document).on('click', '.RecommendationRequest', function(e) {
+        current_player = "";
+        open_and_close_visualizer();
         e.preventDefault();
         let contextURI = $(this).attr('data-uri');
         console.log(`Attempting to pass information for recommendations based of: ${contextURI}`);
@@ -368,6 +377,18 @@
            $('.mouse-menu').hide();
        }
     }
+    function on_load_visualizer() {
+        let path = window.location.pathname;
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
 
+        global_width = $(".content").width();
+        left = $(".content").offset().left;
+        console.log(global_width);
+        new p5(sketch, 'sketch_one');
+        let current = 'sketch_one';
+    }
 </script>
 </html>
