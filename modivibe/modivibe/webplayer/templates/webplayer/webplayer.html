@@ -62,6 +62,12 @@
                 </div>
                 <div id="sketch_one"></div>
                         <script>
+                            let path = window.location.pathname;
+                            let endpoint = path.split('/');
+                            let site = $(endpoint).last();
+                            current_player = site[0];
+                            open_and_close_visualizer();
+
                             global_width = $(".content").width();
                             left = $(".content").offset().left;
                             console.log(global_width);
