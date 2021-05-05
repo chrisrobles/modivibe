@@ -6,7 +6,7 @@
             <span id="trackArtistContainer">Track Artist(s)</span>
         </div>
 
-        <button id="helperButtonControl">click me</button>
+<!--        <button id="helperButtonControl">click me</button>-->
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
@@ -229,7 +229,7 @@
     $('.ConnectionStatus').on('click', transferPlayback);
     $('#progressBarControl').on('change', progressBarSldrMoved);
 
-    $('#helperButtonControl').on('click', helperButton);
+    // $('#helperButtonControl').on('click', helperButton);
 
     // Button event functions
     function transferPlayback() {
@@ -528,24 +528,24 @@
     }
 
     // ryan: temp to use while playing with the API
-    function helperButton(event) {
-        console.log('Attempting to fire helperButton()');
-
-        $.ajax({
-            type: "POST",
-            url: "{% url 'devHelper' %}",
-            data: {
-                csrfmiddlewaretoken: csrftoken,
-            },
-            success: function(response) {
-                if (response) {
-                    console.log('Successfully fired helperButton()');
-                    console.log(response);
-                } else {
-                    console.log('Failed to fire helperButton()');
-                }
-            }
-        });
-    }
+    // function helperButton(event) {
+    //     console.log('Attempting to fire helperButton()');
+    //
+    //     $.ajax({
+    //         type: "POST",
+    //         url: "{% url 'devHelper' %}",
+    //         data: {
+    //             csrfmiddlewaretoken: csrftoken,
+    //         },
+    //         success: function(response) {
+    //             if (response) {
+    //                 console.log('Successfully fired helperButton()');
+    //                 console.log(response);
+    //             } else {
+    //                 console.log('Failed to fire helperButton()');
+    //             }
+    //         }
+    //     });
+    // }
 
 </script>
