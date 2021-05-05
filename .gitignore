@@ -55,3 +55,4 @@ modivibe/venv/
 # might have to include a cache later on, .cache is used by default for spotipy's cache handler
 *.cache
 
+modivibe/modivibe/modivibe/settings.py
