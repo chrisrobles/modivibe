@@ -98,9 +98,7 @@
             success: function(response) {
                if (response === 'True') {
                    console.log('Successfully played request');
-                   if ($('.mouse-menu').is(':visible')) {
-                       $('.mouse-menu').hide();
-                   }
+                   hideMouseMenu();
                }
             }
         });
@@ -130,6 +128,30 @@
         });
     });
 
+    $(document).on('click', '.LikeRequest', function (e) {
+        let contextURI = $(this).attr('data-uri');
+        let likeStatus = $(this).attr('data-liked') === 'true' ? 'false' : 'true';
+        console.log(`Attempting to toggle like for ${contextURI}`);
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'toggleLike' %}",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                track: contextURI,
+                like: likeStatus
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log(`Successfully toggled like for track`);
+                    updateLikeStatus();
+                }
+                else {
+                    console.log(`Failed to toggle like for track`);
+                }
+            },
+        });
+    });
+
     $(document).on('click', '.RecommendationRequest', function(e) {
         e.preventDefault();
         let contextURI = $(this).attr('data-uri');
@@ -145,9 +167,7 @@
                 if(response.status == 200) {
                     $(".content").first().html(response.page);
                     $("html, .content").animate({ scrollTop: 0 }, "fast");
-                    if ($('.mouse-menu').is(':visible')) {
-                       $('.mouse-menu').hide();
-                    }
+                    hideMouseMenu();
                 }
                 else {
                     window.location="/";
@@ -172,10 +192,11 @@
             }
             $('.mouse-menu ul').html(`
                 <li><button class="PlayRequest" data-uri="${dataURI}">Play Artist</button></li>
-                <li><button>Follow Artist</button></li>
+                <li><button class="FollowRequest MouseMenuItem" data-uri="${dataURI}">Follow Artist</button></li>
                 <li><button>Go to Artist</button></li>
                 <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
+            updateFollowStatus()
         }
         else if ($(clickTarget).hasClass('Playlist') || $(clickTarget).parents('.Playlist').length) {
             if (dataURI === null) {
@@ -219,11 +240,12 @@
             $('.mouse-menu ul').html(`
                 <li><button>Add to Queue</button></li>
                 <li><button>Add to Playlist</button></li>
-                <li><button>Add to Liked Songs</button></li>
+                <li><button class="LikeRequest MouseMenuItem" data-uri="${dataURI}">Like Song</button></li>
                 <li><button>Go to Artist</button></li>
                 <li><button>Go to Album</button></li>
                 <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
+            updateLikeStatus();
         } else {
             return;
         }
@@ -286,9 +308,16 @@
                         console.log('Successfully collected follow status, now updating associated buttons');
                         response = JSON.parse(response);
                         let affectedFollowButtons = $(`.FollowRequest[data-uri="${response['artist']}"]`);
-                        $(affectedFollowButtons).attr('data-following', response['following']);
-                        let followText = $(affectedFollowButtons).attr('data-following') === 'true' ? 'person_remove_alt_1' : 'person_add_alt';
-                        $(affectedFollowButtons).text(followText);
+                        $(affectedFollowButtons).each(function () {
+                            $(this).attr('data-following', response['following']);
+                            let followText = "";
+                            if ($(this).hasClass('MouseMenuItem')) {
+                                followText = $(this).attr('data-following') === 'true' ? 'Unfollow Artist' : 'Follow Artist';
+                            } else {
+                                followText = $(this).attr('data-following') === 'true' ? 'person_remove_alt_1' : 'person_add_alt';
+                            }
+                            $(this).text(followText);
+                        });
                     } else {
                         console.log('Failed to collect follow status');
                     }
@@ -296,5 +325,49 @@
             });
         });
     }
+
+    function updateLikeStatus() {
+        let likeButtons = $('.LikeRequest');
+        let affectedURIs = [];
+        $(likeButtons).each(function(){
+            let contextURI = $(this).attr('data-uri');
+            if (affectedURIs.includes(contextURI)) return;
+            affectedURIs.push(contextURI);
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'isLiked' %}",
+                data: {
+                    csrfmiddlewaretoken: csrftoken,
+                    track: contextURI
+                },
+                success: function(response) {
+                    if (response != 'False') {
+                        console.log('Successfully collected like status, now updating associated buttons');
+                        response = JSON.parse(response);
+                        let affectedLikeButtons = $(`.LikeRequest[data-uri="${response['track']}"]`);
+                        $(affectedLikeButtons).each(function () {
+                            $(this).attr('data-liked', response['liked']);
+                            let likeText = "";
+                            if ($(this).hasClass('MouseMenuItem')) {
+                                likeText = $(this).attr('data-liked') === 'true' ? 'Unlike Song' : 'Like Song';
+                            } else {
+                                likeText = $(this).attr('data-liked') === 'true' ? 'favorite_border' : 'favorite';
+                            }
+                            $(this).text(likeText);
+                        });
+                    } else {
+                        console.log('Failed to collect like status');
+                    }
+                },
+            });
+        });
+    }
+
+    function hideMouseMenu() {
+        if ($('.mouse-menu').is(':visible')) {
+           $('.mouse-menu').hide();
+       }
+    }
+
 </script>
 </html>

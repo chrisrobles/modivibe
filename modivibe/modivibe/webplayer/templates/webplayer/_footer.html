@@ -489,7 +489,7 @@
         for(let i = 0; i < artistsList.length; i++){
             let artistURI = artistsList[i]['uri'];
             let artistID = artistURI.split(':')[2];
-            artists += `<a class="Artist ItemLink" href="artist/${artistID}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
+            artists += `<a class="Artist ItemLink" href="/artist/${artistID}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
             if (i != artistsList.length - 1) artists += ", ";
         }
         return artists;
