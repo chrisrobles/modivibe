@@ -40,6 +40,7 @@ urlpatterns = [
     path('artist/<str:artist_id>/topSongs', views.artistTopSongs, name='artistTopSongs'),
     path('artist/<str:artist_id>/albums', views.artistAlbums, name='artistAlbums'),
     path('artist/<str:artist_id>/related', views.artistRelated, name='artistRelated'),
+    path('album/<str:album_id>', views.album, name='album'),
 
     # search bar
     path('search/<str:search_value>', views.search, name='search'),

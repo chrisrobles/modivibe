@@ -34,15 +34,15 @@ def home(request):
     RecentlyPlayed = []
     for a in recentlyPlayedList['items']:
         RecentlyPlayed.append({
-          'contentImg': a['track']['album']['images'][1]['url'] if a['track']['album']['images'] else 'default',
-          'contentName': a['track']['album']['name'],
-          'contentId': a['track']['album']['id'],
-          'artist': a['track']['album']['artists'][0]['name'],
-          'artistId': a['track']['album']['artists'][0]['id'],
-          'albumDate': a['track']['album']['release_date'][0:4],
+            'contentImg': a['track']['album']['images'][1]['url'] if a['track']['album']['images'] else 'default',
+            'contentName': a['track']['album']['name'],
+            'contentId': a['track']['album']['id'],
+            'artist': a['track']['album']['artists'][0]['name'],
+            'artistId': a['track']['album']['artists'][0]['id'],
+            'albumDate': a['track']['album']['release_date'][0:4],
         })
 
-    collectionContext ={
+    collectionContext = {
         'type': 'album',
         'ajax': True,
         'info': RecentlyPlayed,
@@ -213,6 +213,61 @@ def playlist(request, playlist_id):
 
         # TODO: Make the songList an actual HTML page then utilize context & render_to_string
         page = createSongList(info, 'playlist', 'spotify:playlist:' + playlist_id)
+
+        return JsonResponse({'page': page, 'status': 200})
+
+    return redirect('webplayer')  # fix this <------- need html page
+
+
+def album(request, album_id):
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
+
+    userAccessCode = getUserAccessCode()
+    if not userAccessCode:
+        return redirect('splash')
+
+    if isAjaxRequest(request):
+        startAt = 0
+        lim = 50
+        pNo = 1
+
+        slInfo = sp.album_tracks(album_id=album_id, limit=lim, offset=startAt)
+        num_songs = slInfo['total']  # total number of songs in an album
+
+        info = []
+
+        for s in slInfo['items']:
+            info.append({
+                "songNum": pNo,
+                "songName": s['name'],
+                "songId": s['id'],
+                "songURI": s['uri'],
+                "songArtist": s['artists'][0]['name'] if s.get('artists') else "",
+                "artistId": s['artists'][0]['id'] if s.get('artists') else "",
+                "songLength": s['duration_ms']
+            })
+
+            pNo += 1
+
+        while lim + startAt < num_songs:
+            startAt += lim
+            slInfo = sp.album_tracks(album_id=album_id, limit=lim, offset=startAt)
+            for s in slInfo['items']:
+                info.append({
+                    "songNum": pNo,
+                    "songName": s['name'],
+                    "songId": s['id'],
+                    "songURI": s['uri'],
+                    "songArtist": s['artists'][0]['name'] if s.get('artists') else "",
+                    "artistId": s['artists'][0]['id'] if s.get('artists') else "",
+                    "songLength": s['duration_ms']
+                })
+
+                pNo += 1
+
+        # TODO: Make the songList an actual HTML page then utilize context & render_to_string
+        page = createSongList(info, 'album', 'spotify:album:' + album_id)
 
         return JsonResponse({'page': page, 'status': 200})
 
@@ -505,7 +560,8 @@ def artistRelated(request, artist_id):
         })
 
     # TODO: Change the way we handle this to use context variable like other pages (if possible)
-    content = render_to_string('webplayer/collectionItems.html', context={"info": info, "type": "artist", "ajax": True, "userAccessCode": userAccessCode})
+    content = render_to_string('webplayer/collectionItems.html',
+                               context={"info": info, "type": "artist", "ajax": True, "userAccessCode": userAccessCode})
 
     if isAjaxRequest(request):
         return JsonResponse({"content": content, 'status': 200})
@@ -607,8 +663,8 @@ def search(request, search_value):
     }
 
     if isAjaxRequest(request):
-        return JsonResponse({"searchResults": render_to_string('webplayer/search.html', context=context), 'status': 200})
+        return JsonResponse(
+            {"searchResults": render_to_string('webplayer/search.html', context=context), 'status': 200})
     else:
         return render(
             request, 'webplayer/search.html', context=context)
-
