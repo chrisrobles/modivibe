@@ -85,7 +85,6 @@
     </body>
 <script>
     const csrftoken = getCookie('csrftoken');
-
     $(document).on('click', '.PlayRequest', function(e) {
         let contextURI, offsetURI;
         if ($(this).data('parent-uri')) {
@@ -165,6 +164,8 @@
     });
 
     $(document).on('click', '.RecommendationRequest', function(e) {
+        current_player = "";
+        open_and_close_visualizer();
         e.preventDefault();
         let contextURI = $(this).attr('data-uri');
         console.log(`Attempting to pass information for recommendations based of: ${contextURI}`);

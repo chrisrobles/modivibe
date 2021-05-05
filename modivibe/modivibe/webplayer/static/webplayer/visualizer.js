@@ -1,10 +1,18 @@
 
 var paused_value_visualizer = 0;
 var current_instance = 0;
-var show = false;
+var current_player = "webplayer";
 
 var global_width = 0;
 var left = 0;
+
+function current_url_val()
+{
+  while(1)
+  {
+    console.log(window.location.href);
+  }
+}
 
 function close_visualizer() {
       document.getElementById("sketch_one").style.display = 'none';
@@ -14,6 +22,17 @@ function open_visualizer() {
   document.getElementById("sketch_one").style.display = 'block';
 }
 
+function open_and_close_visualizer()
+{
+  if (current_player == "webplayer")
+  {
+    document.getElementById("sketch_one").style.display = 'block';
+  }
+  else
+  {
+    document.getElementById("sketch_one").style.display = 'none';
+  }
+}
 
 var sketch = function(val)
 {
@@ -46,14 +65,6 @@ var sketch = function(val)
 
   val.draw = function(){
     val.draw_lines(0);
-  }
-
-  val.show_item = function()
-  {
-    if (show == true)
-      val.show();
-    else
-      val.hide();
   }
 
   val.draw_lines = function(increase){
