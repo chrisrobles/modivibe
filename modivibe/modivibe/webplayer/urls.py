@@ -24,9 +24,6 @@ urlpatterns = [
     path('isLiked', views.isLiked, name='isLiked'),
     path('progressBarSldrMoved', views.progressBarSldrMoved, name='progressBarSldrMoved'),
 
-    # for use with the helper button
-    path('devHelper', views.devHelper, name='devHelper'),
-
     # user collections and music collections (albums, artists, playlists, podcasts)
     # url should follow:    my/{collection_type}s
     path('my/playlists', views.myPlaylists, name='myPlaylists'),

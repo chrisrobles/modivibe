@@ -464,16 +464,16 @@ def progressBarSldrMoved(request):
     return HttpResponse(response)
 
 # Helper for developing stuffs
-def devHelper(request):
-    # deviceID = request.POST['device_id']
-
-    # returns a JSON object with some user data
-    #   look in the pycharm server terminal for the print out
-    try:
-        returnedData = sp.current_user_playlists()
-        print(json.dumps(returnedData, indent=4))
-
-        response = True
-    except SpotifyException:
-        response = False
-    return HttpResponse(response)
+# def devHelper(request):
+#     # deviceID = request.POST['device_id']
+#
+#     # returns a JSON object with some user data
+#     #   look in the pycharm server terminal for the print out
+#     try:
+#         returnedData = sp.current_user_playlists()
+#         print(json.dumps(returnedData, indent=4))
+#
+#         response = True
+#     except SpotifyException:
+#         response = False
+#     return HttpResponse(response)
