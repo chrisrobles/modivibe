@@ -1,6 +1,6 @@
 @keyframes slideL {
     0% {right: 0%; opacity: 0%;}
-    100% {right: 40%; opacity: 100%;}
+    100% {right: 40%; opacity: 100%; transform: translate(40%, -50%);}
 }
 
 @keyframes slideR {
@@ -15,6 +15,8 @@
     animation-name: slideL;
     animation-duration: 4s;
     right: 40%;
+    transform: translate(40%, -50%);
+    width: 600px;
 }
 
 .slideRight{
@@ -22,26 +24,40 @@
     animation-name: slideR;
     animation-duration: 4s;
     left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+
 }
 
 body{
     height: 100%;
-    background: linear-gradient( lightgrey 33%, darkgrey ) fixed no-repeat;
+    background-color: #c73e1d;
+    background-image: linear-gradient(315deg, #c73e1d 0%, #a23b72 37%, #2e86ab 100%);
     font-family: Roboto, sans-serif;
 }
 
 nav {
+    position: sticky;
     background: #1c1c1c;
     padding: 15px;
+    top: 0;
+    z-index: 10;
+}
+
+.spotifyNavButton{
+    background-color: white;
+    border-radius: 4px;
+    font-family: Roboto;
+    color: black;
+}
+
+.spotifyNavButton:hover{
+    background-color: darkgrey;
+    color: white;
 }
 
 a {
     color: white;
-    text-decoration: none;
-}
-
-.logo{
-    font-size: 30px;
 }
 
 .splashNav{
@@ -56,10 +72,6 @@ a {
     display: flex;
 }
 
-.btn-lg{
-
-}
-
 .navButtons li{
     margin: 0 10px;
     align-self: flex-end;
@@ -69,7 +81,18 @@ a {
     margin: 0 10px;
 }
 
+.col-6{
+    border-radius: 15px;
+    background-color: rgba(0,0,0,0.6);
+    /*opacity: 40%;*/
+}
+
+.textBox{
+    padding: 10px 10px;
+}
+
 .overviewText{
+    font-opacity: 100%; !important;
     color: white;
     text-align: center;
 }

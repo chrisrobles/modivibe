@@ -12,33 +12,36 @@
     <nav>
         <ul class="splashNav">
             <!--Change to an image at a later time, requires more work-->
-            <li><a class="logo" href="#" > MODIVIBE </a></li>
+            <li><a style="text-decoration: none" class="logo" href="#" >
+                <img src="/static/Artboard_1_0.5x.png" style="height:50px; border-radius: 10px; border-color: pink">
+
+            </a>
+            </li>
 
             <!--The not logo buttons-->
             <div class="navButtons">
-                <li> <a href="#">Overview</a></li>
-                <li ><a href="{{ loginurl }}" >Login with Spotify</a></li>
+                <li> <button type = "button" class="spotifyNavButton" href="#">Privacy Policy</button></li>
+                <li ><button type ="button" class="spotifyNavButton" onclick="location.href='{{ loginurl }}'" >Login with Spotify</button></li>
             </div>
         </ul>
     </nav>
     <body>
         <div class='container-fluid overviewText'>
             <div class='row align-items-center'>
-                <div class='col-6'>
+                <div class='col-6 textBox' >
                     <h1>Welcome to Modivibe!</h1>
                     <h5>
                         Modivibe is a versatile, web-based alternative to Spotify filled with ways to customize your experience. Connect with your Spotify account for free now!
                     </h5>
-                    <button type="button" class="btn btn-lg" onclick="location.href='{{ loginurl }}'">Connect</button>
-                    <p style='font-size: small; font-weight: 400;'> *Spotify Premium is REQUIRED to use Modivibe</p>
+                    <button type="button" class="btn btn-lg" onclick="location.href='{{ loginurl }}'">Connect (Premium recommended)</button>
                 </div>
                 <div class='col-6 align-self-center'>
-                    <span class="slideLeft">put graphic here</span>
+                    <img class="slideLeft" src="{%static 'splash/Modivibe_D.png' %}"></img> <!--Modivibe Logo goes here-->
                 </div>
             </div>
             <div class='row align-items-center'>
                 <div class='col-6'>
-                    <span class="slideRight">put graphic here</span>
+                    <img class="slideRight" src="{%static 'splash/Web-Based-Player.png'%}"</img>
                 </div>
                 <div class='col-6'>
                     <h5>
@@ -47,7 +50,7 @@
                     </h5>
                 </div>
             </div>
-            <div class='row align-items-center'>
+            <div class='row align-items-center textBox'>
                 <div class='col-6'>
                     <h5>
                         <h1>On-Demand Recommendation System</h1>
@@ -55,12 +58,12 @@
                     </h5>
                 </div>
                 <div class='col-6'>
-                    <span class="slideLeft">put graphic here</span>
+                    <img class="slideLeft" src="{% static 'splash/Reccomendations.png'%}"></img>
                 </div>
             </div>
-            <div class='row align-items-center'>
+            <div class='row align-items-center textBox'>
                 <div class='col-6'>
-                    <p class="slideRight">put graphic here</p>
+                    <img class="slideRight" src="{% static 'splash/lock.png'%}"></img>
                 </div>
                 <div class='col-6'>
                     <h5>
