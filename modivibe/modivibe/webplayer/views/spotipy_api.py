@@ -462,3 +462,11 @@ def progressBarSldrMoved(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
+
+def logout(request):
+    if not validUser(request):
+        return redirect('splash')
+
+    cache_handler.delete_session()
+
+    return redirect('splash')
