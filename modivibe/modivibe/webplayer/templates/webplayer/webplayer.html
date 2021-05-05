@@ -54,11 +54,20 @@
                         <div class="sidebar">
                             {% include 'webplayer/_sidebar.html' %}
                         </div>
-                        <div class="content" style="overflow-x: hidden; overflow-y: auto;height: calc(100vh - 175px);padding: 0">
+                        <div class="content" style="overflow-x: hidden; overflow-y: auto;height: calc(100vh - 175px);">
                             {% block content %}{% endblock content %}
+
                         </div>
                     </div>
                 </div>
+                <div id="sketch_one"></div>
+                        <script>
+                            global_width = $(".content").width();
+                            left = $(".content").offset().left;
+                            console.log(global_width);
+                            new p5(sketch, 'sketch_one');
+                            let current = 'sketch_one';
+                        </script>
                 <div class="row flex-shrink-1">
                     <div class="col-12">
                         <div class="footer colorScheme" style="bottom: 0; position: fixed; width: 100%; box-sizing: border-box !important; height: auto">{% include 'webplayer/_footer.html' %}</div>

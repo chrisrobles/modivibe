@@ -1,14 +1,4 @@
 {% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
 {% block content %}
 {% load static %}
-    <script>
-        new p5(sketch, 'sketch_one');
-        window.onresize = resize;
-        function resize() {
-            new p5(sketch, 'sketch_one');
-        }
-    </script>
-    <div id="sketch_one" style="max-height: calc(100vh - 175px)">
-    </div>
-
 {% endblock content %}

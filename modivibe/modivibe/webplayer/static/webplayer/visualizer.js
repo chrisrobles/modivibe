@@ -1,11 +1,25 @@
 
 var paused_value_visualizer = 0;
+var current_instance = 0;
+var show = false;
 
-let sketch = function(val)
+var global_width = 0;
+var left = 0;
+
+function close_visualizer() {
+      document.getElementById("sketch_one").style.display = 'none';
+    }
+
+function open_visualizer() {
+  document.getElementById("sketch_one").style.display = 'block';
+}
+
+
+var sketch = function(val)
 {
   val.yoff = 0.0;
   val.max_height = window.innerHeight;
-  val.max_width = window.innerWidth;
+  val.max_width = global_width+100;
 
   val.current_color = 0;
   val.next_color = 0;
@@ -20,7 +34,7 @@ let sketch = function(val)
 
   val.setup = function(){
     var canvas = val.createCanvas(val.max_width, val.max_height);
-    canvas.position(0,0,'relative');
+    canvas.position(left,100,'absolute');
     val.current_color = val.select_new_color();
     val.next_color = val.select_new_color();
     val.current_color_two = val.select_new_color();
@@ -34,15 +48,25 @@ let sketch = function(val)
     val.draw_lines(0);
   }
 
+  val.show_item = function()
+  {
+    if (show == true)
+      val.show();
+    else
+      val.hide();
+  }
+
   val.draw_lines = function(increase){
     val.clear();
     val.noStroke();
+
     if (val.amt >= 1)
     {
       val.next_color = val.select_new_color();
       val.next_color_two = val.select_new_color();
       val.next_color_three = val.select_new_color();
       val.amt = 0.01;
+
     }
 
     val.current_color = val.lerpColor(val.current_color, val.next_color, val.amt);
@@ -79,7 +103,7 @@ let sketch = function(val)
     w = 0;
     for (let x = 0; x < original_plane.length; x++)
     {
-      val.vertex(w, original_plane[x]+30);
+      val.vertex(w, original_plane[x] +30);
       w+=10;
     }
     val.vertex(val.width, val.height);
