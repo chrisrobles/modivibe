@@ -104,6 +104,10 @@ def myPlaylists(request):
     plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
     numPLs = plInfo['total']  # total number of playlists the user has
 
+    # for showing the number of liked songs on the button
+    likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+    numOfLikedSongs = likedSongsInfo['total']  # total number of liked songs
+
     info = []
 
     for p in plInfo['items']:
@@ -130,6 +134,7 @@ def myPlaylists(request):
         'ajax': isAjaxRequest(request),
         'info': info,
         'type': 'playlist',
+        'numOfLikedSongs': numOfLikedSongs,
     }
 
     if context['ajax'] is True:
@@ -342,6 +347,71 @@ def myPodcasts(request):
         return render(request, 'webplayer/collectionItems.html', context=context)
 
 
+def myLikedSongs(request):
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
+
+    userAccessCode = getUserAccessCode()
+    if not userAccessCode:
+        return redirect('splash')
+
+    startAt = 0
+    # limit of 50 or the API call will fail
+    lim = 50
+    songNum = 1
+
+    likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+    numOfSongs = likedSongsInfo['total']  # total number of liked songs
+
+    likedSongsTrimmedInfo = []
+
+    for s in likedSongsInfo['items']:
+        likedSongsTrimmedInfo.append({
+            "songNum": songNum,
+            "songName": s['track']['name'],
+            "songId": s['track']['id'],
+            "songURI": s['track']['uri'],
+            "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+            "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
+            "songLength": s['track']['duration_ms'],
+            'songAlbumURI': s['track']['album']['uri'],
+        })
+
+        songNum += 1
+
+    while lim + startAt < numOfSongs:
+        startAt += lim
+
+        likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+        for s in likedSongsInfo['items']:
+            likedSongsTrimmedInfo.append({
+                "songNum": songNum,
+                "songName": s['track']['name'],
+                "songId": s['track']['id'],
+                "songURI": s['track']['uri'],
+                "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+                "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
+                "songLength": s['track']['duration_ms'],
+                'songAlbumURI': s['track']['album']['uri'],
+            })
+
+            songNum += 1
+
+    # TODO: Make the songList an actual HTML page then utilize context & render_to_string
+    uriPlaceholder = "URI:PLACE:HOLDER"
+    page = createSongList(likedSongsTrimmedInfo, 'liked songs', uriPlaceholder)
+
+    # fix this replace with the correct URI string for the liked strings page to allow the PLAY ALL button to work
+    #   note: not really sure if that is possible with what we're given by spotipy/spotify
+    page = page.replace(uriPlaceholder, 'fix me luls', 1)
+
+    # needed for each song to be playable from the list
+    for song in likedSongsTrimmedInfo:
+        page = page.replace(uriPlaceholder, song['songAlbumURI'], 2)
+
+    return JsonResponse({'page': page, 'status': 200})
+
+
 def artist(request, artist_id):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -398,8 +468,12 @@ def artistTopSongs(request, artist_id):
     content = createSongList(info, 'artist', 'spotify:artist:' + artist_id)
 
     if isAjaxRequest(request):
+        print('***** views.artistTopSongs() fired , is an ajax request *****')
+
         return JsonResponse({"content": content, 'status': 200})
     else:
+        print('***** views.artistTopSongs() fired , is NOT an ajax request *****')
+
         # if not ajax, have to get header info and insert content string into template
         header = getArtistHeaderInfo(sp, artist_id)
         return render(request, 'webplayer/artistPage.html',
@@ -586,4 +660,3 @@ def search(request, search_value):
     else:
         return render(
             request, 'webplayer/search.html', context=context)
-
