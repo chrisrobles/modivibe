@@ -104,11 +104,15 @@ def myPlaylists(request):
     plInfo = sp.current_user_playlists(limit=lim, offset=startAt)
     numPLs = plInfo['total']  # total number of playlists the user has
 
+    # for showing the number of liked songs on the button
+    likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+    numOfLikedSongs = likedSongsInfo['total']  # total number of liked songs
+
     info = []
 
     for p in plInfo['items']:
         info.append({
-            'contentImg': p['images'][0]['url'] if p['images'] else 'default',
+            'contentImg': p['images'][0]['url'] if p['images'] else None,
             'contentName': p['name'],
             'contentId': p['id']
         })
@@ -120,7 +124,7 @@ def myPlaylists(request):
 
         for p in plInfo['items']:
             info.append({
-                'contentImg': p['images'][0]['url'] if p['images'] else 'default',
+                'contentImg': p['images'][0]['url'] if p['images'] else None,
                 'contentName': p['name'],
                 'contentId': p['id']
             })
@@ -130,6 +134,7 @@ def myPlaylists(request):
         'ajax': isAjaxRequest(request),
         'info': info,
         'type': 'playlist',
+        'numOfLikedSongs': numOfLikedSongs,
     }
 
     if context['ajax'] is True:
@@ -213,7 +218,7 @@ def mySavedAlbums(request):
 
     for a in albumInfo['items']:
         info.append({
-            'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+            'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else None,
             'contentName': a['album']['name'],
             'contentId': a['album']['id'],
             'artist': a['album']['artists'][0]['name'],
@@ -227,7 +232,7 @@ def mySavedAlbums(request):
 
         for a in albumInfo['items']:
             info.append({
-                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else None,
                 'contentName': a['album']['name'],
                 'contentId': a['album']['id'],
                 'artist': a['album']['artists'][0]['name'],
@@ -263,7 +268,7 @@ def myArtists(request):
 
     for a in artistInfo['artists']['items']:
         info.append({
-            'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+            'contentImg': a['images'][0]['url'] if a['images'] else None,
             'contentName': a['name'],
             'contentId': a['id']
         })
@@ -274,7 +279,7 @@ def myArtists(request):
 
         for a in artistInfo['artists']['items']:
             info.append({
-                'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+                'contentImg': a['images'][0]['url'] if a['images'] else None,
                 'contentName': a['name'],
                 'contentId': a['id']
             })
@@ -310,7 +315,7 @@ def myPodcasts(request):
 
     for p in podcastInfo['items']:
         info.append({
-            'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else 'default',
+            'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else None,
             'contentName': p['show']['name'],
             'contentId': p['show']['id'],
             'publisher': p['show']['publisher']
@@ -322,7 +327,7 @@ def myPodcasts(request):
 
         for p in podcastInfo['items']:
             info.append({
-                'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else 'default',
+                'contentImg': p['show']['images'][0]['url'] if p['show']['images'] else None,
                 'contentName': p['show']['name'],
                 'contentId': p['show']['id'],
                 'publisher': p['show']['publisher']
@@ -340,6 +345,71 @@ def myPodcasts(request):
         return JsonResponse({'collection': collection, 'status': 200})
     else:
         return render(request, 'webplayer/collectionItems.html', context=context)
+
+
+def myLikedSongs(request):
+    if not validUser(request):
+        return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
+
+    userAccessCode = getUserAccessCode()
+    if not userAccessCode:
+        return redirect('splash')
+
+    startAt = 0
+    # limit of 50 or the API call will fail
+    lim = 50
+    songNum = 1
+
+    likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+    numOfSongs = likedSongsInfo['total']  # total number of liked songs
+
+    likedSongsTrimmedInfo = []
+
+    for s in likedSongsInfo['items']:
+        likedSongsTrimmedInfo.append({
+            "songNum": songNum,
+            "songName": s['track']['name'],
+            "songId": s['track']['id'],
+            "songURI": s['track']['uri'],
+            "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+            "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
+            "songLength": s['track']['duration_ms'],
+            'songAlbumURI': s['track']['album']['uri'],
+        })
+
+        songNum += 1
+
+    while lim + startAt < numOfSongs:
+        startAt += lim
+
+        likedSongsInfo = sp.current_user_saved_tracks(limit=lim, offset=startAt)
+        for s in likedSongsInfo['items']:
+            likedSongsTrimmedInfo.append({
+                "songNum": songNum,
+                "songName": s['track']['name'],
+                "songId": s['track']['id'],
+                "songURI": s['track']['uri'],
+                "songArtist": s['track']['artists'][0]['name'] if s['track'].get('artists') else "",
+                "artistId": s['track']['artists'][0]['id'] if s['track'].get('artists') else "",
+                "songLength": s['track']['duration_ms'],
+                'songAlbumURI': s['track']['album']['uri'],
+            })
+
+            songNum += 1
+
+    # TODO: Make the songList an actual HTML page then utilize context & render_to_string
+    uriPlaceholder = "URI:PLACE:HOLDER"
+    page = createSongList(likedSongsTrimmedInfo, 'liked songs', uriPlaceholder)
+
+    # fix this replace with the correct URI string for the liked strings page to allow the PLAY ALL button to work
+    #   note: not really sure if that is possible with what we're given by spotipy/spotify
+    page = page.replace(uriPlaceholder, 'fix me luls', 1)
+
+    # needed for each song to be playable from the list
+    for song in likedSongsTrimmedInfo:
+        page = page.replace(uriPlaceholder, song['songAlbumURI'], 2)
+
+    return JsonResponse({'page': page, 'status': 200})
 
 
 def artist(request, artist_id):
@@ -398,8 +468,12 @@ def artistTopSongs(request, artist_id):
     content = createSongList(info, 'artist', 'spotify:artist:' + artist_id)
 
     if isAjaxRequest(request):
+        print('***** views.artistTopSongs() fired , is an ajax request *****')
+
         return JsonResponse({"content": content, 'status': 200})
     else:
+        print('***** views.artistTopSongs() fired , is NOT an ajax request *****')
+
         # if not ajax, have to get header info and insert content string into template
         header = getArtistHeaderInfo(sp, artist_id)
         return render(request, 'webplayer/artistPage.html',
@@ -423,7 +497,7 @@ def artistAlbums(request, artist_id):
 
     for a in albums['items']:
         info.append({
-            'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+            'contentImg': a['images'][0]['url'] if a['images'] else None,
             'contentName': a['name'],
             'contentId': a['id'],
             'artist': a['artists'][0]['name'],
@@ -437,7 +511,7 @@ def artistAlbums(request, artist_id):
 
         for a in albums['items']:
             info.append({
-                'contentImg': a['images'][0]['url'] if a['images'] else 'default',
+                'contentImg': a['images'][0]['url'] if a['images'] else None,
                 'contentName': a['name'],
                 'contentId': a['id'],
                 'artist': a['artists'][0]['name'],
@@ -474,7 +548,7 @@ def artistRelated(request, artist_id):
 
     for artist in related['artists']:
         info.append({
-            'contentImg': artist['images'][0]['url'] if artist['images'] else 'default',
+            'contentImg': artist['images'][0]['url'] if artist['images'] else None,
             'contentName': artist['name'],
             'contentId': artist['id']
         })
@@ -536,7 +610,7 @@ def search(request, search_value):
     artists = []
     for ar in sr['artists']['items']:
         artists.append({
-            'contentImg': ar['images'][0]['url'] if ar['images'] else 'default',
+            'contentImg': ar['images'][0]['url'] if ar['images'] else None,
             'contentName': ar['name'],
             'contentId': ar['id']
         })
@@ -548,7 +622,7 @@ def search(request, search_value):
     albums = []
     for al in sr['albums']['items']:
         albums.append({
-            'contentImg': al['images'][0]['url'] if al['images'] else 'default',
+            'contentImg': al['images'][0]['url'] if al['images'] else None,
             'contentName': al['name'],
             'contentId': al['id'],
             'artist': al['artists'][0]['name'],
@@ -563,7 +637,7 @@ def search(request, search_value):
     playlists = []
     for pl in sr['playlists']['items']:
         playlists.append({
-            'contentImg': pl['images'][0]['url'] if pl['images'] else 'default',
+            'contentImg': pl['images'][0]['url'] if pl['images'] else None,
             'contentName': pl['name'],
             'contentId': pl['id']
         })
@@ -586,4 +660,3 @@ def search(request, search_value):
     else:
         return render(
             request, 'webplayer/search.html', context=context)
-
