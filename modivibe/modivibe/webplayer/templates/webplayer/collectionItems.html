@@ -24,6 +24,7 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
 -->
 
 {% block content %}
+{% load static %}
 <div class="container-fluid">
     <section class="CollectionContent">
         <div class="row">
@@ -39,10 +40,23 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
             </div>
         {% endif %}
 
+        <!--  Liked Songs banner -->
+        {% if type == "playlist" %}
+            <div style="padding-left: 5px;" class="col-3">
+                <a href="{% url 'likedSongs' %}" class="ItemLink">
+                    <button id="likedSongsButton" type="button" class="btn btn-primary">
+                        <span id="likedSongsButtonLabel1">Liked Songs</span>
+                        <br>
+                        <span id="likedSongsButtonLabel2">{{ numOfLikedSongs }} liked songs</span>
+                    </button>
+                </a>
+            </div>
+        {% endif %}
+
         {% for item in info %}
             <div style="padding-bottom: 20px;" class="col-3">
                 <div class="ContentItem {{ type|title }}" data-uri="spotify:{{ type }}:{{ item.contentId }}" style="display: flex; flex-direction: column">
-                    <img class="ContentImage" src="{{ item.contentImg }}" style="">
+                    <img class="ContentImage" src={% if not item.contentImg %} "{% static 'default_img.png' %}" {% else %} "{{item.contentImg}}" {% endif %}>
                     <a class="ItemLink" style="text-align:center;" href="/{{ type }}/{{ item.contentId }}">
                         <h3>{{ item.contentName }}</h3>
                     </a>
@@ -62,11 +76,19 @@ In spotipy_api.py, each view must provide the context dictionary with (exact key
             {% endif %}
             </div>
 
-
-            {% if forloop.counter|divisibleby:4 %}
-        </div>
-        <div class="row">
+            <!--  Playlist page shows the Liked Songs button so account for that in the layout  -->
+            {% if type != "playlist" %}
+                {% if forloop.counter|divisibleby:4 %}
+                    </div>
+                    <div class="row">
+                {% endif %}
             {% endif %}
+
+
+<!--            {% if forloop.counter|divisibleby:4 %}-->
+<!--        </div>-->
+<!--        <div class="row">-->
+<!--            {% endif %}-->
 
         {% endfor %}
         </div>

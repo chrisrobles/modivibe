@@ -7,17 +7,18 @@
         <script src="{% static 'lib/jquery/jquery-3.6.0.min.js'%}"></script>
         <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css'%}">
         <script src="{% static 'lib/bootstrap/js/bootstrap.min.js'%}"></script>
-        <script src="{% static 'webplayer/script.js' %}" async></script>
+        <script src="{% static 'webplayer/script.js' %}"></script>
         <link rel="stylesheet" type="text/css" href="{% static 'webplayer/main.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'webplayer/queue.css' %}">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" >
         <script src="https://sdk.scdn.co/spotify-player.js"></script>
-        <script src="{% static 'webplayer/util.js' %}" async></script>
-        <link rel="icon" href="{% static 'Artboard_1_0.5x.png'%}">
-        {% if title %} <title>Modivibe - {{ title }}</title>
-        {% else %} <title>Modivibe</title>
-        {% endif %}
+        <script src="{% static 'webplayer/util.js' %}"></script>
+        <link rel="icon" href="{% static 'Modivibe_Logo.png'%}">
+        <script src="https://cdn.jsdelivr.net/npm/p5@1.3.1/lib/p5.js"></script>
+        <script src="{% static 'webplayer/visualizer.js' %}"></script>
+        <title>Modivibe</title>
     </head>
-    <body>
+    <body onload="on_load_visualizer()">
     <style>
         /* width */
         ::-webkit-scrollbar {
@@ -40,6 +41,7 @@
         }
 
     </style>
+    <div id='container'></div>
         <div class="min-vh-100 p-0 d-flex flex-column overflow-hidden">
             <div class="container-fluid no-gutters d-flex flex-column flex-fill">
                 <div class="row flex-shrink-0">
@@ -52,11 +54,16 @@
                         <div class="sidebar">
                             {% include 'webplayer/_sidebar.html' %}
                         </div>
-                        <div class="content" style="overflow-x: hidden; overflow-y: auto;height: calc(100vh - 157px);">
+                        <div class="content" style="overflow-x: hidden; overflow-y: auto;height: calc(100vh - 175px);">
                             {% block content %}{% endblock content %}
+
                         </div>
                     </div>
                 </div>
+                <div id="sketch_one"></div>
+                        <script>
+
+                        </script>
                 <div class="row flex-shrink-1">
                     <div class="col-12">
                         <div class="footer colorScheme" style="bottom: 0; position: fixed; width: 100%; box-sizing: border-box !important; height: auto">{% include 'webplayer/_footer.html' %}</div>
@@ -73,6 +80,7 @@
         </div>
     </body>
 <script>
+    const csrftoken = getCookie('csrftoken');
     $(document).on('click', '.PlayRequest', function(e) {
         let contextURI, offsetURI;
         if ($(this).data('parent-uri')) {
@@ -88,7 +96,7 @@
             type: 'POST',
             url: "{% url 'setPlayback' %}",
             data: {
-               csrfmiddlewaretoken: '{{ csrf_token }}',
+               csrfmiddlewaretoken: csrftoken,
                device_id: deviceID,
                status: 'play',
                context_uri: contextURI,
@@ -97,10 +105,82 @@
             success: function(response) {
                if (response === 'True') {
                    console.log('Successfully played request');
-                   if ($('.mouse-menu').is(':visible')) {
-                       $('.mouse-menu').hide();
-                   }
+                   hideMouseMenu();
                }
+            }
+        });
+    });
+
+    $(document).on('click', '.FollowRequest', function (e) {
+        let contextURI = $(this).attr('data-uri');
+        let followStatus = $(this).attr('data-following') === 'true' ? 'false' : 'true';
+        console.log(`Attempting to toggle follow for artist ${contextURI}`);
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'toggleFollow' %}",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                artist: contextURI,
+                follow: followStatus
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log(`Successfully toggled follow for artist`);
+                    updateFollowStatus();
+                }
+                else {
+                    console.log(`Failed to toggle follow for artist`);
+                }
+            },
+        });
+    });
+
+    $(document).on('click', '.LikeRequest', function (e) {
+        let contextURI = $(this).attr('data-uri');
+        let likeStatus = $(this).attr('data-liked') === 'true' ? 'false' : 'true';
+        console.log(`Attempting to toggle like for ${contextURI}`);
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'toggleLike' %}",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                track: contextURI,
+                like: likeStatus
+            },
+            success: function(response) {
+                if (response == 'True') {
+                    console.log(`Successfully toggled like for track`);
+                    updateLikeStatus();
+                }
+                else {
+                    console.log(`Failed to toggle like for track`);
+                }
+            },
+        });
+    });
+
+    $(document).on('click', '.RecommendationRequest', function(e) {
+        current_player = "";
+        open_and_close_visualizer();
+        e.preventDefault();
+        let contextURI = $(this).attr('data-uri');
+        console.log(`Attempting to pass information for recommendations based of: ${contextURI}`);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'recommendations' %}",
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                context_uri: contextURI
+            },
+            success: function(response) {
+                if(response.status == 200) {
+                    $(".content").first().html(response.page);
+                    $("html, .content").animate({ scrollTop: 0 }, "fast");
+                    hideMouseMenu();
+                }
+                else {
+                    window.location="/";
+                }
             }
         });
     });
@@ -121,9 +201,11 @@
             }
             $('.mouse-menu ul').html(`
                 <li><button class="PlayRequest" data-uri="${dataURI}">Play Artist</button></li>
-                <li><button>Follow Artist</button></li>
+                <li><button class="FollowRequest MouseMenuItem" data-uri="${dataURI}">Follow Artist</button></li>
                 <li><button>Go to Artist</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
+            updateFollowStatus()
         }
         else if ($(clickTarget).hasClass('Playlist') || $(clickTarget).parents('.Playlist').length) {
             if (dataURI === null) {
@@ -134,6 +216,7 @@
                 <li><button class="PlayRequest" data-uri="${dataURI}">Play Playlist</button></li>
                 <li><button>Add to Queue</button></li>
                 <li><button>Go to Playlist</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
         }
         else if ($(clickTarget).hasClass('Album') || $(clickTarget).parents('.Album').length) {
@@ -145,6 +228,7 @@
                 <li><button class="PlayRequest" data-uri="${dataURI}">Play Album</button></li>
                 <li><button>Add to Queue</button></li>
                 <li><button>Go to Album</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
         }
         else if ($(clickTarget).hasClass('Podcast') || $(clickTarget).parents('.Podcast').length) {
@@ -158,13 +242,19 @@
             `);
         }
         else if ($(clickTarget).hasClass('Song') || $(clickTarget).parents('.Song').length) {
+            if (dataURI === null) {
+                let parentDataURI = $(clickTarget).parents('.Song')[0];
+                dataURI = parentDataURI ? $(parentDataURI).data('uri') : null;
+            }
             $('.mouse-menu ul').html(`
                 <li><button>Add to Queue</button></li>
                 <li><button>Add to Playlist</button></li>
-                <li><button>Add to Liked Songs</button></li>
+                <li><button class="LikeRequest MouseMenuItem" data-uri="${dataURI}">Like Song</button></li>
                 <li><button>Go to Artist</button></li>
                 <li><button>Go to Album</button></li>
+                <li><button class="RecommendationRequest" data-uri="${dataURI}">Recommend Songs</button></li>
             `);
+            updateLikeStatus();
         } else {
             return;
         }
@@ -207,5 +297,98 @@
         $playNumber.text($playNumber.data('number'));
         $playNumber.removeClass('material-icons md-24 md-light');
     });
+
+    function updateFollowStatus() {
+        let followButtons = $('.FollowRequest');
+        let affectedURIs = [];
+        $(followButtons).each(function(){
+            let contextURI = $(this).attr('data-uri');
+            if (affectedURIs.includes(contextURI)) return;
+            affectedURIs.push(contextURI);
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'isFollowing' %}",
+                data: {
+                    csrfmiddlewaretoken: csrftoken,
+                    artist: contextURI
+                },
+                success: function(response) {
+                    if (response != 'False') {
+                        console.log('Successfully collected follow status, now updating associated buttons');
+                        response = JSON.parse(response);
+                        let affectedFollowButtons = $(`.FollowRequest[data-uri="${response['artist']}"]`);
+                        $(affectedFollowButtons).each(function () {
+                            $(this).attr('data-following', response['following']);
+                            let followText = "";
+                            if ($(this).hasClass('MouseMenuItem')) {
+                                followText = $(this).attr('data-following') === 'true' ? 'Unfollow Artist' : 'Follow Artist';
+                            } else {
+                                followText = $(this).attr('data-following') === 'true' ? 'person_remove_alt_1' : 'person_add_alt';
+                            }
+                            $(this).text(followText);
+                        });
+                    } else {
+                        console.log('Failed to collect follow status');
+                    }
+                },
+            });
+        });
+    }
+
+    function updateLikeStatus() {
+        let likeButtons = $('.LikeRequest');
+        let affectedURIs = [];
+        $(likeButtons).each(function(){
+            let contextURI = $(this).attr('data-uri');
+            if (affectedURIs.includes(contextURI)) return;
+            affectedURIs.push(contextURI);
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'isLiked' %}",
+                data: {
+                    csrfmiddlewaretoken: csrftoken,
+                    track: contextURI
+                },
+                success: function(response) {
+                    if (response != 'False') {
+                        console.log('Successfully collected like status, now updating associated buttons');
+                        response = JSON.parse(response);
+                        let affectedLikeButtons = $(`.LikeRequest[data-uri="${response['track']}"]`);
+                        $(affectedLikeButtons).each(function () {
+                            $(this).attr('data-liked', response['liked']);
+                            let likeText = "";
+                            if ($(this).hasClass('MouseMenuItem')) {
+                                likeText = $(this).attr('data-liked') === 'true' ? 'Unlike Song' : 'Like Song';
+                            } else {
+                                likeText = $(this).attr('data-liked') === 'true' ? 'favorite_border' : 'favorite';
+                            }
+                            $(this).text(likeText);
+                        });
+                    } else {
+                        console.log('Failed to collect like status');
+                    }
+                },
+            });
+        });
+    }
+
+    function hideMouseMenu() {
+        if ($('.mouse-menu').is(':visible')) {
+           $('.mouse-menu').hide();
+       }
+    }
+    function on_load_visualizer() {
+        let path = window.location.pathname;
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
+
+        global_width = $(".content").width();
+        left = $(".content").offset().left;
+        console.log(global_width);
+        new p5(sketch, 'sketch_one');
+        let current = 'sketch_one';
+    }
 </script>
 </html>

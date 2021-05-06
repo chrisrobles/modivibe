@@ -98,7 +98,7 @@
 <div class="container-fluid">
    <div class = row>
       <div class="col-sm-12">
-         <h1 style="text-align: center">{{ title }}</h1>
+         <h1 style="text-align: center">Settings</h1>
       </div>
    </div>
     <div class="row">
@@ -150,118 +150,5 @@
          <h3>Option 3</h3>
       </div>
    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <h2>Advanced Recommendation Settings</h2>
-        </div>
-    </div>
-    <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
-   <div class = row>
-      <div class="col-sm-12">
-         <h4 style="text-align: left">Acousticness: <span id="acousticness"></span></h4>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="slidecontainer">
-            <input type="range" min="1" max="100" value="50" class="slider_long" id="acousticness_slider">
-         </div>
-      </div>
-   </div>
-   <div class = row>
-      <div class="col-sm-12">
-         <h4 style="text-align: left">Instrumentalness: <span id="instrumentalness"></span></h4>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="slidecontainer">
-            <input type="range" min="1" max="100" value="50" class="slider_long" id="instrumentalness_slider">
-         </div>
-      </div>
-   </div>
-   <div class = row>
-      <div class="col-sm-12">
-         <h4 style="text-align: left">Danceability: <span id="danceability"></span></h4>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="slidecontainer">
-            <input type="range" min="1" max="100" value="50" class="slider_long" id="danceability_slider">
-         </div>
-      </div>
-   </div>
-   <div class = row>
-      <div class="col-sm-12">
-         <h4 style="text-align: left">Valence: <span id="valence"></span></h4>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="slidecontainer">
-            <input type="range" min="1" max="100" value="50" class="slider_long" id="valence_slider">
-         </div>
-      </div>
-   </div>
-   <div class = row>
-      <div class="col-sm-12">
-         <h4 style="text-align: left">Energy: <span id="energy"></span></h4>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-sm-12">
-         <div class="slidecontainer">
-            <input type="range" min="1" max="100" value="50" class="slider_long" id="energy_slider">
-         </div>
-      </div>
-   </div>
 </div>
-<script>
-   var acousticness_slider = document.getElementById("acousticness_slider");
-   var acousticness = document.getElementById("acousticness");
-   acousticness.innerHTML = acousticness_slider.value; // Display the default slider value
-
-   // Update the current slider value (each time you drag the slider handle)
-   acousticness_slider.oninput = function() {
-     acousticness.innerHTML = this.value;
-   }
-
-   var instrumentalness_slider = document.getElementById("instrumentalness_slider");
-   var instrumentalness = document.getElementById("instrumentalness");
-   instrumentalness.innerHTML = instrumentalness_slider.value; // Display the default slider value
-
-   // Update the current slider value (each time you drag the slider handle)
-   instrumentalness_slider.oninput = function() {
-     instrumentalness.innerHTML = this.value;
-   }
-
-   var danceability_slider = document.getElementById("danceability_slider");
-   var danceability = document.getElementById("danceability");
-   danceability.innerHTML = danceability_slider.value; // Display the default slider value
-
-   // Update the current slider value (each time you drag the slider handle)
-   danceability_slider.oninput = function() {
-     danceability.innerHTML = this.value;
-   }
-
-   var valence_slider = document.getElementById("valence_slider");
-   var valence = document.getElementById("valence");
-   valence.innerHTML = valence_slider.value; // Display the default slider value
-
-   // Update the current slider value (each time you drag the slider handle)
-   valence_slider.oninput = function() {
-     valence.innerHTML = this.value;
-   }
-
-   var energy_slider = document.getElementById("energy_slider");
-   var energy = document.getElementById("energy");
-   energy.innerHTML = acousticness_slider.value; // Display the default slider value
-
-   // Update the current slider value (each time you drag the slider handle)
-   energy_slider.oninput = function() {
-     energy.innerHTML = this.value;
-   }
-
-</script>
 {% endblock content %}

@@ -11,10 +11,16 @@
             <div class="ArtistHeaderLeft col-4">
                 <div><h2>{{ header.artistFollowers }}</h2></div>
                 <div><h4>Followers </h4></div>
-                <div><br>Follow/Unfollow Button</div>
+                <button class="FollowRequest ArtistFollowButton material-icons md-light md-48" data-uri="spotify:artist:{{header.artistId}}" data-following="{{header.followingArtist|lower}}">
+                    {% if header.followingArtist is True %}
+                    person_remove_alt_1
+                    {% else %}
+                    person_add_alt
+                    {% endif %}
+                </button>
             </div>
             <div class="ArtistHeaderCenter col-4">
-                <img class="ArtistHeaderImage" src="{{header.artistImg}}">
+                <img class="ArtistHeaderImage" src={% if not header.artistImg %} "{% static 'default_img.png' %}" {% else %} "{{header.artistImg}}" {% endif %}>
                 <div><h1>{{ header.artistName }}</h1></div>
             </div>
             <div class="ArtistHeaderRight col-4">

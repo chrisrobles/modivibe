@@ -1,12 +1,12 @@
+{% load static %}
 <fieldset class="playbar">
     <span class="playbarLeft">
-        <img class="Album" id="trackImage" src="" alt="Album Cover" width="64" height="64" data-uri="">
+        <img class="Album" id="trackImage" src="{% static 'default_img.png' %}" alt="Album Cover" width="64" height="64" data-uri="">
         <div class="trackInfoContainer">
             <p class="Song" id="trackName" data-uri="">Track Name</p>
             <span id="trackArtistContainer">Track Artist(s)</span>
         </div>
 
-<!--        <button id="helperButtonControl">click me</button>-->
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
@@ -29,7 +29,7 @@
         </div>
     </span>
     <span class="playbarRight">
-        <button class="ConnectionStatus material-icons md-24 md-light md-inactive">wifi_off</button>
+        <button class="ConnectionStatus material-icons md-24 md-light md-inactive" title="Reconnect">wifi_off</button>
         <div class="volumeController">
             <div class="mdc-slider mdc-slider--discrete">
                 <span id="volumeIcon" class="material-icons md-light md-36">volume_up</span>
@@ -136,6 +136,7 @@
             if(deviceState['track_window']['previous_tracks'][0])
             {
                 $('#QueueLast2 .Song').text(deviceState['track_window']['previous_tracks'][0]['name']);
+                $('#QueueLast2 .Song').attr('data-uri', deviceState['track_window']['previous_tracks'][0]['uri']);
                 $('#QueueLast2 .Album').attr('data-uri', deviceState['track_window']['previous_tracks'][0]['album']['uri']);
                 $('#QueueLast2 .Album').prop('src', deviceState['track_window']['previous_tracks'][0]['album']['images'][1]['url']);
                 $('#QueueLast2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['previous_tracks'][0]['artists']));
@@ -147,6 +148,7 @@
             // Update Queue - Last Song 1
             if(deviceState['track_window']['previous_tracks'][1]) {
                 $('#QueueLast1 .Song').text(deviceState['track_window']['previous_tracks'][1]['name']);
+                $('#QueueLast1 .Song').attr('data-uri', deviceState['track_window']['previous_tracks'][1]['uri']);
                 $('#QueueLast1 .Album').attr('data-uri', deviceState['track_window']['previous_tracks'][1]['album']['uri']);
                 $('#QueueLast1 .Album').prop('src', deviceState['track_window']['previous_tracks'][1]['album']['images'][1]['url']);
                 $('#QueueLast1 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['previous_tracks'][1]['artists']));
@@ -157,6 +159,7 @@
 
             // Update Queue - Current Song
             $('#QueueCurrent .Song').text(deviceState['track_window']['current_track']['name']);
+            $('#QueueCurrent .Song').attr('data-uri', deviceState['track_window']['current_track']['uri']);
             $('#QueueCurrent .Album').attr('data-uri', albumURI);
             $('#QueueCurrent .Album').prop('src', deviceState['track_window']['current_track']['album']['images'][1]['url']);
             $('#QueueCurrent .ArtistContainer').html(artists);
@@ -164,6 +167,7 @@
             // Update Queue - Next Song 1
             if (deviceState['track_window']['next_tracks'][0]) {
                 $('#QueueNext1 .Song').text(deviceState['track_window']['next_tracks'][0]['name']);
+                $('#QueueNext1 .Song').attr('data-uri', deviceState['track_window']['next_tracks'][0]['uri']);
                 $('#QueueNext1 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][0]['album']['uri']);
                 $('#QueueNext1 .Album').prop('src', deviceState['track_window']['next_tracks'][0]['album']['images'][1]['url']);
                 $('#QueueNext1 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][0]['artists']));
@@ -175,6 +179,7 @@
             // Update Queue - Next Song 2
             if (deviceState['track_window']['next_tracks'][1]) {
                 $('#QueueNext2 .Song').text(deviceState['track_window']['next_tracks'][1]['name']);
+                $('#QueueNext2 .Song').attr('data-uri', deviceState['track_window']['next_tracks'][1]['uri']);
                 $('#QueueNext2 .Album').attr('data-uri', deviceState['track_window']['next_tracks'][1]['album']['uri']);
                 $('#QueueNext2 .Album').prop('src', deviceState['track_window']['next_tracks'][1]['album']['images'][1]['url']);
                 $('#QueueNext2 .ArtistContainer').html(getArtistAsLinks(deviceState['track_window']['next_tracks'][1]['artists']));
@@ -222,8 +227,6 @@
     $('#shuffleTrackControl').on('click', toggleShuffle);
     $('#repeatTrackControl').on('click', toggleRepeat);
     $('.ConnectionStatus').on('click', transferPlayback);
-
-    // $('#helperButtonControl').on('click', helperButton);
     $('#progressBarControl').on('change', progressBarSldrMoved);
 
     // Button event functions
@@ -233,7 +236,7 @@
             type: "POST",
             url: "{% url 'transferPlayback' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 device_id: deviceID,
             },
             success: function(response) {
@@ -249,16 +252,16 @@
     function togglePlayback(event){
         let playbackRequest = (isPlaying) ? 'pause' : 'play';
         console.log(`Requesting playback: ${playbackRequest}`);
-
         $.ajax({
             type: "POST",
             url: "{% url 'setPlayback' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 device_id: deviceID,
                 status: playbackRequest
             },
             success: function(response) {
+                paused_value_visualizer = playbackRequest == 'pause' ? 0 : 1; //in visualizer.js
                 if (response == 'True') {
                     console.log(`Success: ${playbackRequest}`);
 
@@ -297,7 +300,7 @@
                 type: "POST",
                 url: "{% url 'setVolume' %}",
                 data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    csrfmiddlewaretoken: csrftoken,
                     device_id: deviceID,
                     volume: volumeLvlBeforeClickToMute
                 },
@@ -320,7 +323,7 @@
                 type: "POST",
                 url: "{% url 'setVolume' %}",
                 data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    csrfmiddlewaretoken: csrftoken,
                     device_id: deviceID,
                     volume: 0
                 },
@@ -345,7 +348,7 @@
             type: "POST",
             url: "{% url 'setVolume' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 device_id: deviceID,
                 volume: $(this).val()
             },
@@ -368,7 +371,7 @@
             type: "POST",
             url: "{% url 'getVolume' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 device_id: deviceID,
             },
             success: function(response) {
@@ -388,7 +391,7 @@
             type: "POST",
             url: "{% url 'previousTrack' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 device_id: deviceID,
             },
             success: function(response) {
@@ -410,7 +413,7 @@
             type: "POST",
             url: "{% url 'nextTrack' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 device_id: deviceID,
             },
             success: function(response) {
@@ -435,7 +438,7 @@
             type: "POST",
             url: "{% url 'setShuffle' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 device_id: deviceID,
                 shuffle_status: shuffleStatus
             },
@@ -461,7 +464,7 @@
                 type: "POST",
                 url: "{% url 'setRepeat' %}",
                 data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    csrfmiddlewaretoken: csrftoken,
                     device_id: deviceID,
                     repeat_status: repeatStatus
                 },
@@ -484,7 +487,7 @@
         for(let i = 0; i < artistsList.length; i++){
             let artistURI = artistsList[i]['uri'];
             let artistID = artistURI.split(':')[2];
-            artists += `<a class="Artist ItemLink" href="artist/${artistID}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
+            artists += `<a class="Artist ItemLink" href="/artist/${artistID}" data-uri="${artistURI}">${artistsList[i]['name']}</a>`;
             if (i != artistsList.length - 1) artists += ", ";
         }
         return artists;
@@ -508,7 +511,7 @@
             type: "POST",
             url: "{% url 'progressBarSldrMoved' %}",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
+                csrfmiddlewaretoken: csrftoken,
                 device_id: deviceID,
                 position_ms: progressBarControl.value * 1000,
             },
@@ -521,27 +524,5 @@
             }
         });
     }
-
-    // ryan: temp to use while playing with the API
-    // function helperButton(event) {
-    //    console.log('Attempting to mute volume');
-    //    $.ajax({
-    //         type: "POST",
-    //         url: "{% url 'setVolume' %}",
-    //         data: {
-    //             csrfmiddlewaretoken: '{{ csrf_token }}',
-    //             device_id: deviceID,
-    //             volume: 0
-    //         },
-    //         success: function(response) {
-    //             if (response == 'True') {
-    //                 console.log('Successfully muted volume');
-    //                 if ($('.mdc-slider__input').val() <= 0) { $('#volumeIcon').text('volume_mute'); }
-    //             } else {
-    //                 console.log('Failed to set volume');
-    //             }
-    //         }
-    //     });
-    // }
 
 </script>

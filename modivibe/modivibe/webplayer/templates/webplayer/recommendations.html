@@ -1,0 +1,468 @@
+{% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
+<!-- IMPORTANT: no spaces between anything for the extends argument -->
+
+
+{% block content %}
+{% load static %}
+<style>
+   .switch {
+   position: relative;
+   display: inline-block;
+   width: 60px;
+   height: 34px;
+   }
+   /* Hide default HTML checkbox */
+   .switch input {
+   opacity: 0;
+   width: 0;
+   height: 0;
+   }
+   /* The slider */
+   .slider {
+   position: absolute;
+   cursor: pointer;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-color: #ccc;
+   -webkit-transition: .4s;
+   transition: .4s;
+   }
+   .slider:before {
+   position: absolute;
+   content: "";
+   height: 26px;
+   width: 26px;
+   left: 4px;
+   bottom: 4px;
+   background-color: white;
+   -webkit-transition: .4s;
+   transition: .4s;
+   }
+   input:checked + .slider {
+   background-color: #646464;
+   }
+   input:focus + .slider {
+   box-shadow: 0 0 1px #5f5f5f;
+   }
+   input:checked + .slider:before {
+   -webkit-transform: translateX(26px);
+   -ms-transform: translateX(26px);
+   transform: translateX(26px);
+   }
+   /* Rounded sliders */
+   .slider.round {
+   border-radius: 34px;
+   }
+   .slider.round:before {
+   border-radius: 50%;
+   }
+   .slide_long_container {
+   width: 100%; /* Width of the outside container */
+   }
+   /* The slider itself */
+   .slider_long {
+   -webkit-appearance: none;  /* Override default CSS styles */
+   appearance: none;
+   width: 100%; /* Full-width */
+   height: 25px; /* Specified height */
+   background: #d3d3d3; /* Grey background */
+   opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+   -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+   transition: opacity .2s;
+   border-radius: 4px;
+   }
+   /* Mouse-over effects */
+   .slider_long:hover {
+   opacity: 1; /* Fully shown on mouse-over */
+   }
+   /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+   .slider_long::-webkit-slider-thumb {
+   -webkit-appearance: none; /* Override default look */
+   appearance: none;
+   width: 25px; /* Set a specific slider handle width */
+   height: 25px; /* Slider handle height */
+   background: #5f5f5f; /* Green background */
+   cursor: pointer; /* Cursor on hover */
+   border-radius: 4px;
+   }
+   .slider_long::-moz-range-thumb {
+   width: 25px; /* Set a specific slider handle width */
+   height: 25px; /* Slider handle height */
+   background: #4CAF50; /* Green background */
+   cursor: pointer; /* Cursor on hover */
+   }
+
+   .FeatureHelp, .FeatureHelp:focus {
+      outline: 0;
+      border: 0;
+      background: none;
+   }
+
+</style>
+<div class="container-fluid">
+   <div class="row">
+      <div class="col-6 Queue p-0">
+         <div class="row">
+           <div class="col-sm-12">
+               <h2>Recommendation Reference</h2>
+           </div>
+         </div>
+         <hr class="col-xs-12" style="border: 1px solid #bfbfbf; margin-top: 0;">
+         <div id="recommendationReference" class="row">
+            <div class="col-6">
+               <img src={% if not referenceInfo.image %} "{% static 'default_img.png' %}" {% else %} "{{referenceInfo.image}}" {% endif %} alt="Album"></img>
+            </div>
+            <div class="col-6">
+               <div class="row font-weight-bold justify-content-center">{{ referenceInfo.type|upper }}</div>
+               <hr class="col-xs-12" style="border: 1px solid #bfbfbf; margin-top: 0;">
+               {% if referenceInfo.type == 'artist' %}
+                  <div class="row justify-content-center font-weight-bold text-center" id="referenceArtistName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
+               {% elif referenceInfo.type == 'album' %}
+                  <div class="row justify-content-center font-weight-bold text-center" id="referenceAlbumName">{{ referenceInfo.name }}</div>
+                  <div class="row justify-content-center text-center" id="referenceAlbumArtistName" data-uri="{{ referenceInfo.artistURI }}" data-name="{{ referenceInfo.artistName }}">{{ referenceInfo.artistName }}</div>
+               {% elif referenceInfo.type == 'playlist' %}
+                  <div class="row justify-content-center font-weight-bold text-center" id="referencePlaylistName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
+               {% elif referenceInfo.type == 'track' %}
+                  <div class="row justify-content-center font-weight-bold text-center" id="referenceTrackName" data-uri="{{ referenceInfo.uri }}" data-name="{{ referenceInfo.name }}">{{ referenceInfo.name }}</div>
+                  <div class="row justify-content-center text-center" id="referenceTrackArtistName" data-uri="{{ referenceInfo.artistURI }}" data-name="{{ referenceInfo.artistName }}">{{ referenceInfo.artistName }}</div>
+               {% endif %}
+            </div>
+         </div>
+         <hr class="col-xs-12" style="border: 1px solid #bfbfbf;">
+         <button id="recommend" class='col-12' style="color: darkgrey; border: 1px solid white;">GENERATE RECOMMENDATIONS</button>
+         <ul id="generatedRecommendations" class="QueueContainer" style="width: 100%;">
+
+         </ul>
+      </div>
+      <div class="col-6">
+         <div class="row">
+           <div class="col-sm-12">
+               <h2>Target Features</h2>
+           </div>
+         </div>
+         <hr class="col-xs-12" style="border: 1px solid #bfbfbf; margin-top: 0;">
+
+         <div class="row">
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Acousticness: <span id="acousticness"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Describes how acoustic a track is.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="1" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.acousticness }}" {% else %} "0.02" {% endif %} step="0.01" class="slider_long" id="acousticness_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Danceability: <span id="danceability"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="1" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.danceability }}" {% else %} "0.7" {% endif %} step="0.01" class="slider_long" id="danceability_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Energy: <span id="energy"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="1" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.energy }}" {% else %} "0.7" {% endif %} step="0.01" class="slider_long" id="energy_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Instrumentalness: <span id="instrumentalness"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Predicts whether a track contains no vocals. The higher the value, the greater likelihood the track contains no vocal content.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="1" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.instrumentalness }}" {% else %} "0.02" {% endif %} step="0.01" class="slider_long" id="instrumentalness_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Key: <span id="key"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Describes the key the track was recorded in. The value describes how many semi-tones you are from C. <br>C = 0. C#/Db = 1...
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="11" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.key }}" {% else %} "5" {% endif %} step="1" class="slider_long" id="key_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Liveness: <span id="liveness"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Detects the presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="1" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.liveness }}" {% else %} "0.12" {% endif %} step="0.01" class="slider_long" id="liveness_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Loudness: <span id="loudness"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Describes the overall loudness of a track in decibels (dB). Loudness values are averaged across the entire track.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="-60" max="2" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.loudness }}" {% else %} "-6" {% endif %} step="1" class="slider_long" id="loudness_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Speechiness: <span id="speechiness"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Detects the presence of spoken words in a track.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="1" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.speechiness }}" {% else %} "0.06" {% endif %} step="0.01" class="slider_long" id="speechiness_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Tempo: <span id="tempo"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Describes the overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="250" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.tempo }}" {% else %} "120" {% endif %} step="1" class="slider_long" id="tempo_slider">
+               </div>
+            </div>
+         </div>
+
+         <div class = row>
+            <div class="col-sm-12 d-flex justify-content-between">
+               <h4 style="text-align: left">Valence: <span id="valence"></span></h4>
+               <button class="FeatureHelp material-icons md-light md-24 align-self-center mb-1">help_outline</button>
+            </div>
+         </div>
+         <div class="FeatureDescription row d-none">
+            <div class="col-sm-12">
+               Describes the musical positiveness conveyed by a track.
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div class="slidecontainer">
+                  <input type="range" min="0" max="1" value={% if referenceInfo.trackFeatures %}"{{ referenceInfo.trackFeatures.valence }}" {% else %} "0.35" {% endif %} step="0.01" class="slider_long" id="valence_slider">
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<script>
+
+   $('.FeatureHelp').on('click', function() {
+      let parentRow = $(this).parents('.row')[0];
+      let associatedDesc = $(parentRow).next('.FeatureDescription');
+      if ($(associatedDesc).hasClass('d-none')) {
+         $(associatedDesc).removeClass('d-none');
+      } else {
+         $(associatedDesc).addClass('d-none');
+      }
+   });
+
+   $('#referenceArtistName, #referenceAlbumArtistName, #referenceTrackArtistName').each(function() {
+      let artists = [
+         {
+            uri: $(this).attr('data-uri'),
+            name: $(this).attr('data-name')
+         }
+      ]
+      $(this).html(getArtistAsLinks(artists));
+   });
+
+   $('#acousticness').text($('#acousticness_slider').val());
+   $('#acousticness_slider').on('input', function() {
+      $('#acousticness').text(this.value);
+   });
+
+   $('#danceability').text($('#danceability_slider').val());
+   $('#danceability_slider').on('input', function() {
+      $('#danceability').text(this.value);
+   });
+
+   $('#energy').text($('#energy_slider').val());
+   $('#energy_slider').on('input', function() {
+      $('#energy').text(this.value);
+   });
+
+   $('#instrumentalness').text($('#instrumentalness_slider').val());
+   $('#instrumentalness_slider').on('input', function() {
+      $('#instrumentalness').text(this.value);
+   });
+
+   $('#key').text($('#key_slider').val());
+   $('#key_slider').on('input', function() {
+      $('#key').text(this.value);
+   });
+
+   $('#liveness').text($('#liveness_slider').val());
+   $('#liveness_slider').on('input', function() {
+      $('#liveness').text(this.value);
+   });
+
+   $('#loudness').text($('#loudness_slider').val());
+   $('#loudness_slider').on('input', function() {
+      $('#loudness').text(this.value);
+   });
+
+   $('#speechiness').text($('#speechiness_slider').val());
+   $('#speechiness_slider').on('input', function() {
+      $('#speechiness').text(this.value);
+   });
+
+   $('#tempo').text($('#tempo_slider').val());
+   $('#tempo_slider').on('input', function() {
+      $('#tempo').text(this.value);
+   });
+
+   $('#valence').text($('#valence_slider').val());
+   $('#valence_slider').on('input', function() {
+      $('#valence').text(this.value);
+   });
+
+   $('#recommend').on('click', function() {
+      let songFeatures = {
+         'acousticness': $('#acousticness_slider').val(),
+         'danceability': $('#danceability_slider').val(),
+         'energy': $('#energy_slider').val(),
+         'instrumentalness': $('#instrumentalness_slider').val(),
+         'key': $('#key_slider').val(),
+         'liveness': $('#liveness_slider').val(),
+         'loudness': $('#loudness_slider').val(),
+         'speechiness': $('#speechiness_slider').val(),
+         'tempo': $('#tempo_slider').val(),
+         'valence': $('#valence_slider').val()
+      }
+      console.log(songFeatures);
+      $.ajax({
+         type: 'POST',
+         url: "{% url 'getRecommendations' %}",
+         data: {
+            csrfmiddlewaretoken: csrftoken,
+            reference: `{{ referenceString|safe }}`,
+            features: JSON.stringify(songFeatures)
+         },
+         success: function(response) {
+            if (response != 'False') {
+               $('#generatedRecommendations').empty();
+               console.log(response);
+               let tracks = response['tracks'];
+               for (let i = 0; i < tracks.length; i++) {
+                  let currentTrack = tracks[i];
+                  let trackURI = currentTrack['uri'];
+                  let trackName = currentTrack['name'];
+                  let albumURI = currentTrack['album']['uri'];
+                  let albumArt = currentTrack['album']['images'][2]['url'];
+                  let trackArtists = getArtistAsLinks(currentTrack['artists']);
+                  $('#generatedRecommendations').append(`
+                     <li class="QueueItem" data-uri="${trackURI}" parent-uri="${albumURI}">
+                        <span class="PlayRequest material-icons md-light md-24" data-uri="${trackURI}" data-parent-uri="${albumURI}" style="align-self: center; margin-right: 10px;">
+                            play_arrow
+                        </span>
+                        <img class="Album" src="${albumArt}" alt="Album" data-uri="${albumURI}">
+                        <div class="TrackInfoContainer">
+                            <p class="Song" data-uri="${trackURI}">${trackName}</p>
+                            <span class="ArtistContainer">${trackArtists}</span>
+                        </div>
+                    </li>
+                  `);
+               }
+
+            } else {
+               console.log('Failed to generate recommendations');
+            }
+         },
+      });
+   });
+
+
+</script>
+{% endblock content %}
