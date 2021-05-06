@@ -1,33 +1,68 @@
-* {
-    /*box-sizing: border-box;
-    padding: 0;
-    margin: 0;*/
+@keyframes slideL {
+    0% {right: 0%; opacity: 0%;}
+    100% {right: 40%; opacity: 100%; transform: translate(40%, -50%);}
 }
 
+@keyframes slideR {
+     0% {left: 0%; opacity: 0%;}
+    100% {left: 50%; opacity: 100%;}
+
+}
+
+
+.slideLeft{
+    position: absolute;
+    animation-name: slideL;
+    animation-duration: 4s;
+    right: 40%;
+    transform: translate(40%, -50%);
+    width: 600px;
+}
+
+.slideRight{
+    position: absolute;
+    animation-name: slideR;
+    animation-duration: 4s;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+
+}
 
 body{
     height: 100%;
-    /*height: 100vh;
-    width: 100vw;
-    /*margin: 0;*/
-    /*overflow: hidden;*/
-    background-color: darkgrey;
-    background: linear-gradient( #1c1c1c 33%, darkgrey ) fixed no-repeat;
+    width: 100%;
+    background-color: #c73e1d;
+    background-image: linear-gradient(315deg, #c73e1d 0%, #a23b72 37%, #2e86ab 100%);
     font-family: Roboto, sans-serif;
+    overflow-x: hidden;
 }
 
 nav {
+    position: sticky;
     background: #1c1c1c;
     padding: 15px;
+    top: 0;
+    z-index: 10;
+}
+
+.spotifyNavButton{
+    font-weight: bold;
+    border-radius: 12px;
+    font-family: Roboto;
+    color: black;
+    width: 200px;
+    background-color: #dbf26e;
+    background-image: linear-gradient(319deg, #dbf26e 0%, #61fa74 37%, #1cfdd6 100%);
+}
+
+.spotifyNavButton:hover{
+        background-color: rgba(0,0,0,0.2);
+        color: blue;
 }
 
 a {
     color: white;
-    text-decoration: none;
-}
-
-.logo{
-    font-size: 30px;
 }
 
 .splashNav{
@@ -36,11 +71,6 @@ a {
     margin: 0;
     display: flex;
     justify-content: space-between;
-}
-.splashContainer{
-    /*display: flex;
-    flex: 1;
-    justify-content: flex-start;*/
 }
 
 .navButtons{
@@ -56,10 +86,18 @@ a {
     margin: 0 10px;
 }
 
-.splashRedirect.button{
+.col-6{
+    border-radius: 15px;
+    background-color: rgba(0,0,0,0.6);
+    /*opacity: 40%;*/
+}
+
+.textBox{
+    padding: 10px 10px;
 }
 
 .overviewText{
+    font-opacity: 100%; !important;
     color: white;
     text-align: center;
 }
@@ -71,7 +109,8 @@ h1{
     padding-bottom: 100px;
 }
 .foot{
-    background-color: darkgrey;
+    background-color: black;
+    color: white;
     padding-top: 10px !important;
     padding-bottom: 10px !important; 
     text-align: center;
@@ -79,6 +118,8 @@ h1{
 .foot p{
     margin: 0 !important;
 }
+
+
 .btn {
     background: white;
 }
