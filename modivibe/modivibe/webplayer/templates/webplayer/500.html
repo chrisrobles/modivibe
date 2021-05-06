@@ -7,6 +7,7 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css' %}">
         <script src="{% static 'lib/bootstrap/js/bootstrap.min.js'%}"></script>
+      <link rel="icon" href="{% static 'Modivibe_Logo.png'%}">
         <title>Error 500</title>
     </head>
 
@@ -32,7 +33,7 @@
         </style>
         <ul class="splashNav">
             <a style="text-decoration: none" class="logo" href="{% url 'splash' %}" >
-                <img src="/static/Artboard_1_0.5x.png" style="height:50px; border-radius: 10px; border-color: pink">
+                <img src="{% static 'Modivibe_Logo.png'%}" style="height:50px; border-radius: 10px; border-color: pink">
             </a>
         </ul>
     </nav>

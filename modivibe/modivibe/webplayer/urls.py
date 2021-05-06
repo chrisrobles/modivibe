@@ -48,9 +48,9 @@ urlpatterns = [
     path('getRecommendations', views.getRecommendations, name='getRecommendations'),
 
     # logout
-    path('logout', views.logout, name='logout')
+    path('logout', views.logout, name='logout'),
     
     # error pages (for testing purposes)
-    # path('404', views.view404test, name='404Handler'),
-    # path('500', views.view500test, name='500Handler'),
+    #path('404', views.view404test, name='404Handler'),
+    #path('500', views.view500test, name='500Handler'),
 ]
