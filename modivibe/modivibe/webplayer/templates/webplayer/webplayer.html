@@ -80,7 +80,7 @@
         </div>
     </body>
 <script>
-    const csrftoken = getCookie('csrftoken');
+    const csrftoken = "{{ csrftoken }}";
     $(document).on('click', '.PlayRequest', function(e) {
         let contextURI, offsetURI;
         if ($(this).data('parent-uri')) {
