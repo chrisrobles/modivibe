@@ -23,6 +23,7 @@ urlpatterns = [
     path('isFollowing', views.isFollowing, name='isFollowing'),
     path('isLiked', views.isLiked, name='isLiked'),
     path('progressBarSldrMoved', views.progressBarSldrMoved, name='progressBarSldrMoved'),
+    path('recentlyPlayedList', views.getRecentPlayed, name='getRecentPlayed'),
 
     # user collections and music collections (albums, artists, playlists, podcasts)
     # url should follow:    my/{collection_type}s
@@ -39,6 +40,7 @@ urlpatterns = [
     path('artist/<str:artist_id>/topSongs', views.artistTopSongs, name='artistTopSongs'),
     path('artist/<str:artist_id>/albums', views.artistAlbums, name='artistAlbums'),
     path('artist/<str:artist_id>/related', views.artistRelated, name='artistRelated'),
+    path('album/<str:album_id>', views.album, name='album'),
 
     # search bar
     path('search/<str:search_value>', views.search, name='search'),
