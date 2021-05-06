@@ -587,3 +587,18 @@ def search(request, search_value):
         return render(
             request, 'webplayer/search.html', context=context)
 
+
+def view404error(request, exception):
+    return render(request, 'webplayer/404.html')
+
+
+def view500error(request):
+    return render(request, 'webplayer/500.html')
+
+
+# def view404test(request):
+#     return render(request, 'webplayer/404.html')
+#
+#
+# def view500test(request):
+#     return render(request, 'webplayer/500.html')

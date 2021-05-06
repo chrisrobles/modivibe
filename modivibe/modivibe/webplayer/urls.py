@@ -44,4 +44,8 @@ urlpatterns = [
     # recommendations
     path('recommendations', views.recommendations, name='recommendations'),
     path('getRecommendations', views.getRecommendations, name='getRecommendations'),
+
+    # error pages (for testing purposes)
+    # path('404', views.view404test, name='404Handler'),
+    # path('500', views.view500test, name='500Handler'),
 ]

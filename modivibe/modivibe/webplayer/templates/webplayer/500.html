@@ -1,20 +1,15 @@
-<!--This file is to serve when a 404 error appears-->
+<!--This file is to serve when a 500 error appears-->
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+
   <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css' %}">
         <script src="{% static 'lib/bootstrap/js/bootstrap.min.js'%}"></script>
-        <title>Error 404</title>
+        <title>Error 500</title>
     </head>
 
-</body>
     <nav>
         <style>
             nav
@@ -52,7 +47,7 @@
             overflow-x: hidden;
         }
         </style>
-        <h1>ERROR 404 - Page Not Found</h1>
+        <h1>ERROR 500 - Internal Server Error</h1>
         <h5>Please use the home button at the top to be redirected to the splash page.</h5>
     </body>
 </html>
