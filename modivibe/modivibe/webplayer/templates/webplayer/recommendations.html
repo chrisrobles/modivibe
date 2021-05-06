@@ -3,6 +3,7 @@
 
 
 {% block content %}
+{% load static %}
 <style>
    .switch {
    position: relative;
@@ -111,7 +112,7 @@
          <hr class="col-xs-12" style="border: 1px solid #bfbfbf; margin-top: 0;">
          <div id="recommendationReference" class="row">
             <div class="col-6">
-               <img src="{{referenceInfo.image}}" alt="Album"></img>
+               <img src={% if not referenceInfo.image %} "{% static 'default_img.png' %}" {% else %} "{{referenceInfo.image}}" {% endif %} alt="Album"></img>
             </div>
             <div class="col-6">
                <div class="row font-weight-bold justify-content-center">{{ referenceInfo.type|upper }}</div>
@@ -227,7 +228,7 @@
          </div>
          <div class="FeatureDescription row d-none">
             <div class="col-sm-12">
-               Describes the key the track was recorded in.
+               Describes the key the track was recorded in. The value describes how many semi-tones you are from C. <br>C = 0. C#/Db = 1...
             </div>
          </div>
          <div class="row">

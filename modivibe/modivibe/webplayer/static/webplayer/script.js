@@ -1,15 +1,20 @@
 $(document).ready(function() {
     // comment this out, and uncomment the ones in each function when testing back/forward button
-    window.history.replaceState({}, "", "/webplayer");
+    //window.history.replaceState({}, "", "/webplayer");
     $(document).on("click", ".SideBarUserCollection", function(e) {
         e.preventDefault();
-        //window.history.pushState({}, "", $(this).attr("href"));
-
+        let path = $(this).attr("href");
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
         $.ajax({
-            url: $(this).attr("href"),
+            url: path,
             type: "GET",
+            cache: false,
             success: function(response) {
                 if(response.status == 200) {
+                  window.history.pushState({}, "", path);
                   $(".content").first().html(response.collection);
                   $("html, .content").animate({ scrollTop: 0 }, "fast");
 
@@ -24,14 +29,18 @@ $(document).ready(function() {
 
     $(document).on("click", ".ItemLink", function(e) {
         e.preventDefault();
-
-       // window.history.pushState({}, "", $(this).attr("href"));
-
+        let path = $(this).attr("href");
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
         $.ajax({
-            url: $(this).attr("href"),
+            url: path,
             type: "GET",
+            cache: false,
             success: function(response) {
                 if(response.status == 200) {
+                    window.history.pushState({}, "", path);
                     $(".content").first().html(response.page);
                     $("html, .content").animate({ scrollTop: 0 }, "fast");
 
@@ -45,15 +54,19 @@ $(document).ready(function() {
 
     $(document).on("click", ".ArtistItems", function(e) {
         e.preventDefault();
-        //window.history.pushState({}, "", $(this).attr("href"));
         let dataType = "[data-tab=" + $(this).children(".ArtistItemButton:first").data("tab") + "]";
-
+        let path = $(this).attr("href");
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
         $.ajax({
             url: $(this).attr("href"),
             type: "GET",
             data: {
                 'fromArtistPage': true
             },
+            cache: false,
             success: function(response) {
                 if(response.status == 200) {
                     $(".ArtistItemButton").removeAttr("style");
@@ -95,12 +108,19 @@ $(document).ready(function() {
 
             // if input
             if(input) {
+                let path = "/search/" + input;
+                let endpoint = path.split('/');
+                let site = $(endpoint).last();
+                current_player = site[0];
+                open_and_close_visualizer();
                 $.ajax({
-                    url: "/search/"+input,
+                    url: path,
                     type: "GET",
+                    cache: false,
                     success: function(response) {
                         if(response.status == 200) {
                             console.log("Search success.");
+                            window.history.pushState({}, "", path);
                             $(".content").first().html(response.searchResults);
                             $("button.PlayRequest").remove();
                             $("html, .content").animate({ scrollTop: 0 }, "fast");
@@ -115,5 +135,31 @@ $(document).ready(function() {
                 console.log("Empty search value.");
             }
         }
+    });
+
+    $(window).on("popstate", function(e) {
+        let path = window.location.pathname;
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
+        $.ajax({
+            url: path,
+            type: "GET",
+            cache: false,
+            success: function(response) {
+                if(response.status == 200) {
+                    $(".content").first().html(Object.values(response)[0]); // content should be first element of json response
+                    $("html, .content").animate({ scrollTop: 0 }, "fast");
+
+                    if(path.includes("/search/")) {
+                        $("button.PlayRequest").remove();
+                    }
+                }
+                else {
+                    window.location = "/";
+                }
+            }
+        });
     });
 });
