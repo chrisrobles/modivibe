@@ -4,7 +4,10 @@ $(document).ready(function() {
     $(document).on("click", ".SideBarUserCollection", function(e) {
         e.preventDefault();
         let path = $(this).attr("href");
-
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
         $.ajax({
             url: path,
             type: "GET",
@@ -27,7 +30,10 @@ $(document).ready(function() {
     $(document).on("click", ".ItemLink", function(e) {
         e.preventDefault();
         let path = $(this).attr("href");
-
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
         $.ajax({
             url: path,
             type: "GET",
@@ -49,7 +55,11 @@ $(document).ready(function() {
     $(document).on("click", ".ArtistItems", function(e) {
         e.preventDefault();
         let dataType = "[data-tab=" + $(this).children(".ArtistItemButton:first").data("tab") + "]";
-
+        let path = $(this).attr("href");
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
         $.ajax({
             url: $(this).attr("href"),
             type: "GET",
@@ -99,6 +109,10 @@ $(document).ready(function() {
             // if input
             if(input) {
                 let path = "/search/" + input;
+                let endpoint = path.split('/');
+                let site = $(endpoint).last();
+                current_player = site[0];
+                open_and_close_visualizer();
                 $.ajax({
                     url: path,
                     type: "GET",
@@ -125,7 +139,10 @@ $(document).ready(function() {
 
     $(window).on("popstate", function(e) {
         let path = window.location.pathname;
-
+        let endpoint = path.split('/');
+        let site = $(endpoint).last();
+        current_player = site[0];
+        open_and_close_visualizer();
         $.ajax({
             url: path,
             type: "GET",

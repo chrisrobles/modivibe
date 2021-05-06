@@ -41,7 +41,7 @@ def getContextURIInfo(referenceURI):
         referenceData = {
             'type': referenceType,
             'name': artistInfo['name'],
-            'image': artistInfo['images'][0]['url'] if artistInfo['images'] else 'default',
+            'image': artistInfo['images'][0]['url'] if artistInfo['images'] else None,
             'uri': artistInfo['uri'],
             'genres': artistInfo['genres'][:7],
         }
@@ -56,7 +56,7 @@ def getContextURIInfo(referenceURI):
         referenceData = {
             'type': referenceType,
             'name': albumInfo['name'],
-            'image': albumInfo['images'][0]['url'] if albumInfo['images'] else 'default',
+            'image': albumInfo['images'][0]['url'] if albumInfo['images'] else None,
             'uri': albumInfo['uri'],
             'genres': genres[:7],
             'artistURI': albumInfo['artists'][0]['uri'],
@@ -77,7 +77,7 @@ def getContextURIInfo(referenceURI):
         referenceData = {
             'type': referenceType,
             'name': playlistInfo['name'],
-            'image': playlistInfo['images'][0]['url'] if playlistInfo['images'] else 'default',
+            'image': playlistInfo['images'][0]['url'] if playlistInfo['images'] else None,
             'uri': playlistInfo['uri'],
             'tracks': tracks
         }
@@ -110,7 +110,7 @@ def getContextURIInfo(referenceURI):
         referenceData = {
             'type': referenceType,
             'name': trackInfo['name'],
-            'image': trackInfo['album']['images'][0]['url'] if trackInfo['album']['images'] else 'default',
+            'image': trackInfo['album']['images'][0]['url'] if trackInfo['album']['images'] else None,
             'uri': trackInfo['uri'],
             'artistURI': trackInfo['artists'][0]['uri'],
             'artistName': trackInfo['artists'][0]['name'],
@@ -484,3 +484,26 @@ def progressBarSldrMoved(request):
     except SpotifyException:
         response = False
     return HttpResponse(response)
+
+# Helper for developing stuffs
+# def devHelper(request):
+#     # deviceID = request.POST['device_id']
+#
+#     # returns a JSON object with some user data
+#     #   look in the pycharm server terminal for the print out
+#     try:
+#         returnedData = sp.current_user_playlists()
+#         print(json.dumps(returnedData, indent=4))
+#
+#         response = True
+#     except SpotifyException:
+#         response = False
+#     return HttpResponse(response)
+
+def logout(request):
+    if not validUser(request):
+        return redirect('splash')
+
+    cache_handler.delete_session()
+
+    return redirect('splash')

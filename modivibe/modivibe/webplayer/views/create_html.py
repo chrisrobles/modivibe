@@ -94,7 +94,7 @@ def getArtistHeaderInfo(sp, artist_id):
     isUserFollowing = sp.current_user_following_artists(ids=[ar['uri']])[0]
     return {
         'artistName': ar['name'],
-        'artistImg': ar['images'][0]['url'] if ar['images'] else 'default',
+        'artistImg': ar['images'][0]['url'] if ar['images'] else None,
         'artistFollowers': ar['followers']['total'],
         'artistId': ar['id'],
         'artistGenres': ar['genres'][:7],

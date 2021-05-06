@@ -20,3 +20,7 @@ urlpatterns = [
     #path('admin/', admin.site.urls),
     path('', include('webplayer.urls')),
 ]
+
+#error pages
+handler404 = 'webplayer.views.pages.view404error'
+handler500 = 'webplayer.views.pages.view500error'

@@ -50,7 +50,7 @@ class ModivibeCache(CacheHandler):
         if token_info:
             self.session['modivibe_access'] = token_info
 
-    def delete_token(self):
+    def delete_session(self):
         self.session.clear()
 
 cache_handler = ModivibeCache()

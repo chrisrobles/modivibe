@@ -18,7 +18,6 @@ urlpatterns = [
     path('previousTrack', views.previousTrack, name='previousTrack'),
     path('setShuffle', views.setShuffle, name='setShuffle'),
     path('setRepeat', views.setRepeat, name='setRepeat'),
-    path('helperButton', views.helperButton, name='helperButton'),
     path('toggleFollow', views.toggleFollow, name='toggleFollow'),
     path('toggleLike', views.toggleLike, name='toggleLike'),
     path('isFollowing', views.isFollowing, name='isFollowing'),
@@ -32,6 +31,7 @@ urlpatterns = [
     path('my/albums', views.mySavedAlbums, name='myAlbums'),
     path('my/artists', views.myArtists, name='myArtists'),
     path('my/podcasts', views.myPodcasts, name='myPodcasts'),
+    path('my/likedSongs', views.myLikedSongs, name='likedSongs'),
 
     # displays an item's page
     # url should follow:    {collection_type}/<str:type_id>
@@ -48,4 +48,11 @@ urlpatterns = [
     # recommendations
     path('recommendations', views.recommendations, name='recommendations'),
     path('getRecommendations', views.getRecommendations, name='getRecommendations'),
+
+    # logout
+    path('logout', views.logout, name='logout'),
+    
+    # error pages (for testing purposes)
+    #path('404', views.view404test, name='404Handler'),
+    #path('500', views.view500test, name='500Handler'),
 ]

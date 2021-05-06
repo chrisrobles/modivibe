@@ -1,12 +1,12 @@
+{% load static %}
 <fieldset class="playbar">
     <span class="playbarLeft">
-        <img class="Album" id="trackImage" src="" alt="Album Cover" width="64" height="64" data-uri="">
+        <img class="Album" id="trackImage" src="{% static 'default_img.png' %}" alt="Album Cover" width="64" height="64" data-uri="">
         <div class="trackInfoContainer">
             <p class="Song" id="trackName" data-uri="">Track Name</p>
             <span id="trackArtistContainer">Track Artist(s)</span>
         </div>
 
-<!--        <button id="helperButtonControl">click me</button>-->
     </span>
     <span class="playbarMiddle">
         <div class="trackControllers">
@@ -227,8 +227,6 @@
     $('#shuffleTrackControl').on('click', toggleShuffle);
     $('#repeatTrackControl').on('click', toggleRepeat);
     $('.ConnectionStatus').on('click', transferPlayback);
-
-    // $('#helperButtonControl').on('click', helperButton);
     $('#progressBarControl').on('change', progressBarSldrMoved);
 
     // Button event functions
@@ -254,7 +252,6 @@
     function togglePlayback(event){
         let playbackRequest = (isPlaying) ? 'pause' : 'play';
         console.log(`Requesting playback: ${playbackRequest}`);
-
         $.ajax({
             type: "POST",
             url: "{% url 'setPlayback' %}",
@@ -264,6 +261,7 @@
                 status: playbackRequest
             },
             success: function(response) {
+                paused_value_visualizer = playbackRequest == 'pause' ? 0 : 1; //in visualizer.js
                 if (response == 'True') {
                     console.log(`Success: ${playbackRequest}`);
 
@@ -526,27 +524,5 @@
             }
         });
     }
-
-    // ryan: temp to use while playing with the API
-    // function helperButton(event) {
-    //    console.log('Attempting to mute volume');
-    //    $.ajax({
-    //         type: "POST",
-    //         url: "{% url 'setVolume' %}",
-    //         data: {
-    //             csrfmiddlewaretoken: csrftoken,
-    //             device_id: deviceID,
-    //             volume: 0
-    //         },
-    //         success: function(response) {
-    //             if (response == 'True') {
-    //                 console.log('Successfully muted volume');
-    //                 if ($('.mdc-slider__input').val() <= 0) { $('#volumeIcon').text('volume_mute'); }
-    //             } else {
-    //                 console.log('Failed to set volume');
-    //             }
-    //         }
-    //     });
-    // }
 
 </script>

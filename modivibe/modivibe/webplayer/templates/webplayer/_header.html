@@ -1,6 +1,5 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% load static %}
-<a style="text-decoration: none;" href="{% url 'webplayer' %}"><img src="{% static 'Artboard_1_0.5x.png'%}" style ="height:50px; border-radius: 10px; border-color: pink"></a>
 <style>
 
 * {box-sizing: border-box;}
@@ -71,26 +70,47 @@ body {
       border: 1px solid #ccc;
   }
 }
+
+    .SearchBar {
+        margin-right: 15px;
+    }
+
+    .HeaderButton {
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+
 </style>
 
-<fieldset class = "TopBar">
-    <span class = "TopBarLeft">
-        <div class="DirectionalButtons">
+<div class = "TopBar">
+    <div class = "TopBarLeft col-6">
+        <a style="text-decoration: none;" href="{% url 'webplayer' %}"><img src="{% static 'Modivibe_Logo.png' %}" style ="height:50px; border-radius: 10px; border-color: pink"></a>
+        <div class="DirectionalButtons col-2">
            <button onClick="window.history.back();" class="material-icons myButton" aria-label="back" style="background:none; border:none; outline: none; cursor:pointer; color: white">arrow_back_ios</button>
            <button onClick="window.history.forward();" class="material-icons myButton" aria-label="forward" style="background:none; border:none; outline: none; cursor:pointer; color: white">arrow_forward_ios</button>
         </div>
-    </span>
-    <span class="TopBarRight">
+    </div>
+    <div class="TopBarRight col-6">
         <div class="SearchBar">
             <form autocomplete="off" method="get">
-            <div class="autocomplete" style="width:300px; text-align: right">
+            <div class="autocomplete" style="width:300px; text-align: center;">
                 <input id="searchInput" type="text" name="mySearch" placeholder="Search Spotify"
-                style="border: 2px solid #808080; border-radius: 8px; " maxlength="80" value>
+                style="border: 2px solid #808080; border-radius: 8px; " maxlength="80">
             </div>
             </form>
         </div>
-    </span>
-</fieldset>
+        <div class="HeaderButton">
+            <a class="ItemLink" style="text-decoration: none;" href="{% url 'settings' %}">
+                <span><span class="material-icons" style="vertical-align: -4px;">settings</span></span>
+            </a>
+        </div>
+        <div class="HeaderButton">
+            <a class=""href="{% url 'logout' %}">
+                <span class="material-icons logoutButton" style="vertical-align: -4px;">logout</span>
+            </a>
+        </div>
+    </div>
+</div>
 <script>
     function autocomplete(inp, arr) { //takes in text and array of possible values
       var currentFocus;
