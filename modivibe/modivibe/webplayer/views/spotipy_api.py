@@ -395,6 +395,27 @@ def helperButton(request):
     return HttpResponse(response)
 
 
+def getRecentPlayed(request):
+
+    limit = request.POST.get('limit',None)
+    try:
+        recentlyPlayedList = sp.current_user_recently_played(limit=limit)
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(recentlyPlayedList)
+
+        for a in recentlyPlayedList['items']:
+            info.append({
+                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+                'contentName': a['album']['name'],
+                'contentId': a['album']['id'],
+                'artist': a['album']['artists'][0]['name'],
+                'artistId': a['album']['artists'][0]['id'],
+            })
+        response = recentlyPlayedList
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
 def getRecommendations(request):
     reference = request.POST.get('reference', None)
     if not reference:
@@ -423,6 +444,7 @@ def getRecommendations(request):
     else:
         return HttpResponse(False)
     print('Seeds:', genres, tracks, artists)
+
 
     features = request.POST.get('features', None)
     if not features:
