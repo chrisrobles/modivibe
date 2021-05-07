@@ -101,7 +101,7 @@ $(document).ready(function() {
     $(document).on("click", ".setColor2", function(e) {
         $('*, a, .material-icons').css('color', $('.color2SchemeInput').val());
         $('.changedCSS').empty();
-        $('.changedCSS').html("a, h3 { color: " + $('.color2SchemeInput').val() + " !important;");
+        $('.changedCSS').html(".material-icons, .PlayRequest, a, h3, h1, .ArtistItemButton { color: " + $('.color2SchemeInput').val() + " !important;}");
     });
 
     $(document).on("keydown", "#searchInput", function(e) {
