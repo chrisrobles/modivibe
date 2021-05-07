@@ -88,7 +88,6 @@ $(document).ready(function() {
         $('.colorScheme').css('background-color', $('.colorSchemeInput').val());
         color = color.match(/[A-Za-z0-9]{2}/g);
         color = color.map(function(v) { return parseInt(v, 16) });
-        console.log(color);
         color[0] -= 40;
         color[1] -= 40;
         color[2] -= 40;
