@@ -253,7 +253,14 @@ body {
 }
 
 .CollectionSongs .Song:hover {
-    background-color: black;
+    font-size: x-large;
+    background-image: linear-gradient(rgba(255,0,0,0), rgba(255,0,0,0), #8b8b8b);
+    border-radius: 5px;
+
+}
+.Song {
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 h1 {
