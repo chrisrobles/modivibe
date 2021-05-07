@@ -23,7 +23,7 @@ def createSongList(info, type, context_uri):
 
     htmlStr = \
         f'''
-        <button class="PlayRequest" data-uri="{context_uri}">PLAY {type.upper()}</button>
+        <button class="btn btn-secondary PlayRequest" style="margin-left: 0px !important" data-uri="{context_uri}">PLAY {type.upper()}</button>
         <section class="CollectionSongs">\n'''
 
     htmlStr += \
