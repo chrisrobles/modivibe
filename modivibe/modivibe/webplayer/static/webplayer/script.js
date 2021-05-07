@@ -99,6 +99,10 @@ $(document).ready(function() {
         color[2] += 60;
         $('.content').css('background-color', "rgb(" + color.join(",") + ")")
     });
+    $(document).on("click", ".setColor2", function(e) {
+        $('*').css('color', $('.color2SchemeInput').val());
+        $('.material-icons').css('color', $('.color2SchemeInput').val());
+    });
 
     $(document).on("keydown", "#searchInput", function(e) {
         if(e.keyCode == 13) {
