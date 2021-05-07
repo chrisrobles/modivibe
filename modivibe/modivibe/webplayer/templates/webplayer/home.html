@@ -1,4 +1,29 @@
 {% extends ajax|yesno:"webplayer/webplayer_ajax.html,webplayer/webplayer.html" %}
 {% block content %}
-{% load static %}
+    <h1> Home </h1>
+
+<!--<script>-->
+<!--    recentPlay();-->
+
+
+
+<!--function recentPlay() {-->
+<!--    $.ajax({-->
+<!--        type: "POST",-->
+<!--        url: "{% url 'getRecentPlayed' %}",-->
+<!--        data: {-->
+<!--            csrfmiddlewaretoken: '{{ csrf_token }}',-->
+<!--            limit: 10,-->
+<!--        },-->
+<!--        success: function (response) {-->
+<!--            if (response != 'False') {-->
+<!--                console.log(response);-->
+<!--            } else {-->
+<!--                console.log('Failed to get recently played');-->
+<!--            }-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+<!--</script>-->
+
 {% endblock content %}

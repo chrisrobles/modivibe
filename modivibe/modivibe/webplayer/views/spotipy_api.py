@@ -6,6 +6,7 @@ from spotipy.exceptions import SpotifyException
 from spotipy.oauth2 import SpotifyOauthError
 from .create_html import *
 from random import choice, sample
+from django.views.decorators.csrf import csrf_exempt
 import json
 import pprint
 
@@ -28,7 +29,7 @@ def getUserAccessCode():
     except:
         return None
 
-
+@csrf_exempt
 def isAjaxRequest(request):
     return request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
@@ -147,6 +148,7 @@ def redirectToHome(request):
 # Helper function to return a dictionary containing device info
 # Expects:
 #   device_id [STRING] (generated device id)
+@csrf_exempt
 def getDeviceInfo(deviceID):
     response = False
     try:
@@ -162,6 +164,7 @@ def getDeviceInfo(deviceID):
 # Sets Spotify's active device to Modivibe
 # Expects:
 #   device_id [STRING] (generated device id)
+@csrf_exempt
 def transferPlayback(request):
     deviceID = request.POST['device_id']
     try:
@@ -176,6 +179,7 @@ def transferPlayback(request):
 #   device_id [STRING] (generated device id)
 #   status [STRING] ('play' || 'pause') DEFAULT: 'play'
 #   context_uri [STRING] (uri for provided track/playlist/album/etc) DEFAULT: None
+@csrf_exempt
 def setPlayback(request):
     response = False
     deviceID = request.POST['device_id']
@@ -217,6 +221,7 @@ def setPlayback(request):
 # Expects:
 #   device_id [STRING] (generated device id)
 #   volume [STRING||INT] (value checked from 0-100 by spotipy)
+@csrf_exempt
 def setVolume(request):
     deviceID = request.POST['device_id']
     songVolume = int(request.POST['volume'])
@@ -230,6 +235,7 @@ def setVolume(request):
 # Searches user devices to find Modivibe and determine set volume
 # Expects:
 #   device_id [STRING] (generated device id)
+@csrf_exempt
 def getVolume(request):
     deviceID = request.POST['device_id']
     device = getDeviceInfo(deviceID)
@@ -242,6 +248,7 @@ def getVolume(request):
 # Skips to next track in user's queue
 # Excepts:
 #   device_id [STRING] (generated device id)
+@csrf_exempt
 def nextTrack(request):
     deviceID = request.POST['device_id']
     try:
@@ -254,6 +261,7 @@ def nextTrack(request):
 # Skips to previous track in user's queue
 # Excepts:
 #   device_id [STRING] (generated device id)
+@csrf_exempt
 def previousTrack(request):
     deviceID = request.POST['device_id']
     try:
@@ -267,6 +275,7 @@ def previousTrack(request):
 # Excepts:
 #   device_id [STRING] (generated device id)
 #   shuffle_status [STRING] ('enabled' || 'disabled')
+@csrf_exempt
 def setShuffle(request):
     response = False
     deviceID = request.POST['device_id']
@@ -285,6 +294,7 @@ def setShuffle(request):
 # Excepts:
 #   device_id [STRING] (generated device id)
 #   repeat_status [STRING] (0, 1, 2)
+@csrf_exempt
 def setRepeat(request):
     deviceID = request.POST['device_id']
     repeatStatus = request.POST.get('repeat_status', None)
@@ -306,6 +316,7 @@ def setRepeat(request):
 # Excepts:
 #   artist [STRING] (the artist uri)
 #   follow [STRING] ('true' || 'false')
+@csrf_exempt
 def toggleFollow(request):
     response = False
     artistURI = request.POST.get('artist', None)
@@ -331,6 +342,7 @@ def toggleFollow(request):
 # Excepts:
 #   track [STRING] (the track uri)
 #   like [STRING] ('true' || 'false')
+@csrf_exempt
 def toggleLike(request):
     response = False
     trackURI = request.POST.get('track', None)
@@ -356,6 +368,7 @@ def toggleLike(request):
 # If so, return the artist URI and follow status for asynchronous calls
 # Excepts:
 #   artist [STRING] (the artist uri)
+@csrf_exempt
 def isFollowing(request):
     artistURI = request.POST.get('artist', None)
     artistList = [artistURI]
@@ -371,6 +384,7 @@ def isFollowing(request):
 # If so, return the track URI and like status for asynchronous calls
 # Excepts:
 #   track [STRING] (the track uri)
+@csrf_exempt
 def isLiked(request):
     trackURI = request.POST.get('track', None)
     trackList = [trackURI]
@@ -384,6 +398,7 @@ def isLiked(request):
 
 
 # Helper while developing the progress bar
+@csrf_exempt
 def helperButton(request):
     response = False
     deviceID = request.POST['device_id']
@@ -394,7 +409,29 @@ def helperButton(request):
         response = False
     return HttpResponse(response)
 
+@csrf_exempt
+def getRecentPlayed(request):
 
+    limit = request.POST.get('limit',None)
+    try:
+        recentlyPlayedList = sp.current_user_recently_played(limit=limit)
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(recentlyPlayedList)
+
+        for a in recentlyPlayedList['items']:
+            info.append({
+                'contentImg': a['album']['images'][0]['url'] if a['album']['images'] else 'default',
+                'contentName': a['album']['name'],
+                'contentId': a['album']['id'],
+                'artist': a['album']['artists'][0]['name'],
+                'artistId': a['album']['artists'][0]['id'],
+            })
+        response = recentlyPlayedList
+    except SpotifyException:
+        response = False
+    return HttpResponse(response)
+
+@csrf_exempt
 def getRecommendations(request):
     reference = request.POST.get('reference', None)
     if not reference:
@@ -424,6 +461,7 @@ def getRecommendations(request):
         return HttpResponse(False)
     print('Seeds:', genres, tracks, artists)
 
+
     features = request.POST.get('features', None)
     if not features:
         return HttpResponse(False)
@@ -451,7 +489,7 @@ def getRecommendations(request):
     except SpotifyException:
         return HttpResponse(False)
 
-
+@csrf_exempt
 def progressBarSldrMoved(request):
     deviceID = request.POST['device_id']
     songPositionMs = int(request.POST['position_ms'])
@@ -478,6 +516,7 @@ def progressBarSldrMoved(request):
 #         response = False
 #     return HttpResponse(response)
 
+@csrf_exempt
 def logout(request):
     if not validUser(request):
         return redirect('splash')
