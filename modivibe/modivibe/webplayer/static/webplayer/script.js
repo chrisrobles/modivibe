@@ -99,8 +99,9 @@ $(document).ready(function() {
         $('.content').css('background-color', "rgb(" + color.join(",") + ")")
     });
     $(document).on("click", ".setColor2", function(e) {
-        $('*').css('color', $('.color2SchemeInput').val());
-        $('.material-icons').css('color', $('.color2SchemeInput').val());
+        $('*, a, .material-icons').css('color', $('.color2SchemeInput').val());
+        $('.changedCSS').empty();
+        $('.changedCSS').html("a, h3 { color: " + $('.color2SchemeInput').val() + " !important;");
     });
 
     $(document).on("keydown", "#searchInput", function(e) {
