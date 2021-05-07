@@ -8,6 +8,7 @@ from spotipy.oauth2 import SpotifyOauthError
 from .spotipy_api import validUser, isAjaxRequest, getUserAccessCode, getContextURIInfo
 from .create_html import *
 from json import dumps
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Login flow: splash, click loginurl -> redirectToHome -> splash or home
@@ -18,7 +19,7 @@ def splash(request):
     }
     return render(request, 'webplayer/splash.html', context)
 
-
+@csrf_exempt
 def home(request):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -63,7 +64,7 @@ def home(request):
     else:
         return render(request, 'webplayer/home.html', context=context)
 
-
+@csrf_exempt
 def recommendations(request):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -90,7 +91,7 @@ def recommendations(request):
     else:
         return render(request, 'webplayer/recommendations.html', context=context)
 
-
+@csrf_exempt
 def settings(request):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -113,6 +114,7 @@ def settings(request):
 
 # Display all of the current user's playlists
 # my/playlists
+@csrf_exempt
 def myPlaylists(request):
     # check a user is authenticated
     # also refreshes token if expired
@@ -168,7 +170,7 @@ def myPlaylists(request):
     else:
         return render(request, 'webplayer/collectionItems.html', context=context)
 
-
+@csrf_exempt
 def playlist(request, playlist_id):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -223,7 +225,7 @@ def playlist(request, playlist_id):
 
     return redirect('webplayer')  # fix this <------- need html page
 
-
+@csrf_exempt
 def album(request, album_id):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -277,7 +279,6 @@ def album(request, album_id):
         return JsonResponse({'page': page, 'status': 200})
 
     return redirect('webplayer')  # fix this <------- need html page
-
 
 def mySavedAlbums(request):
     # check if user is authenticated
@@ -333,7 +334,7 @@ def mySavedAlbums(request):
     else:
         return render(request, 'webplayer/collectionItems.html', context=context)
 
-
+@csrf_exempt
 def myArtists(request):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -377,7 +378,7 @@ def myArtists(request):
     else:
         return render(request, 'webplayer/collectionItems.html', context=context)
 
-
+@csrf_exempt
 def myPodcasts(request):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -426,7 +427,7 @@ def myPodcasts(request):
     else:
         return render(request, 'webplayer/collectionItems.html', context=context)
 
-
+@csrf_exempt
 def myLikedSongs(request):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -491,7 +492,7 @@ def myLikedSongs(request):
 
     return JsonResponse({'page': page, 'status': 200})
 
-
+@csrf_exempt
 def artist(request, artist_id):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -517,7 +518,7 @@ def artist(request, artist_id):
     else:
         return render(request, 'webplayer/artistPage.html', context=context)
 
-
+@csrf_exempt
 def artistTopSongs(request, artist_id):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -560,7 +561,7 @@ def artistTopSongs(request, artist_id):
                       context={"header": header, "content": content, "contentType": "topSongs",
                                "loadContent": True, "ajax": False, "userAccessCode": userAccessCode})
 
-
+@csrf_exempt
 def artistAlbums(request, artist_id):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -613,7 +614,7 @@ def artistAlbums(request, artist_id):
                       context={"header": header, "content": content, "contentType": "albums",
                                "loadContent": True, "ajax": False, "userAccessCode": userAccessCode})
 
-
+@csrf_exempt
 def artistRelated(request, artist_id):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
@@ -648,6 +649,7 @@ def artistRelated(request, artist_id):
 
 # Never return search_value back to ajax directly!!! (users would be able to insert html)
 # Render cleans input
+@csrf_exempt
 def search(request, search_value):
     if not validUser(request):
         return JsonResponse({'status': 401}) if isAjaxRequest(request) else redirect('splash')
