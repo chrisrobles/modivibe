@@ -88,7 +88,6 @@ $(document).ready(function() {
         $('.colorScheme').css('background-color', $('.colorSchemeInput').val());
         color = color.match(/[A-Za-z0-9]{2}/g);
         color = color.map(function(v) { return parseInt(v, 16) });
-        console.log(color);
         color[0] -= 40;
         color[1] -= 40;
         color[2] -= 40;
@@ -100,8 +99,9 @@ $(document).ready(function() {
         $('.content').css('background-color', "rgb(" + color.join(",") + ")")
     });
     $(document).on("click", ".setColor2", function(e) {
-        $('*').css('color', $('.color2SchemeInput').val());
-        $('.material-icons').css('color', $('.color2SchemeInput').val());
+        $('*, a, .material-icons').css('color', $('.color2SchemeInput').val());
+        $('.changedCSS').empty();
+        $('.changedCSS').html("a, h3 { color: " + $('.color2SchemeInput').val() + " !important;");
     });
 
     $(document).on("keydown", "#searchInput", function(e) {
