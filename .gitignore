@@ -56,3 +56,5 @@ modivibe/venv/
 *.cache
 
 modivibe/modivibe/static_root/
+modivibe/modivibe/modivibe/settings.py.save
+modivibe/modivibe/modivibe/settings.py.save.1
