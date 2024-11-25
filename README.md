@@ -1,5 +1,5 @@
 # modivibe
-A fan-made Spotify Experience. A Senior Capstone project.
+A fan-made Spotify Experience.
 
 ## Contributors
 
