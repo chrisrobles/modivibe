@@ -1,5 +1,8 @@
-# modivibe
+# Modivibe
+
 A fan-made Spotify Experience.
+
+[Link to project](https://www.modivibe.com)
 
 ## Contributors
 
